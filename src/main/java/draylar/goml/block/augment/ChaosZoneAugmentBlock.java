@@ -7,8 +7,8 @@ import net.minecraft.entity.player.PlayerEntity;
 
 public class ChaosZoneAugmentBlock extends ClaimAugmentBlock {
 
-    public ChaosZoneAugmentBlock(Settings settings) {
-        super(settings);
+    public ChaosZoneAugmentBlock(Settings settings, String texture) {
+        super(settings, texture);
     }
 
     @Override

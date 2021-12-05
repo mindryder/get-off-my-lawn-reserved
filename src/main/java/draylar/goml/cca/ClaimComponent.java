@@ -6,7 +6,7 @@ import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
 import draylar.goml.api.Claim;
 import draylar.goml.api.ClaimBox;
 
-public interface ClaimComponent extends ComponentV3, AutoSyncedComponent {
+public interface ClaimComponent extends ComponentV3 {
     RTreeMap<ClaimBox, Claim> getClaims();
     void add(ClaimBox box, Claim info);
     void remove(ClaimBox box);

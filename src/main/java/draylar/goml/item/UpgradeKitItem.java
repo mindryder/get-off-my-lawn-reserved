@@ -9,32 +9,38 @@ import draylar.goml.api.ClaimBox;
 import draylar.goml.api.ClaimUtils;
 import draylar.goml.block.ClaimAnchorBlock;
 import draylar.goml.entity.ClaimAnchorBlockEntity;
+import eu.pb4.polymer.api.item.PolymerItem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.item.TooltipContext;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class UpgradeKitItem extends Item {
+public class UpgradeKitItem extends Item implements PolymerItem {
 
     private final ClaimAnchorBlock from;
     private final ClaimAnchorBlock to;
+    private final Item clientItem;
 
-    public UpgradeKitItem(ClaimAnchorBlock from, ClaimAnchorBlock to) {
+    public UpgradeKitItem(ClaimAnchorBlock from, ClaimAnchorBlock to, Item display) {
         super(new Item.Settings().group(GetOffMyLawn.GROUP));
+        this.clientItem = display;
 
         this.from = from;
         this.to = to;
@@ -103,7 +109,6 @@ public class UpgradeKitItem extends Item {
         return ActionResult.PASS;
     }
 
-    @Environment(EnvType.CLIENT)
     @Override
     public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
         if(tooltip == null) {
@@ -111,5 +116,17 @@ public class UpgradeKitItem extends Item {
         }
 
         tooltip.add(new TranslatableText(from.getTranslationKey()).append(" -> ").append(new TranslatableText(to.getTranslationKey())).formatted(Formatting.GRAY));
+    }
+
+    @Override
+    public Item getPolymerItem(ItemStack itemStack, @Nullable ServerPlayerEntity player) {
+        return this.clientItem;
+    }
+
+    @Override
+    public ItemStack getPolymerItemStack(ItemStack itemStack, @Nullable ServerPlayerEntity player) {
+        var clientStack = PolymerItem.super.getPolymerItemStack(itemStack, player);
+        clientStack.addEnchantment(Enchantments.LURE, 68);
+        return clientStack;
     }
 }

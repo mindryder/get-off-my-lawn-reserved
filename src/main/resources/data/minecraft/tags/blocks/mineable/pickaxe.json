@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+   "goml:reinforced_claim_anchor",
+   "goml:glistening_claim_anchor",
+   "goml:crystal_claim_anchor",
+   "goml:emeradic_claim_anchor",
+   "goml:withered_claim_anchor",
+   "goml:ender_binding",
+   "goml:lake_spirit_grace",
+   "goml:angelic_aura",
+   "goml:heaven_wings",
+   "goml:village_core",
+   "goml:withering_seal",
+   "goml:chaos_zone"
+  ]
+}

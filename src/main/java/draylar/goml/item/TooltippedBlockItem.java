@@ -1,5 +1,7 @@
 package draylar.goml.item;
 
+import eu.pb4.polymer.api.block.PolymerHeadBlock;
+import eu.pb4.polymer.api.item.PolymerHeadBlockItem;
 import net.minecraft.block.Block;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.BlockItem;
@@ -11,11 +13,11 @@ import net.minecraft.world.World;
 
 import java.util.List;
 
-public class TooltippedBlockItem extends BlockItem {
+public class TooltippedBlockItem extends PolymerHeadBlockItem {
 
     private final int lines;
 
-    public TooltippedBlockItem(Block block, Settings settings, int lines) {
+    public TooltippedBlockItem(PolymerHeadBlock block, Settings settings, int lines) {
         super(block, settings);
         this.lines = lines;
     }

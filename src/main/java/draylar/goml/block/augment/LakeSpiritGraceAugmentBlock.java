@@ -7,8 +7,8 @@ import net.minecraft.entity.player.PlayerEntity;
 
 public class LakeSpiritGraceAugmentBlock extends ClaimAugmentBlock {
 
-    public LakeSpiritGraceAugmentBlock(Settings settings) {
-        super(settings);
+    public LakeSpiritGraceAugmentBlock(Settings settings, String texture) {
+        super(settings, texture);
     }
 
     @Override

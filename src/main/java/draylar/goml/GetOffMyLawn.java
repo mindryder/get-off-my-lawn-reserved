@@ -12,10 +12,13 @@ import draylar.goml.registry.GOMLBlocks;
 import draylar.goml.registry.GOMLEntities;
 import draylar.goml.registry.GOMLItems;
 import draylar.omegaconfig.OmegaConfig;
+import eu.pb4.polymer.api.item.PolymerItemGroup;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.Style;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,7 +27,7 @@ public class GetOffMyLawn implements ModInitializer, WorldComponentInitializer {
 
 	public static final ComponentKey<ClaimComponent> CLAIM = ComponentRegistryV3.INSTANCE.getOrCreate(id("claims"), ClaimComponent.class);
 	public static final GOMLConfig CONFIG = OmegaConfig.register(GOMLConfig.class);
-	public static final ItemGroup GROUP = FabricItemGroupBuilder.build(id("group"), () -> new ItemStack(GOMLItems.GOGGLES));
+	public static final PolymerItemGroup GROUP = PolymerItemGroup.create(id("group"), new TranslatableText("itemGroup.goml.group"));
 	public static final Logger LOGGER = LogManager.getLogger();
 
 	@Override
@@ -34,6 +37,11 @@ public class GetOffMyLawn implements ModInitializer, WorldComponentInitializer {
 		GOMLEntities.init();
 		EventHandlers.init();
 		ClaimCommand.init();
+
+		// It's a small bug, I need to fix it later in polymer directly
+		var icon = new ItemStack(GOMLBlocks.WITHERED_CLAIM_ANCHOR.getSecond());
+		icon.setCustomName(GROUP.getDisplayName().shallowCopy().setStyle(Style.EMPTY.withItalic(false)));
+		GROUP.setIcon(icon);
 	}
 
 	public static Identifier id(String name) {

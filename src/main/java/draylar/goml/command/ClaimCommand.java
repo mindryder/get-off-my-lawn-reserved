@@ -8,6 +8,8 @@ import draylar.goml.GetOffMyLawn;
 import draylar.goml.api.Claim;
 import draylar.goml.api.ClaimBox;
 import draylar.goml.api.ClaimUtils;
+import me.lucko.fabric.api.permissions.v0.Permissions;
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.registry.CommandRegistry;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.server.MinecraftServer;
@@ -30,7 +32,7 @@ public class ClaimCommand {
     }
 
     public static void init() {
-        CommandRegistry.INSTANCE.register(false, dispatcher -> {
+        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             LiteralCommandNode<ServerCommandSource> baseNode = CommandManager
                     .literal("goml")
                     .build();
@@ -38,7 +40,7 @@ public class ClaimCommand {
             LiteralCommandNode<ServerCommandSource> generalNode = CommandManager
                     .literal("general")
                     .executes(ClaimCommand::general)
-                    .requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(3))
+                    .requires(Permissions.require("goml.command.general", 3))
                     .build();
 
             LiteralCommandNode<ServerCommandSource> infoNode = CommandManager
@@ -49,13 +51,13 @@ public class ClaimCommand {
             LiteralCommandNode<ServerCommandSource> worldNode = CommandManager
                     .literal("world")
                     .executes(ClaimCommand::world)
-                    .requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(3))
+                    .requires(Permissions.require("goml.command.world", 3))
                     .build();
 
             LiteralCommandNode<ServerCommandSource> removeNode = CommandManager
                     .literal("remove")
                     .executes(ClaimCommand::remove)
-                    .requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(3))
+                    .requires(Permissions.require("goml.command.remove", 3))
                     .build();
 
             LiteralCommandNode<ServerCommandSource> helpNode = CommandManager
@@ -104,7 +106,7 @@ public class ClaimCommand {
      * @return  success flag
      */
     private static int general(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        MinecraftServer server = context.getSource().getMinecraftServer();
+        MinecraftServer server = context.getSource().getServer();
         ServerPlayerEntity player = context.getSource().getPlayer();
         AtomicInteger numberOfClaimsTotal = new AtomicInteger();
 

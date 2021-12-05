@@ -13,9 +13,6 @@
     "augment.VillagerEntityMixin",
     "compat.BlastExplosionMixin"
   ],
-  "client": [
-    "WorldRendererMixin"
-  ],
   "injectors": {
     "defaultRequire": 1
   }

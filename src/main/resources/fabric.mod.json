@@ -2,10 +2,11 @@
   "schemaVersion": 1,
   "id": "goml",
   "version": "${version}",
-  "name": "Get Off My Lawn",
+  "name": "Get Off My Lawn (Server Side Edition)",
   "description": "Keep people off your lawn with claims!",
   "authors": [
-    "Draylar"
+    "Draylar",
+    "Patbox (Server side port)"
   ],
   "contact": {
     "homepage": "https://www.curseforge.com/minecraft/mc-mods/get-off-my-lawn",
@@ -27,9 +28,9 @@
   ],
   "accessWidener": "goml.accesswidener",
   "depends": {
-    "fabricloader": ">=0.7.4",
+    "fabricloader": ">=0.12.6",
     "fabric": "*",
-    "minecraft": ">=1.16"
+    "minecraft": ">=1.18"
   },
   "custom": {
     "cardinal-components": [

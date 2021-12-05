@@ -7,13 +7,15 @@ import net.minecraft.entity.player.PlayerEntity;
 
 public class AngelicAuraAugmentBlock extends ClaimAugmentBlock {
 
-    public AngelicAuraAugmentBlock(Settings settings) {
-        super(settings);
+    public AngelicAuraAugmentBlock(Settings settings, String texture) {
+        super(settings, texture);
     }
 
     @Override
     public void playerTick(PlayerEntity player) {
-        player.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 5, 0, true, false));
+        if (player.age % 80 == 0) {
+            player.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 80, 0, true, false));
+        }
     }
 
     @Override

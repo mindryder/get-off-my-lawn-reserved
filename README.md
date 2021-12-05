@@ -1,3 +1,5 @@
+*This README is little outdated/not updated to server sided version, new one will be available soon™* 
+
 # Get Off My Lawn
 
 *Get Off My Lawn* is a take on the popular concept of claims. It helps protect your stuff! It is built for [Fabric](https://fabricmc.net/use/) on 1.15.2.

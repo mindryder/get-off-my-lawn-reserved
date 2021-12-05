@@ -28,13 +28,11 @@ public class WorldClaimComponent implements ClaimComponent {
     @Override
     public void add(ClaimBox box, Claim info) {
         this.claims = this.claims.put(box, info);
-        GetOffMyLawn.CLAIM.sync(world);
     }
 
     @Override
     public void remove(ClaimBox box) {
         this.claims = this.claims.remove(box);
-        GetOffMyLawn.CLAIM.sync(world);
     }
 
     @Override

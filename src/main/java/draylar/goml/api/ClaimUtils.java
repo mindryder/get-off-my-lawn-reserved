@@ -63,8 +63,8 @@ public class ClaimUtils {
      * @param checkPos  position to check against
      * @return  whether or not the claim information matches up with the player and position
      */
-    public static boolean claimMatchesWith(Entry<ClaimBox, Claim> claim, PlayerEntity checkPlayer, BlockPos checkPos) {
-        return playerHasPermission(claim, checkPlayer) && claim.getValue().getOrigin().equals(checkPos);
+    public static boolean claimMatchesWith(Entry<ClaimBox, Claim> claim, @Nullable PlayerEntity checkPlayer, BlockPos checkPos) {
+        return (checkPlayer == null || playerHasPermission(claim, checkPlayer)) && claim.getValue().getOrigin().equals(checkPos);
     }
 
     /**
