@@ -48,7 +48,6 @@ public class BucketItemMixin {
             boolean noPermission = claimsFound.anyMatch((Entry<ClaimBox, Claim> boxInfo) -> !boxInfo.getValue().hasPermission(user));
 
             if(noPermission) {
-                // TODO: translatable text
                 user.sendMessage(new LiteralText("This block is protected by a claim."), true);
                 cir.setReturnValue(TypedActionResult.fail(user.getStackInHand(hand)));
             }

@@ -9,13 +9,16 @@ import draylar.goml.api.PermissionReason;
 import draylar.goml.api.event.ClaimEvents;
 import draylar.goml.block.ClaimAnchorBlock;
 import draylar.goml.entity.ClaimAnchorBlockEntity;
+import eu.pb4.polymer.api.block.PolymerBlockUtils;
 import net.fabricmc.fabric.api.event.player.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BlockItem;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.Registry;
 
 public class EventHandlers {
 
@@ -29,10 +32,24 @@ public class EventHandlers {
         registerAttackEntityCallback();
         registerInteractEntityCallback();
         registerAnchorAttackCallback();
+        registerPolymerMining();
+    }
+
+    private static void registerPolymerMining() {
+        PolymerBlockUtils.SERVER_SIDE_MINING_CHECK.register((player, pos, state) -> {
+            Selection<Entry<ClaimBox, Claim>> claimsFound = ClaimUtils.getClaimsAt(player.getWorld(), pos);
+
+            return testPermission(claimsFound, player, Hand.MAIN_HAND, pos, PermissionReason.AREA_PROTECTED) == ActionResult.FAIL;
+        });
     }
 
     private static void registerInteractEntityCallback() {
         UseEntityCallback.EVENT.register((playerEntity, world, hand, entity, entityHitResult) -> {
+
+            if (GetOffMyLawn.CONFIG.allowedEntityInteraction.contains(Registry.ENTITY_TYPE.getId(entity.getType()))) {
+                return ActionResult.PASS;
+            }
+
             Selection<Entry<ClaimBox, Claim>> claimsFound = ClaimUtils.getClaimsAt(world, entity.getBlockPos());
             return testPermission(claimsFound, playerEntity, hand, entity.getBlockPos(), PermissionReason.ENTITY_PROTECTED);
         });
@@ -47,12 +64,28 @@ public class EventHandlers {
 
     private static void registerInteractBlockCallback() {
         UseBlockCallback.EVENT.register((playerEntity, world, hand, blockHitResult) -> {
+            if (!(playerEntity.getStackInHand(hand).getItem() instanceof BlockItem)) {
+                var blockState = world.getBlockState(blockHitResult.getBlockPos());
+
+                if (GetOffMyLawn.CONFIG.allowedBlockInteraction.contains(Registry.BLOCK.getId(blockState.getBlock()))) {
+                    return ActionResult.PASS;
+                }
+            }
+
             Selection<Entry<ClaimBox, Claim>> claimsFound = ClaimUtils.getClaimsAt(world, blockHitResult.getBlockPos());
             return testPermission(claimsFound, playerEntity, hand, blockHitResult.getBlockPos(), PermissionReason.AREA_PROTECTED);
         });
 
         // handle placing blocks at side of block not in claim
         UseBlockCallback.EVENT.register((playerEntity, world, hand, blockHitResult) -> {
+            if (!(playerEntity.getStackInHand(hand).getItem() instanceof BlockItem)) {
+                var blockState = world.getBlockState(blockHitResult.getBlockPos());
+
+                if (GetOffMyLawn.CONFIG.allowedBlockInteraction.contains(Registry.BLOCK.getId(blockState.getBlock()))) {
+                    return ActionResult.PASS;
+                }
+            }
+
             Selection<Entry<ClaimBox, Claim>> claimsFound = ClaimUtils.getClaimsAt(world, blockHitResult.getBlockPos().offset(blockHitResult.getSide()));
             return testPermission(claimsFound, playerEntity, hand, blockHitResult.getBlockPos(), PermissionReason.AREA_PROTECTED);
         });

@@ -22,13 +22,14 @@ import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
+import java.util.function.IntSupplier;
 
 public class ClaimAnchorBlock extends Block implements BlockEntityProvider, PolymerHeadBlock {
 
-    private final int radius;
+    private final IntSupplier radius;
     private final String texture;
 
-    public ClaimAnchorBlock(Block.Settings settings, int radius, String texture) {
+    public ClaimAnchorBlock(Block.Settings settings, IntSupplier radius, String texture) {
         super(settings);
         this.radius = radius;
         this.texture = texture;
@@ -42,7 +43,7 @@ public class ClaimAnchorBlock extends Block implements BlockEntityProvider, Poly
 
         if (!world.isClient()) {
             Claim claimInfo = new Claim(Collections.singleton(placer.getUuid()), pos);
-            GetOffMyLawn.CLAIM.get(world).add(new ClaimBox(pos, radius), claimInfo);
+            GetOffMyLawn.CLAIM.get(world).add(new ClaimBox(pos, radius.getAsInt()), claimInfo);
 
             // Assign claim to BE
             BlockEntity be = world.getBlockEntity(pos);
@@ -99,12 +100,13 @@ public class ClaimAnchorBlock extends Block implements BlockEntityProvider, Poly
                 return false;
             }
         }
+        var radius = this.radius.getAsInt();
 
         return ClaimUtils.getClaimsInBox(worldView, pos.add(-radius, -radius, -radius), pos.add(radius, radius, radius)).isEmpty();
     }
 
     public int getRadius() {
-        return radius;
+        return this.radius.getAsInt();
     }
 
     @Nullable
