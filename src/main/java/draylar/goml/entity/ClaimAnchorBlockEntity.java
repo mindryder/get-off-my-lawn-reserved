@@ -9,6 +9,7 @@ import draylar.goml.api.ClaimUtils;
 import draylar.goml.block.ClaimAnchorBlock;
 import draylar.goml.block.ClaimAugmentBlock;
 import draylar.goml.registry.GOMLEntities;
+import eu.pb4.holograms.api.holograms.WorldHologram;
 import eu.pb4.polymer.api.entity.PolymerEntity;
 import eu.pb4.polymer.api.utils.PolymerObject;
 import net.fabricmc.fabric.api.util.NbtType;
@@ -58,10 +59,6 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
         });
 
         super.readNbt(tag);
-    }
-
-    public void update() {
-
     }
 
     public void addChild(BlockPos pos, ClaimAugmentBlockEntity augment) {
@@ -137,6 +134,7 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
             // Reset players in claim
             anchor.previousTickPlayers.clear();
             anchor.previousTickPlayers.addAll(playersInClaim);
+
         }
     }
 
@@ -170,5 +168,8 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
     public void from(ClaimAnchorBlockEntity be) {
         this.previousTickPlayers.addAll(be.getPreviousTickPlayers());
         this.augmentEntities.putAll(be.getAugmentEntities());
+    }
+
+    public void showHologram(PlayerEntity player) {
     }
 }

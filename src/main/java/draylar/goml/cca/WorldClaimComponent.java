@@ -38,13 +38,14 @@ public class WorldClaimComponent implements ClaimComponent {
     @Override
     public void readFromNbt(NbtCompound tag) {
         this.claims = RTreeMap.create(new ConfigurationBuilder().star().build(), ClaimBox::toBox);
-
+        var world = this.world.getRegistryKey().getValue();
         NbtList NbtList = tag.getList("Claims", NbtType.COMPOUND);
 
         NbtList.forEach(child -> {
             NbtCompound childCompound = (NbtCompound) child;
             ClaimBox box = boxFromTag((NbtCompound) childCompound.get("Box"));
             Claim claimInfo = Claim.fromTag((NbtCompound) childCompound.get("Info"));
+            claimInfo.internal_setWorld(world);
             add(box, claimInfo);
         });
     }

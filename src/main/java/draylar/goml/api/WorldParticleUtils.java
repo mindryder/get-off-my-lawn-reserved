@@ -12,9 +12,7 @@ import net.minecraft.util.math.Vec3f;
 
 // Original implementation https://github.com/NucleoidMC/plasmid/blob/1.16/src/main/java/xyz/nucleoid/plasmid/map/workspace/editor/ParticleOutlineRenderer.java
 public class WorldParticleUtils {
-    public static void render(ServerPlayerEntity player, BlockPos min, BlockPos max, float red, float green, float blue) {
-        DustParticleEffect effect = new DustParticleEffect(new Vec3f(red, green, blue), 2.0F);
-
+    public static void render(ServerPlayerEntity player, BlockPos min, BlockPos max, ParticleEffect effect) {
         Edge[] edges = edges(min, max);
 
         int maxInterval = 5;
@@ -25,7 +23,7 @@ public class WorldParticleUtils {
 
             int interval = 1;
             if (length > 0) {
-                interval = MathHelper.clamp(length / Math.min(maxCount, length), 1, maxInterval);
+                interval = MathHelper.clamp(length / Math.min(maxCount, length), 2, maxInterval);
             }
 
             int steps = (length + interval - 1) / interval;
@@ -42,7 +40,7 @@ public class WorldParticleUtils {
     private static void spawnParticleIfVisible(ServerPlayerEntity player, ParticleEffect effect, double x, double y, double z) {
         ServerWorld world = player.getWorld();
 
-        Vec3d delta = player.getPos().subtract(x, y, z);
+        /*Vec3d delta = player.getPos().subtract(x, y, z);
         double length2 = delta.lengthSquared();
         if (length2 > 256 * 256) {
             return;
@@ -52,7 +50,7 @@ public class WorldParticleUtils {
         double dot = (delta.multiply(1.0 / Math.sqrt(length2))).dotProduct(rotation);
         if (dot > 0.0) {
             return;
-        }
+        }*/
 
         world.spawnParticles(
                 player, effect, true,

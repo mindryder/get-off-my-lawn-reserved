@@ -2,10 +2,12 @@ package draylar.goml.config;
 
 
 import com.google.gson.*;
-import com.ibm.icu.impl.ValidIdentifiers;
 import draylar.goml.GetOffMyLawn;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.block.Block;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
@@ -34,6 +36,14 @@ public class GOMLConfig {
     public Set<Identifier> allowedBlockInteraction = new HashSet<>();
 
     public Set<Identifier> allowedEntityInteraction = new HashSet<>();
+
+    public boolean canInteract(Block block) {
+        return this.allowedBlockInteraction.contains(Registry.BLOCK.getId(block));
+    }
+
+    public boolean canInteract(Entity entity) {
+        return this.allowedEntityInteraction.contains(Registry.ENTITY_TYPE.getId(entity.getType()));
+    }
 
     public static GOMLConfig loadOrCreateConfig() {
         try {

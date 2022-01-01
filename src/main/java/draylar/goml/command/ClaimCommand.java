@@ -1,18 +1,20 @@
 package draylar.goml.command;
 
 import com.jamieswhiteshirt.rtree3i.RTreeMap;
+import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.tree.LiteralCommandNode;
+import draylar.goml.AdminModePlayer;
 import draylar.goml.GetOffMyLawn;
 import draylar.goml.api.Claim;
 import draylar.goml.api.ClaimBox;
 import draylar.goml.api.ClaimUtils;
 import draylar.goml.config.GOMLConfig;
+import draylar.goml.ui.ClaimListGui;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.registry.CommandRegistry;
 import net.minecraft.command.argument.EntityArgumentType;
+import net.minecraft.command.argument.GameProfileArgumentType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -63,10 +65,18 @@ public class ClaimCommand {
                                     .executes(context -> trust(context, true)))
                     )
 
+                    .then(literal("list")
+                            .requires(Permissions.require("goml.command.list", true))
+                            .executes(context -> openList(context, context.getSource().getPlayer().getGameProfile()))
+                    )
+
 
                     .then(literal("admin")
                             .requires(Permissions.require("goml.command.admin", 3))
-
+                            .then(literal("adminmode")
+                                    .requires(Permissions.require("goml.command.admin.admin_mode", 3))
+                                    .executes(ClaimCommand::adminMode)
+                            )
                             .then(literal("world")
                                     .requires(Permissions.require("goml.command.admin.world", 3))
                                     .executes(ClaimCommand::world)
@@ -83,9 +93,33 @@ public class ClaimCommand {
                                     .requires(Permissions.require("goml.command.admin.reload", 4))
                                     .executes(ClaimCommand::reload)
                             )
+                            .then(literal("list")
+                                    .requires(Permissions.require("goml.command.list", true))
+                                    .then(CommandManager.argument("player", GameProfileArgumentType.gameProfile())
+                                            .executes(context -> {
+                                                var player = GameProfileArgumentType.getProfileArgument(context, "player").toArray(new GameProfile[0]);
+
+                                                if (player.length == 0) {
+                                                    context.getSource().sendFeedback(new TranslatableText("argument.player.unknown").formatted(Formatting.RED), false);
+                                                }
+
+                                                return openList(context, player[0]);
+                                            })
+                                    )
+                            )
                     )
             );
         });
+    }
+
+    private static int adminMode(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        ServerPlayerEntity player = context.getSource().getPlayer();
+
+        var newMode = !((AdminModePlayer) player).goml_getAdminMode();
+        ((AdminModePlayer) player).goml_setAdminMode(newMode);
+        context.getSource().sendFeedback(new TranslatableText(newMode ? "text.goml.admin_mode.enabled" : "text.goml.admin_mode.disabled"), false);
+
+        return 1;
     }
 
     /**
@@ -195,8 +229,16 @@ public class ClaimCommand {
         player.sendMessage(new LiteralText("/goml addowner - adds an owner to the current claim."), false);
         player.sendMessage(new LiteralText("/goml trust - adds a trusted member to the current claim."), false);
         player.sendMessage(new LiteralText("/goml untrust - removes a trusted member from the current claim."), false);
+        player.sendMessage(new LiteralText("/goml list - displays all claims you have access to."), false);
         player.sendMessage(new LiteralText("-------------------------------------").formatted(Formatting.BLUE), false);
         player.sendMessage(new LiteralText("GitHub repository: https://github.com/Patbox/get-off-my-lawn-server-sided"), false);
+
+        return 1;
+    }
+
+    private static int openList(CommandContext<ServerCommandSource> context, GameProfile target) throws CommandSyntaxException {
+
+        ClaimListGui.open(context.getSource().getPlayer(), target);
 
         return 1;
     }

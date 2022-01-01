@@ -89,6 +89,9 @@ public class UpgradeKitItem extends Item implements PolymerItem {
 
                         // new claim
                         Claim claimInfo = new Claim(Collections.singleton(context.getPlayer().getUuid()), pos);
+                        if (this.to.asItem() != null) {
+                            claimInfo.internal_setIcon(this.to.asItem().getDefaultStack());
+                        }
                         GetOffMyLawn.CLAIM.get(world).add(new ClaimBox(pos, to.getRadius()), claimInfo);
 
                         // decrement stack

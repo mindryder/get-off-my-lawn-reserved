@@ -1,10 +1,9 @@
 package draylar.goml.block;
 
-import draylar.goml.GetOffMyLawn;
 import draylar.goml.api.Augment;
-import draylar.goml.api.ClaimUtils;
 import draylar.goml.entity.ClaimAnchorBlockEntity;
 import draylar.goml.entity.ClaimAugmentBlockEntity;
+import draylar.goml.registry.GOMLTextures;
 import eu.pb4.polymer.api.block.PolymerHeadBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
@@ -25,6 +24,11 @@ import org.jetbrains.annotations.Nullable;
 public class ClaimAugmentBlock extends Block implements Augment, BlockEntityProvider, PolymerHeadBlock {
 
     private final String texture;
+
+    @Deprecated
+    public ClaimAugmentBlock(Settings settings) {
+        this(settings, GOMLTextures.MISSING_TEXTURE);
+    }
 
     public ClaimAugmentBlock(Settings settings, String texture) {
         super(settings);

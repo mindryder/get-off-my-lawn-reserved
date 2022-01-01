@@ -29,8 +29,8 @@
   "accessWidener": "goml.accesswidener",
   "depends": {
     "fabricloader": ">=0.12.6",
-    "fabric": "*",
-    "minecraft": ">=1.18"
+    "fabric": ">=0.45.0",
+    "minecraft": ">=1.18.1"
   },
   "custom": {
     "cardinal-components": [

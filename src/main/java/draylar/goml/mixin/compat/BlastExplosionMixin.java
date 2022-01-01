@@ -13,42 +13,38 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.Iterator;
+import java.util.List;
 
 @Mixin(CustomExplosion.class)
 public abstract class BlastExplosionMixin extends Explosion {
 
+    @Shadow @Final private List<BlockPos> affectedBlocks;
     @Unique private BlockPos goml_contextPos = null;
 
     private BlastExplosionMixin(World world, @Nullable Entity entity, double x, double y, double z, float power) {
         super(world, entity, x, y, z, power);
     }
 
-    @Inject(
-            method = "affectWorld",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;getBlock()Lnet/minecraft/block/Block;", ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void storePosition(boolean boolean_1, CallbackInfo ci, boolean boolean_2, Iterator var3, BlockPos blockPos, ObjectArrayList objectArrayList, BlockState blockState) {
-        goml_contextPos = blockPos;
+    @Inject(method = "collectBlocksAndDamageEntities", at = @At("TAIL"))
+    private void goml_clearBlocks(CallbackInfo ci) {
+        this.affectedBlocks.removeIf((b) -> !ClaimUtils.canExplosionDestroy(this.world, b, this.getCausingEntity()));
     }
 
-    @Redirect(
-            method = "affectWorld",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;isAir()Z", ordinal = 0))
-    private boolean isAirAndInvalid(BlockState blockState) {
-        return blockState.isAir() || !isValid(goml_contextPos);
-    }
-
-    @Unique
-    private boolean isValid(BlockPos blockPos) {
-        Selection<Entry<ClaimBox, Claim>> claimsFound = ClaimUtils.getClaimsAt(super.world, blockPos);
-        return claimsFound.isEmpty();
+    @ModifyVariable(method = "collectBlocksAndDamageEntities", at = @At("STORE"), ordinal = 0)
+    private List<Entity> goml_clearEntities(List<Entity> x) {
+        x.removeIf((e) -> !ClaimUtils.canExplosionDestroy(this.world, e.getBlockPos(), this.getCausingEntity()));
+        return x;
     }
 }

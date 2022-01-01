@@ -58,5 +58,16 @@
   "item.goml.glistening_upgrade_kit": "Glistening Upgrade Kit",
   "item.goml.crystal_upgrade_kit": "Crystal Upgrade Kit",
   "item.goml.emeradic_upgrade_kit": "Emeradic Upgrade Kit",
-  "item.goml.withered_upgrade_kit": "Withered Upgrade Kit"
+  "item.goml.withered_upgrade_kit": "Withered Upgrade Kit",
+
+  "text.goml.gui.next_page": "Next Page",
+  "text.goml.gui.previous_page": "Previous Page",
+  "text.goml.radius": "Radius: %s",
+  "text.goml.owners": "Owners: %s",
+  "text.goml.trusted": "Trusted: %s",
+  "text.goml.your_claims": "Your claims",
+  "text.goml.someones_claims": "%s's claims",
+
+  "text.goml.admin_mode.enabled": "Enabled Admin Mode! You can now modify claims of other players!",
+  "text.goml.admin_mode.disabled": "Disabled Admin Mode! You can no longer modify claims of other players!"
 }

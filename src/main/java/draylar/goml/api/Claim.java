@@ -1,11 +1,21 @@
 package draylar.goml.api;
 
+import draylar.goml.registry.GOMLItems;
+import eu.pb4.polymer.api.utils.PolymerUtils;
+import eu.pb4.polymer.impl.PolymerImplUtils;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -23,10 +33,14 @@ public class Claim {
     public static final String POSITION_KEY = "Pos";
     public static final String OWNERS_KEY = "Owners";
     public static final String TRUSTED_KEY = "Trusted";
+    public static final String ICON_KEY = "Icon";
 
     private final Set<UUID> owners;
     private final Set<UUID> trusted = new HashSet<>();
     private final BlockPos origin;
+    private Identifier world;
+    @Nullable
+    private ItemStack icon;
 
     /**
      * Returns a {@link Claim} instance with the given owner and origin position.
@@ -127,7 +141,9 @@ public class Claim {
         tag.put(OWNERS_KEY, ownersTag);
         tag.put(TRUSTED_KEY, trustedTag);
         tag.putLong(POSITION_KEY, origin.asLong());
-
+        if (this.icon != null) {
+            tag.put(ICON_KEY, this.icon.writeNbt(new NbtCompound()));
+        }
         return tag;
     }
 
@@ -158,6 +174,29 @@ public class Claim {
         NbtList trustedTag = tag.getList(TRUSTED_KEY, NbtType.INT_ARRAY);
         trustedTag.forEach(trustedUUID -> trustedUUIDs.add(NbtHelper.toUuid(trustedUUID)));
 
-        return new Claim(ownerUUIDs, trustedUUIDs, BlockPos.fromLong(tag.getLong(POSITION_KEY)));
+        var claim = new Claim(ownerUUIDs, trustedUUIDs, BlockPos.fromLong(tag.getLong(POSITION_KEY)));
+
+        if (tag.contains(ICON_KEY, NbtElement.COMPOUND_TYPE)) {
+            claim.icon = ItemStack.fromNbt(tag.getCompound(ICON_KEY));
+        }
+        return claim;
+    }
+
+    public Identifier getWorld() {
+        return this.world;
+    }
+
+    public ItemStack getIcon() {
+        return this.icon != null ? this.icon.copy() : Items.STONE.getDefaultStack();
+    }
+
+    @ApiStatus.Internal
+    public void internal_setIcon(ItemStack stack) {
+        this.icon = stack.copy();
+    }
+
+    @ApiStatus.Internal
+    public void internal_setWorld(Identifier world) {
+        this.world = world;
     }
 }
