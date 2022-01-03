@@ -30,16 +30,13 @@ import java.util.List;
 @Mixin(CustomExplosion.class)
 public abstract class BlastExplosionMixin extends Explosion {
 
-    @Shadow @Final private List<BlockPos> affectedBlocks;
-    @Unique private BlockPos goml_contextPos = null;
-
     private BlastExplosionMixin(World world, @Nullable Entity entity, double x, double y, double z, float power) {
         super(world, entity, x, y, z, power);
     }
 
     @Inject(method = "collectBlocksAndDamageEntities", at = @At("TAIL"))
     private void goml_clearBlocks(CallbackInfo ci) {
-        this.affectedBlocks.removeIf((b) -> !ClaimUtils.canExplosionDestroy(this.world, b, this.getCausingEntity()));
+        ((CustomExplosion) (Object) this).affectedBlocks.removeIf((b) -> !ClaimUtils.canExplosionDestroy(this.world, b, this.getCausingEntity()));
     }
 
     @ModifyVariable(method = "collectBlocksAndDamageEntities", at = @At("STORE"), ordinal = 0)

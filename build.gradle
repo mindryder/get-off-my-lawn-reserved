@@ -57,7 +57,7 @@ dependencies {
 	modImplementation include("io.github.ladysnake:PlayerAbilityLib:${pal_version}")
 
 	// Dev testing
-	modCompileOnly 'curse.maven:BLAST-349938:3350311'
+	modCompileOnly 'curse.maven:BLAST-349938:3543409'
 	modCompileOnly files("./modsWithCompat/appliedenergistics2-10.0.0-beta.2.jar")
 
 
