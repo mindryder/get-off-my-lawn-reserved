@@ -8,7 +8,6 @@
     "BucketItemMixin",
     "ExplosionMixin",
     "PistonBlockMixin",
-    "ServerWorldMixin",
     "TntEntityMixin",
     "admin.ServerPlayerEntityMixin",
     "augment.EndermanEntityMixin",
