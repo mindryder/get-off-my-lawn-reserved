@@ -55,6 +55,7 @@ public class ClaimAnchorBlock extends Block implements BlockEntityProvider, Poly
         if (!world.isClient()) {
             Claim claimInfo = new Claim(Collections.singleton(placer.getUuid()), pos);
             claimInfo.internal_setIcon(new ItemStack(itemStack.getItem()));
+            claimInfo.internal_setWorld(world.getRegistryKey().getValue());
             GetOffMyLawn.CLAIM.get(world).add(new ClaimBox(pos, radius.getAsInt()), claimInfo);
 
             // Assign claim to BE

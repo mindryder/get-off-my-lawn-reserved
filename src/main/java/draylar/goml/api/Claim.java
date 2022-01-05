@@ -183,7 +183,7 @@ public class Claim {
     }
 
     public Identifier getWorld() {
-        return this.world;
+        return this.world != null ? this.world : new Identifier("undefined");
     }
 
     public ItemStack getIcon() {

@@ -92,6 +92,7 @@ public class UpgradeKitItem extends Item implements PolymerItem {
                         if (this.to.asItem() != null) {
                             claimInfo.internal_setIcon(this.to.asItem().getDefaultStack());
                         }
+                        claimInfo.internal_setWorld(currentClaim.get().getValue().getWorld());
                         GetOffMyLawn.CLAIM.get(world).add(new ClaimBox(pos, to.getRadius()), claimInfo);
 
                         // decrement stack
