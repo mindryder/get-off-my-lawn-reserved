@@ -10,11 +10,13 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.context.LootContext;
+import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -89,7 +91,7 @@ public class ClaimAugmentBlockEntity extends BlockEntity implements PolymerObjec
                     GetOffMyLawn.LOGGER.warn(String.format("An augment at %s tried to locate a parent at %s, but it could not be found!", entity.pos.toString(), entity.parentPosition.toString()));
                     entity.world.setBlockState(entity.pos, Blocks.AIR.getDefaultState());
                     var list = DefaultedList.<ItemStack>of();
-                    list.addAll(state.getDroppedStacks(new LootContext.Builder(serverWorld)));
+                    list.addAll(state.getDroppedStacks((new LootContext.Builder(serverWorld)).parameter(LootContextParameters.ORIGIN, Vec3d.ofCenter(pos)).parameter(LootContextParameters.BLOCK_STATE, state).optionalParameter(LootContextParameters.BLOCK_ENTITY, blockEntity).parameter(LootContextParameters.TOOL, ItemStack.EMPTY)));
                     ItemScatterer.spawn(serverWorld, pos, list);
                 }
             }
@@ -98,7 +100,7 @@ public class ClaimAugmentBlockEntity extends BlockEntity implements PolymerObjec
                 GetOffMyLawn.LOGGER.warn(String.format("An augment at %s has an invalid parent and parent position! Removing now.", entity.pos.toString()));
                 entity.world.setBlockState(entity.pos, Blocks.AIR.getDefaultState());
                 var list = DefaultedList.<ItemStack>of();
-                list.addAll(state.getDroppedStacks(new LootContext.Builder(serverWorld)));
+                list.addAll(state.getDroppedStacks((new LootContext.Builder(serverWorld)).parameter(LootContextParameters.ORIGIN, Vec3d.ofCenter(pos)).parameter(LootContextParameters.BLOCK_STATE, state).parameter(LootContextParameters.TOOL, ItemStack.EMPTY)));
                 ItemScatterer.spawn(serverWorld, pos, list);
             }
         }
