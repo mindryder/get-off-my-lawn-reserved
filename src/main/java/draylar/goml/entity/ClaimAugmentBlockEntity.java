@@ -78,7 +78,6 @@ public class ClaimAugmentBlockEntity extends BlockEntity implements PolymerObjec
         return augment;
     }
 
-    // todo: This code doesn't run, but it's incomplete anyway, I should rework it in future
     public static <T extends BlockEntity> void tick(World world, BlockPos pos, BlockState state, T baseBlockEntity) {
         if (world instanceof ServerWorld serverWorld && baseBlockEntity instanceof ClaimAugmentBlockEntity entity) {
             // Parent is null and parent position is not null, assume we are just loading the augment from tags.

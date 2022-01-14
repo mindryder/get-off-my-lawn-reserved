@@ -14,7 +14,6 @@ import net.fabricmc.fabric.api.event.player.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
@@ -32,10 +31,10 @@ public class EventHandlers {
         registerAttackEntityCallback();
         registerInteractEntityCallback();
         registerAnchorAttackCallback();
-        registerPolymerMining();
+        registerPolymerMiningCallback();
     }
 
-    private static void registerPolymerMining() {
+    private static void registerPolymerMiningCallback() {
         PolymerBlockUtils.SERVER_SIDE_MINING_CHECK.register((player, pos, state) -> {
             Selection<Entry<ClaimBox, Claim>> claimsFound = ClaimUtils.getClaimsAt(player.getWorld(), pos);
 

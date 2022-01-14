@@ -1,4 +1,4 @@
-package draylar.goml.mixin.admin;
+package draylar.goml.mixin;
 
 import draylar.goml.AdminModePlayer;
 import net.minecraft.server.network.ServerPlayerEntity;

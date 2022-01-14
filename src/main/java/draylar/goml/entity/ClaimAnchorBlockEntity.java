@@ -107,29 +107,30 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
             List<PlayerEntity> playersInClaim = anchor.world.getEntitiesByClass(PlayerEntity.class, new Box(anchor.pos.add(-radius, -radius, -radius), anchor.pos.add(radius, radius, radius)), entity -> true);
 
             // Tick all augments
-            anchor.augmentEntities.forEach((position, augmentBE) -> {
+            for (var augmentBE : anchor.augmentEntities.values()) {
                 Augment augment = augmentBE.getAugment();
 
                 if (augment != null) {
                     if (augment.ticks()) {
                         augment.tick(anchor.claim, anchor.world, augmentBE);
-                        playersInClaim.forEach(augment::playerTick);
+                        for (PlayerEntity playerEntity : playersInClaim) {
+                            augment.playerTick(playerEntity);
+                        }
                     }
 
                     // Enter/Exit behavior
-                    playersInClaim.forEach(player -> {
-                        // this player was NOT in the claim last tick, call entry method
-                        if (!anchor.previousTickPlayers.contains(player)) {
-                            augment.onPlayerEnter(anchor.claim, player);
+                    for (PlayerEntity playerEntity : playersInClaim) {// this player was NOT in the claim last tick, call entry method
+                        if (!anchor.previousTickPlayers.contains(playerEntity)) {
+                            augment.onPlayerEnter(anchor.claim, playerEntity);
                         }
-                    });
+                    }
 
                     // Tick exit behavior
                     anchor.previousTickPlayers.stream().filter(player -> !playersInClaim.contains(player)).forEach(player -> {
                         augment.onPlayerExit(anchor.claim, player);
                     });
                 }
-            });
+            }
 
             // Reset players in claim
             anchor.previousTickPlayers.clear();
@@ -168,6 +169,27 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
     public void from(ClaimAnchorBlockEntity be) {
         this.previousTickPlayers.addAll(be.getPreviousTickPlayers());
         this.augmentEntities.putAll(be.getAugmentEntities());
+    }
+
+    @Override
+    public void markDirty() {
+
+        // Make sure exit logic is run after claim is removed from world
+        // This can happen while teleporting
+        for (var augmentBE : this.augmentEntities.values()) {
+            Augment augment = augmentBE.getAugment();
+
+            if (augment != null) {
+                for (var player : this.previousTickPlayers) {
+                    augment.onPlayerExit(this.claim, player);
+                }
+            }
+        }
+
+        // Reset players in claim
+        this.previousTickPlayers.clear();
+        
+        super.markDirty();
     }
 
     public void showHologram(PlayerEntity player) {
