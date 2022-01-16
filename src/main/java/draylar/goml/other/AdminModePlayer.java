@@ -1,4 +1,4 @@
-package draylar.goml;
+package draylar.goml.other;
 
 public interface AdminModePlayer {
     void goml_setAdminMode(boolean value);

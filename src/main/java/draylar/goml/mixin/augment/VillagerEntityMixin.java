@@ -2,7 +2,7 @@ package draylar.goml.mixin.augment;
 
 import draylar.goml.api.Claim;
 import draylar.goml.api.ClaimUtils;
-import draylar.goml.entity.ClaimAnchorBlockEntity;
+import draylar.goml.block.entity.ClaimAnchorBlockEntity;
 import draylar.goml.registry.GOMLBlocks;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;

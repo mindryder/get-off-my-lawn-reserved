@@ -1,8 +1,9 @@
 package draylar.goml.block;
 
 import draylar.goml.api.Augment;
-import draylar.goml.entity.ClaimAnchorBlockEntity;
-import draylar.goml.entity.ClaimAugmentBlockEntity;
+import draylar.goml.api.Claim;
+import draylar.goml.block.entity.ClaimAnchorBlockEntity;
+import draylar.goml.block.entity.ClaimAugmentBlockEntity;
 import draylar.goml.registry.GOMLTextures;
 import eu.pb4.polymer.api.block.PolymerHeadBlock;
 import net.minecraft.block.Block;
@@ -19,11 +20,15 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.BooleanSupplier;
 
 public class ClaimAugmentBlock extends Block implements Augment, BlockEntityProvider, PolymerHeadBlock {
 
     private final String texture;
+    private BooleanSupplier isEnabled = () -> true;
 
     @Deprecated
     public ClaimAugmentBlock(Settings settings) {
@@ -35,13 +40,22 @@ public class ClaimAugmentBlock extends Block implements Augment, BlockEntityProv
         this.texture = texture;
     }
 
+    @ApiStatus.Internal
+    public void setEnabledCheck(BooleanSupplier check) {
+        this.isEnabled = check;
+    }
+
     @Override
     public boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
-        for (Direction direction : Direction.values()) {
-            BlockState offsetState = world.getBlockState(pos.offset(direction));
+        if (world instanceof World) {
+            for (Direction direction : Direction.values()) {
+                var blockEntity = world.getBlockEntity(pos.offset(direction));
 
-            if (offsetState.getBlock() instanceof ClaimAugmentBlock || offsetState.getBlock() instanceof ClaimAnchorBlock) {
-                return true;
+                if (blockEntity instanceof ClaimAnchorBlockEntity claimAnchorBlockEntity && claimAnchorBlockEntity.getClaim() != null) {
+                    return this.canPlace(claimAnchorBlockEntity.getClaim(), (World) world, pos, claimAnchorBlockEntity);
+                } else if (blockEntity instanceof ClaimAugmentBlockEntity claimAugmentBlockEntity && claimAugmentBlockEntity.getParent() != null && claimAugmentBlockEntity.getParent().getClaim() != null) {
+                    return this.canPlace(claimAugmentBlockEntity.getParent().getClaim(), (World) world, pos, claimAugmentBlockEntity.getParent());
+                }
             }
         }
 
@@ -113,6 +127,16 @@ public class ClaimAugmentBlock extends Block implements Augment, BlockEntityProv
         }
 
         super.onBreak(world, pos, state, player);
+    }
+
+    @Override
+    public boolean canPlace(Claim claim, World world, BlockPos pos, ClaimAnchorBlockEntity anchor) {
+        return !anchor.hasAugment(this);
+    }
+
+    @Override
+    public boolean isEnabled(Claim claim, World world) {
+        return this.isEnabled.getAsBoolean();
     }
 
     @Nullable

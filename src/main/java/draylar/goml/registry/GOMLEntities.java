@@ -1,8 +1,8 @@
 package draylar.goml.registry;
 
 import draylar.goml.GetOffMyLawn;
-import draylar.goml.entity.ClaimAnchorBlockEntity;
-import draylar.goml.entity.ClaimAugmentBlockEntity;
+import draylar.goml.block.entity.ClaimAnchorBlockEntity;
+import draylar.goml.block.entity.ClaimAugmentBlockEntity;
 import eu.pb4.polymer.api.block.PolymerBlockUtils;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.block.Block;

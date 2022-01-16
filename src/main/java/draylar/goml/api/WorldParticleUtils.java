@@ -21,17 +21,17 @@ public class WorldParticleUtils {
         for (Edge edge : edges) {
             int length = edge.length();
 
-            int interval = 1;
+            double interval = 1;
             if (length > 0) {
-                interval = MathHelper.clamp(length / Math.min(maxCount, length), 2, maxInterval);
+                interval = MathHelper.clamp(length / Math.min(maxCount, length), 1, maxInterval);
             }
 
-            int steps = (length + interval - 1) / interval;
-            for (int i = 0; i <= steps; i++) {
-                double m = (double) (i * interval) / length;
+            double steps = (length + interval - 1) / interval;
+            for (double i = 0; i < steps; i++) {
+                double m = (i * interval) / length;
                 spawnParticleIfVisible(
                         player, effect,
-                        edge.projX(m), edge.projY(m), edge.projZ(m)
+                        edge.projX(m) + 0.5, edge.projY(m) + 0.5, edge.projZ(m) + 0.5
                 );
             }
         }
@@ -65,9 +65,9 @@ public class WorldParticleUtils {
         int minX = min.getX();
         int minY = min.getY();
         int minZ = min.getZ();
-        int maxX = max.getX();// + 1;
-        int maxY = max.getY();// + 1;
-        int maxZ = max.getZ();// + 1;
+        int maxX = max.getX() - 1;
+        int maxY = max.getY() - 1;
+        int maxZ = max.getZ() - 1;
 
         return new Edge[] {
                 // edges

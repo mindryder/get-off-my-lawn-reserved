@@ -1,6 +1,6 @@
 package draylar.goml.mixin;
 
-import draylar.goml.AdminModePlayer;
+import draylar.goml.other.AdminModePlayer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ServerPlayerEntityMixin implements AdminModePlayer {
 
     @Unique
-    private boolean goml_adminMode = true;
+    private boolean goml_adminMode = false;
 
     @Inject(method = "copyFrom", at = @At("HEAD"))
     private void goml_copyAdminMode(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci) {

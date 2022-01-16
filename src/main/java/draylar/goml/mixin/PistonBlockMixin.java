@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class PistonBlockMixin {
 
     @Inject(at = @At("HEAD"), method = "isMovable", cancellable = true)
-    private static void isMoveable(BlockState state, World world, BlockPos pos, Direction motionDir, boolean canBreak, Direction pistonDir, CallbackInfoReturnable<Boolean> cir) {
+    private static void goml_isMoveable(BlockState state, World world, BlockPos pos, Direction motionDir, boolean canBreak, Direction pistonDir, CallbackInfoReturnable<Boolean> cir) {
         if(state.getBlock() instanceof ClaimAnchorBlock) {
             cir.setReturnValue(false);
         }

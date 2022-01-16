@@ -8,7 +8,7 @@ import draylar.goml.api.ClaimUtils;
 import draylar.goml.api.PermissionReason;
 import draylar.goml.api.event.ClaimEvents;
 import draylar.goml.block.ClaimAnchorBlock;
-import draylar.goml.entity.ClaimAnchorBlockEntity;
+import draylar.goml.block.entity.ClaimAnchorBlockEntity;
 import eu.pb4.polymer.api.block.PolymerBlockUtils;
 import net.fabricmc.fabric.api.event.player.*;
 import net.minecraft.block.entity.BlockEntity;
@@ -123,7 +123,7 @@ public class EventHandlers {
         if(!claims.isEmpty()) {
             boolean noPermission = claims.anyMatch((Entry<ClaimBox, Claim> boxInfo) -> !boxInfo.getValue().hasPermission(player));
 
-            if(noPermission && !player.hasPermissionLevel(3)) {
+            if(noPermission && !ClaimUtils.isInAdminMode(player)) {
                 ActionResult check = ClaimEvents.PERMISSION_DENIED.invoker().check(player, player.world, hand, pos, reason);
 
                 if(check.isAccepted() || check.equals(ActionResult.PASS)) {

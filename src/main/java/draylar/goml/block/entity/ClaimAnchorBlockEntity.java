@@ -1,4 +1,4 @@
-package draylar.goml.entity;
+package draylar.goml.block.entity;
 
 import com.jamieswhiteshirt.rtree3i.Entry;
 import draylar.goml.GetOffMyLawn;
@@ -9,8 +9,6 @@ import draylar.goml.api.ClaimUtils;
 import draylar.goml.block.ClaimAnchorBlock;
 import draylar.goml.block.ClaimAugmentBlock;
 import draylar.goml.registry.GOMLEntities;
-import eu.pb4.holograms.api.holograms.WorldHologram;
-import eu.pb4.polymer.api.entity.PolymerEntity;
 import eu.pb4.polymer.api.utils.PolymerObject;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.block.BlockState;
@@ -22,6 +20,7 @@ import net.minecraft.nbt.NbtLong;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -73,6 +72,11 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
         this.claim = claim;
     }
 
+    @Nullable
+    public Claim getClaim() {
+        return this.claim;
+    }
+
     public static <T extends BlockEntity> void tick(World world, BlockPos pos, BlockState state, T blockEntity) {
         if (!world.isClient() && blockEntity instanceof ClaimAnchorBlockEntity anchor) {
 
@@ -110,16 +114,17 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
             for (var augmentBE : anchor.augmentEntities.values()) {
                 Augment augment = augmentBE.getAugment();
 
-                if (augment != null) {
+                if (augment != null && augment.isEnabled(anchor.claim, world)) {
                     if (augment.ticks()) {
                         augment.tick(anchor.claim, anchor.world, augmentBE);
                         for (PlayerEntity playerEntity : playersInClaim) {
-                            augment.playerTick(playerEntity);
+                            augment.playerTick(anchor.claim, playerEntity);
                         }
                     }
 
                     // Enter/Exit behavior
-                    for (PlayerEntity playerEntity : playersInClaim) {// this player was NOT in the claim last tick, call entry method
+                    for (PlayerEntity playerEntity : playersInClaim) {
+                        // this player was NOT in the claim last tick, call entry method
                         if (!anchor.previousTickPlayers.contains(playerEntity)) {
                             augment.onPlayerEnter(anchor.claim, playerEntity);
                         }
@@ -172,14 +177,14 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
     }
 
     @Override
-    public void markDirty() {
+    public void markRemoved() {
 
         // Make sure exit logic is run after claim is removed from world
         // This can happen while teleporting
         for (var augmentBE : this.augmentEntities.values()) {
             Augment augment = augmentBE.getAugment();
 
-            if (augment != null) {
+            if (augment != null && augment.isEnabled(this.claim, this.world)) {
                 for (var player : this.previousTickPlayers) {
                     augment.onPlayerExit(this.claim, player);
                 }
@@ -189,7 +194,7 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
         // Reset players in claim
         this.previousTickPlayers.clear();
         
-        super.markDirty();
+        super.markRemoved();
     }
 
     public void showHologram(PlayerEntity player) {

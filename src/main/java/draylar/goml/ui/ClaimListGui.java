@@ -96,15 +96,6 @@ public class ClaimListGui extends PagedGui {
         return DisplayElement.empty();
     }
 
-    @Override
-    protected DisplayElement getNavElement(int id) {
-        return switch (id) {
-            case 2 -> DisplayElement.previousPage(this);
-            case 6 -> DisplayElement.nextPage(this);
-            default -> DisplayElement.filler();
-        };
-    }
-
     public static final List<Text> getPlayerNames(MinecraftServer server, Collection<UUID> uuids) {
         var list = new ArrayList<Text>();
 

@@ -1,10 +1,9 @@
-package draylar.goml.command;
+package draylar.goml.other;
 
 import com.jamieswhiteshirt.rtree3i.RTreeMap;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import draylar.goml.AdminModePlayer;
 import draylar.goml.GetOffMyLawn;
 import draylar.goml.api.Claim;
 import draylar.goml.api.ClaimBox;
@@ -255,8 +254,9 @@ public class ClaimCommand {
         }
 
         if(!world.isClient()) {
+            var skipChecks = ClaimUtils.isInAdminMode(player);
             ClaimUtils.getClaimsAt(world, player.getBlockPos()).forEach(claimedArea -> {
-                if(claimedArea.getValue().isOwner(player)) {
+                if(skipChecks || claimedArea.getValue().isOwner(player)) {
                     if(owner) {
                         claimedArea.getValue().addOwner(toAdd);
                         player.sendMessage(prefix(new TranslatableText("goml.owner_added", toAdd.getDisplayName())), false);

@@ -84,7 +84,13 @@ public abstract class PagedGui extends SimpleGui {
 
     protected abstract DisplayElement getElement(int id);
 
-    protected abstract DisplayElement getNavElement(int id);
+    protected DisplayElement getNavElement(int id) {
+        return switch (id) {
+            case 2 -> DisplayElement.previousPage(this);
+            case 6 -> DisplayElement.nextPage(this);
+            default -> DisplayElement.filler();
+        };
+    }
 
     public record DisplayElement(@Nullable GuiElementInterface element, @Nullable Slot slot) {
         private static final DisplayElement EMPTY = DisplayElement.of(new GuiElement(ItemStack.EMPTY, GuiElementInterface.EMPTY_CALLBACK));

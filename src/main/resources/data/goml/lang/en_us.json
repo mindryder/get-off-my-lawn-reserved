@@ -53,6 +53,10 @@
   "block.goml.defenders_right.description.1": "Grants bonus damage to",
   "block.goml.defenders_right.description.2": "tamed pets within a claim.",
 
+  "block.goml.greeter": "Anchor Augment: Greeter",
+  "block.goml.greeter.description.1": "Sends message to players",
+  "block.goml.greeter.description.2": "entering your claim.",
+
   "item.goml.goggles": "Goggles of (Claim) Revealing",
   "item.goml.reinforced_upgrade_kit": "Reinforced Upgrade Kit",
   "item.goml.glistening_upgrade_kit": "Glistening Upgrade Kit",
@@ -60,14 +64,25 @@
   "item.goml.emeradic_upgrade_kit": "Emeradic Upgrade Kit",
   "item.goml.withered_upgrade_kit": "Withered Upgrade Kit",
 
+  "text.goml.gui.input_greeting.title": "Change greeting text",
+  "text.goml.gui.input_greeting.set": "Save changes",
+  "text.goml.gui.input_greeting.close": "Cancel changes",
   "text.goml.gui.next_page": "Next Page",
   "text.goml.gui.previous_page": "Previous Page",
+  "text.goml.gui.player_list.title": "Trusted players",
+  "text.goml.gui.player_list.add_player": "Add player",
+  "text.goml.gui.click_to_remove": "Click to remove player from claim",
+  "text.goml.gui.player_add_gui.title": "Add player to claim",
   "text.goml.radius": "Radius: %s",
   "text.goml.owners": "Owners: %s",
   "text.goml.trusted": "Trusted: %s",
   "text.goml.your_claims": "Your claims",
   "text.goml.someones_claims": "%s's claims",
+  "text.goml.owner": "Owner",
 
   "text.goml.admin_mode.enabled": "Enabled Admin Mode! You can now modify claims of other players!",
-  "text.goml.admin_mode.disabled": "Disabled Admin Mode! You can no longer modify claims of other players!"
+  "text.goml.admin_mode.disabled": "Disabled Admin Mode! You can no longer modify claims of other players!",
+
+  "text.goml.changed_greeting": "Your claim's greeting has been changed to: %s",
+  "text.goml.disabled_augment": "This item is disabled!"
 }

@@ -10,6 +10,7 @@
     "PistonBlockMixin",
     "PlayerManagerMixin",
     "ServerPlayerEntityMixin",
+    "ShapedRecipeMixin",
     "TntEntityMixin",
     "augment.EndermanEntityMixin",
     "augment.VillagerEntityMixin",

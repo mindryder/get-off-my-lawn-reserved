@@ -1,5 +1,6 @@
 package draylar.goml.block.augment;
 
+import draylar.goml.api.Claim;
 import draylar.goml.block.ClaimAugmentBlock;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -12,7 +13,7 @@ public class AngelicAuraAugmentBlock extends ClaimAugmentBlock {
     }
 
     @Override
-    public void playerTick(PlayerEntity player) {
+    public void playerTick(Claim claim, PlayerEntity player) {
         if (player.age % 80 == 0) {
             player.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 80, 0, true, false));
         }

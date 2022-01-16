@@ -30,7 +30,7 @@ public abstract class TntEntityMixin extends Entity {
     }
 
     @Inject(at = @At("HEAD"), method = "explode", cancellable = true)
-    private void attemptExplosion(CallbackInfo ci) {
+    private void goml_attemptExplosion(CallbackInfo ci) {
         if (causingEntity instanceof PlayerEntity) {
             Selection<Entry<ClaimBox, Claim>> claimsFound = ClaimUtils.getClaimsAt(world, getBlockPos());
 

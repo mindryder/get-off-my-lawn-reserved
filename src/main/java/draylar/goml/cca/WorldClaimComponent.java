@@ -2,7 +2,6 @@ package draylar.goml.cca;
 
 import com.jamieswhiteshirt.rtree3i.ConfigurationBuilder;
 import com.jamieswhiteshirt.rtree3i.RTreeMap;
-import draylar.goml.GetOffMyLawn;
 import draylar.goml.api.Claim;
 import draylar.goml.api.ClaimBox;
 import net.fabricmc.fabric.api.util.NbtType;
@@ -44,7 +43,7 @@ public class WorldClaimComponent implements ClaimComponent {
         NbtList.forEach(child -> {
             NbtCompound childCompound = (NbtCompound) child;
             ClaimBox box = boxFromTag((NbtCompound) childCompound.get("Box"));
-            Claim claimInfo = Claim.fromTag((NbtCompound) childCompound.get("Info"));
+            Claim claimInfo = Claim.fromNbt((NbtCompound) childCompound.get("Info"));
             claimInfo.internal_setWorld(world);
             add(box, claimInfo);
         });
@@ -58,7 +57,7 @@ public class WorldClaimComponent implements ClaimComponent {
             NbtCompound claimTag = new NbtCompound();
 
             claimTag.put("Box", serializeBox(claim.getKey()));
-            claimTag.put("Info", claim.getValue().asTag());
+            claimTag.put("Info", claim.getValue().asNbt());
 
             NbtListClaims.add(claimTag);
         });

@@ -1,11 +1,7 @@
 package draylar.goml.api;
 
-import draylar.goml.registry.GOMLItems;
-import eu.pb4.polymer.api.utils.PolymerUtils;
-import eu.pb4.polymer.impl.PolymerImplUtils;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -17,10 +13,7 @@ import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Represents a claim on land with an origin {@link BlockPos}, owners, and other allowed players.
@@ -34,6 +27,7 @@ public class Claim {
     public static final String OWNERS_KEY = "Owners";
     public static final String TRUSTED_KEY = "Trusted";
     public static final String ICON_KEY = "Icon";
+    public static final String CUSTOM_DATA_KEY = "CustomData";
 
     private final Set<UUID> owners;
     private final Set<UUID> trusted = new HashSet<>();
@@ -41,6 +35,8 @@ public class Claim {
     private Identifier world;
     @Nullable
     private ItemStack icon;
+
+    private Map<DataKey<Object>, Object> customData = new HashMap<>();
 
     /**
      * Returns a {@link Claim} instance with the given owner and origin position.
@@ -123,8 +119,8 @@ public class Claim {
      *
      * @return  this object serialized to a {@link NbtCompound}
      */
-    public NbtCompound asTag() {
-        NbtCompound tag = new NbtCompound();
+    public NbtCompound asNbt() {
+        NbtCompound nbt = new NbtCompound();
 
         // collect owner UUIDs into list
         NbtList ownersTag = new NbtList();
@@ -138,13 +134,26 @@ public class Claim {
             trustedTag.add(NbtHelper.fromUuid(trustedUUID));
         });
 
-        tag.put(OWNERS_KEY, ownersTag);
-        tag.put(TRUSTED_KEY, trustedTag);
-        tag.putLong(POSITION_KEY, origin.asLong());
+        nbt.put(OWNERS_KEY, ownersTag);
+        nbt.put(TRUSTED_KEY, trustedTag);
+        nbt.putLong(POSITION_KEY, origin.asLong());
         if (this.icon != null) {
-            tag.put(ICON_KEY, this.icon.writeNbt(new NbtCompound()));
+            nbt.put(ICON_KEY, this.icon.writeNbt(new NbtCompound()));
         }
-        return tag;
+
+        var customData = new NbtCompound();
+
+        for (var entry : this.customData.entrySet()) {
+            var value = entry.getKey().serializer().apply(entry.getValue());
+
+            if (value != null) {
+                customData.put(entry.getKey().key(), value);
+            }
+        }
+
+        nbt.put(CUSTOM_DATA_KEY, customData);
+
+        return nbt;
     }
 
     /**
@@ -155,30 +164,39 @@ public class Claim {
      * <li>"Owners" - {@link UUID}s of claim owners
      * <li>"Pos" - origin {@link BlockPos} of claim
      *
-     * @param tag  tag to deserialize information from
+     * @param nbt  tag to deserialize information from
      * @return  {@link Claim} instance with information from tag
      */
-    public static Claim fromTag(NbtCompound tag) {
+    public static Claim fromNbt(NbtCompound nbt) {
         // Handle legacy data stored in "Owner" key, which is a single UUID
-        if(tag.containsUuid(OWNER_KEY)) {
-            return new Claim(Collections.singleton(tag.getUuid(OWNER_KEY)), BlockPos.fromLong(tag.getLong(POSITION_KEY)));
+        if(nbt.containsUuid(OWNER_KEY)) {
+            return new Claim(new HashSet<>(Collections.singleton(nbt.getUuid(OWNER_KEY))), BlockPos.fromLong(nbt.getLong(POSITION_KEY)));
         }
 
         // Collect UUID of owners
         Set<UUID> ownerUUIDs = new HashSet<>();
-        NbtList ownersTag = tag.getList(OWNERS_KEY, NbtType.INT_ARRAY);
+        NbtList ownersTag = nbt.getList(OWNERS_KEY, NbtType.INT_ARRAY);
         ownersTag.forEach(ownerUUID -> ownerUUIDs.add(NbtHelper.toUuid(ownerUUID)));
 
         // Collect UUID of trusted
         Set<UUID> trustedUUIDs = new HashSet<>();
-        NbtList trustedTag = tag.getList(TRUSTED_KEY, NbtType.INT_ARRAY);
+        NbtList trustedTag = nbt.getList(TRUSTED_KEY, NbtType.INT_ARRAY);
         trustedTag.forEach(trustedUUID -> trustedUUIDs.add(NbtHelper.toUuid(trustedUUID)));
 
-        var claim = new Claim(ownerUUIDs, trustedUUIDs, BlockPos.fromLong(tag.getLong(POSITION_KEY)));
+        var claim = new Claim(ownerUUIDs, trustedUUIDs, BlockPos.fromLong(nbt.getLong(POSITION_KEY)));
 
-        if (tag.contains(ICON_KEY, NbtElement.COMPOUND_TYPE)) {
-            claim.icon = ItemStack.fromNbt(tag.getCompound(ICON_KEY));
+        if (nbt.contains(ICON_KEY, NbtElement.COMPOUND_TYPE)) {
+            claim.icon = ItemStack.fromNbt(nbt.getCompound(ICON_KEY));
         }
+
+        for (var key : nbt.getCompound(CUSTOM_DATA_KEY).getKeys()) {
+            var dataKey = DataKey.getKey(key);
+
+            if (dataKey != null) {
+                claim.customData.put((DataKey<Object>) dataKey, dataKey.deserializer().apply(nbt.get(key)));
+            }
+        }
+
         return claim;
     }
 
@@ -188,6 +206,27 @@ public class Claim {
 
     public ItemStack getIcon() {
         return this.icon != null ? this.icon.copy() : Items.STONE.getDefaultStack();
+    }
+
+    @Nullable
+    public <T> T getData(DataKey<T> key) {
+        try {
+            return (T) this.customData.getOrDefault(key, key.defaultValue());
+        } catch (Exception e) {
+            return key.defaultValue();
+        }
+    }
+
+    public <T> void setData(DataKey<T> key, T data) {
+        if (data != null) {
+            this.customData.put((DataKey<Object>) key, data);
+        } else {
+            this.customData.remove(key);
+        }
+    }
+
+    public <T> void removeData(DataKey<T> key) {
+        setData(key, null);
     }
 
     @ApiStatus.Internal

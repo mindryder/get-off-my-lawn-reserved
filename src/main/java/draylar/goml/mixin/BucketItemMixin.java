@@ -9,6 +9,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.BucketItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Hand;
@@ -32,13 +33,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * This mixin serves as an extra protection layer against client desync when using buckets in claims you don't own.
  */
 @Mixin(BucketItem.class)
-public class BucketItemMixin {
+public class BucketItemMixin extends Item {
 
     @Shadow @Final private Fluid fluid;
 
+    public BucketItemMixin(Settings settings) {
+        super(settings);
+    }
+
     @Inject(at = @At("HEAD"), method = "use", cancellable = true)
-    private void preventBucketUsageInClaims(World world, PlayerEntity user, Hand hand, CallbackInfoReturnable<TypedActionResult<ItemStack>> cir) {
-        HitResult hitResult = rayTrace(world, user, this.fluid == Fluids.EMPTY ? RaycastContext.FluidHandling.SOURCE_ONLY : RaycastContext.FluidHandling.NONE);
+    private void goml_preventBucketUsageInClaims(World world, PlayerEntity user, Hand hand, CallbackInfoReturnable<TypedActionResult<ItemStack>> cir) {
+        HitResult hitResult = raycast(world, user, this.fluid == Fluids.EMPTY ? RaycastContext.FluidHandling.SOURCE_ONLY : RaycastContext.FluidHandling.NONE);
         BlockHitResult blockHitResult = (BlockHitResult) hitResult;
         BlockPos blockPos = blockHitResult.getBlockPos();
 
@@ -52,27 +57,5 @@ public class BucketItemMixin {
                 cir.setReturnValue(TypedActionResult.fail(user.getStackInHand(hand)));
             }
         }
-    }
-
-    /**
-     * Copy of protected method {@link net.minecraft.item.Item#raycast(World, PlayerEntity, RaycastContext.FluidHandling)}
-     *
-     * @param world  world to ray trace in
-     * @param player  player to ray trace from
-     * @param fluidHandling  fluid handling
-     * @return  {@link HitResult} of raytrace
-     */
-    private static HitResult rayTrace(World world, PlayerEntity player, RaycastContext.FluidHandling fluidHandling) {
-        float f = player.getPitch();
-        float g = player.getYaw();
-        Vec3d vec3d = player.getCameraPosVec(1.0F);
-        float h = MathHelper.cos(-g * 0.017453292F - 3.1415927F);
-        float i = MathHelper.sin(-g * 0.017453292F - 3.1415927F);
-        float j = -MathHelper.cos(-f * 0.017453292F);
-        float k = MathHelper.sin(-f * 0.017453292F);
-        float l = i * j;
-        float n = h * j;
-        Vec3d vec3d2 = vec3d.add((double)l * 5.0D, (double)k * 5.0D, (double)n * 5.0D);
-        return world.raycast(new RaycastContext(vec3d, vec3d2, RaycastContext.ShapeType.OUTLINE, fluidHandling, player));
     }
 }

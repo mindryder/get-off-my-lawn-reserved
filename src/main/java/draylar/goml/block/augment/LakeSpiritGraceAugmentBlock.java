@@ -1,5 +1,6 @@
 package draylar.goml.block.augment;
 
+import draylar.goml.api.Claim;
 import draylar.goml.block.ClaimAugmentBlock;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -12,7 +13,7 @@ public class LakeSpiritGraceAugmentBlock extends ClaimAugmentBlock {
     }
 
     @Override
-    public void playerTick(PlayerEntity player) {
+    public void playerTick(Claim claim, PlayerEntity player) {
         player.addStatusEffect(new StatusEffectInstance(StatusEffects.WATER_BREATHING, 5, 0, true, false));
         player.addStatusEffect(new StatusEffectInstance(StatusEffects.DOLPHINS_GRACE, 5, 0, true, false));
     }

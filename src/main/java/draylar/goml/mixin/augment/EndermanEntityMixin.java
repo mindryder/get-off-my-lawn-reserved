@@ -2,7 +2,7 @@ package draylar.goml.mixin.augment;
 
 import draylar.goml.api.Claim;
 import draylar.goml.api.ClaimUtils;
-import draylar.goml.entity.ClaimAnchorBlockEntity;
+import draylar.goml.block.entity.ClaimAnchorBlockEntity;
 import draylar.goml.registry.GOMLBlocks;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.mob.EndermanEntity;
@@ -25,7 +25,7 @@ public abstract class EndermanEntityMixin extends HostileEntity {
             at = @At("HEAD"),
             cancellable = true
     )
-    private void attemptTeleport(double x, double y, double z, CallbackInfoReturnable<Boolean> cir) {
+    private void goml_attemptTeleport(double x, double y, double z, CallbackInfoReturnable<Boolean> cir) {
         boolean b = ClaimUtils.getClaimsAt(world, getBlockPos()).anyMatch(claim -> {
             Claim foundClaim = claim.getValue();
             ClaimAnchorBlockEntity anchor = ClaimUtils.getAnchor(world, foundClaim);

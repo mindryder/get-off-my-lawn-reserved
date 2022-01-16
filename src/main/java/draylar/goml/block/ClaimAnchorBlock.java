@@ -4,9 +4,10 @@ import draylar.goml.GetOffMyLawn;
 import draylar.goml.api.Claim;
 import draylar.goml.api.ClaimBox;
 import draylar.goml.api.ClaimUtils;
-import draylar.goml.entity.ClaimAnchorBlockEntity;
+import draylar.goml.block.entity.ClaimAnchorBlockEntity;
 import draylar.goml.registry.GOMLEntities;
 import draylar.goml.registry.GOMLTextures;
+import draylar.goml.ui.ClaimPlayerListGui;
 import eu.pb4.polymer.api.block.PolymerHeadBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
@@ -18,6 +19,7 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -27,6 +29,7 @@ import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.function.IntSupplier;
 
 @SuppressWarnings({"deprecation"})
@@ -53,7 +56,7 @@ public class ClaimAnchorBlock extends Block implements BlockEntityProvider, Poly
         }
 
         if (!world.isClient()) {
-            Claim claimInfo = new Claim(Collections.singleton(placer.getUuid()), pos);
+            Claim claimInfo = new Claim(new HashSet<>(Collections.singleton(placer.getUuid())), pos);
             claimInfo.internal_setIcon(new ItemStack(itemStack.getItem()));
             claimInfo.internal_setWorld(world.getRegistryKey().getValue());
             GetOffMyLawn.CLAIM.get(world).add(new ClaimBox(pos, radius.getAsInt()), claimInfo);
@@ -102,12 +105,15 @@ public class ClaimAnchorBlock extends Block implements BlockEntityProvider, Poly
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        var blockEntity = world.getBlockEntity(pos, GOMLEntities.CLAIM_ANCHOR);
-        if (blockEntity.isPresent()) {
-            blockEntity.get().showHologram(player);
+    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity playerEntity, Hand hand, BlockHitResult hit) {
+        if (playerEntity instanceof ServerPlayerEntity player) {
+            var blockEntity = world.getBlockEntity(pos, GOMLEntities.CLAIM_ANCHOR);
+            if (blockEntity.isPresent()) {
+                blockEntity.get().showHologram(player);
+                ClaimPlayerListGui.open(player, blockEntity.get().getClaim(), ClaimUtils.isInAdminMode(player));
+            }
         }
-        return super.onUse(state, world, pos, player, hand, hit);
+        return super.onUse(state, world, pos, playerEntity, hand, hit);
     }
 
     @Override
@@ -118,7 +124,7 @@ public class ClaimAnchorBlock extends Block implements BlockEntityProvider, Poly
 
         if (worldView instanceof World) {
             World world = (World) worldView;
-            if (GetOffMyLawn.CONFIG.dimensionBlacklist.contains(world.getRegistryKey().getValue().toString())) {
+            if (GetOffMyLawn.CONFIG.dimensionBlacklist.contains(world.getRegistryKey().getValue())) {
                 return false;
             }
         }

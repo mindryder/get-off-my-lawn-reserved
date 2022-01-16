@@ -1,4 +1,4 @@
-package draylar.goml.entity;
+package draylar.goml.block.entity;
 
 import draylar.goml.GetOffMyLawn;
 import draylar.goml.api.Augment;
@@ -7,7 +7,6 @@ import eu.pb4.polymer.api.utils.PolymerObject;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.ItemEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameters;
