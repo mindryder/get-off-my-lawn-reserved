@@ -77,6 +77,7 @@ public class UpgradeKitItem extends Item implements PolymerItem {
 
                     // if we don't overlap with another claim
                     if(ClaimUtils.getClaimsInBox(world, pos.add(-to.getRadius(), -to.getRadius(), -to.getRadius()), pos.add(to.getRadius(), to.getRadius(), to.getRadius()), currentClaim.get().getKey().toBox()).isEmpty()) {
+                        var claimInfo = currentClaim.get().getValue();
 
                         // remove claim
                         GetOffMyLawn.CLAIM.get(world).remove(currentClaim.get().getKey());
@@ -85,11 +86,10 @@ public class UpgradeKitItem extends Item implements PolymerItem {
                         BlockEntity oldBE = world.getBlockEntity(pos);
                         world.setBlockState(pos, to.getDefaultState());
 
-                        // new claim
-                        Claim claimInfo = new Claim(Collections.singleton(context.getPlayer().getUuid()), pos);
                         if (this.to.asItem() != null) {
                             claimInfo.internal_setIcon(this.to.asItem().getDefaultStack());
                         }
+                        claimInfo.internal_setRadius(to.getRadius());
                         claimInfo.internal_setWorld(currentClaim.get().getValue().getWorld());
                         GetOffMyLawn.CLAIM.get(world).add(new ClaimBox(pos, to.getRadius()), claimInfo);
 

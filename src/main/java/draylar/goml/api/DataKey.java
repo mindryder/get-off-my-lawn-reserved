@@ -1,5 +1,6 @@
 package draylar.goml.api;
 
+import draylar.goml.block.augment.HeavenWingsAugmentBlock;
 import net.minecraft.nbt.*;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
@@ -76,5 +77,16 @@ public record DataKey<T>(String key, T defaultValue, Function<T, NbtElement> ser
     @Nullable
     public static DataKey<?> getKey(String key) {
         return REGISTRY.get(key);
+    }
+
+    public static Collection<String> keys() {
+        return REGISTRY.keySet();
+    }
+
+    public static <T extends Enum<T>> DataKey<T> ofEnum(String key, Class<T> tClass, T defaultValue) {
+        return new DataKey<>(key, defaultValue, (i) -> NbtString.of(i.name()), (nbt) -> {
+            var value = nbt instanceof NbtString string ? Enum.valueOf(tClass, string.asString()) : null;
+            return value != null ? value : defaultValue;
+        });
     }
 }

@@ -30,7 +30,7 @@ public class ClaimListGui extends PagedGui {
     }
 
     protected ClaimListGui(ServerPlayerEntity player, GameProfile target) {
-        super(player);
+        super(player, null);
 
         ClaimUtils.getClaimsWithAccess(player.getWorld(), target.getId()).forEach(this.claimList::add);
         this.setTitle(new TranslatableText(
@@ -55,31 +55,9 @@ public class ClaimListGui extends PagedGui {
 
             var icon = GuiElementBuilder.from(claim.getIcon());
             icon.setName(new LiteralText(claim.getOrigin().toShortString()).append(new LiteralText(" (" + claim.getWorld().toString() + ")").formatted(Formatting.GRAY)));
-
-            var owners = getPlayerNames(server, claim.getOwners());
-            var trusted = getPlayerNames(server, claim.getTrusted());
-
-            icon.setLore(new ArrayList<>());
-
-            icon.addLoreLine(new TranslatableText("text.goml.radius",
-                    new LiteralText("" + entry.getKey().getRadius()).formatted(Formatting.WHITE)
-            ).formatted(Formatting.YELLOW));
-
-            if (!owners.isEmpty()) {
-                icon.addLoreLine(new TranslatableText("text.goml.owners", owners.remove(0)).formatted(Formatting.GOLD));
-
-                for (var text : owners) {
-                    icon.addLoreLine(new LiteralText("   ").append(text));
-                }
-            }
-
-            if (!trusted.isEmpty()) {
-                icon.addLoreLine(new TranslatableText("text.goml.trusted", trusted.remove(0)).formatted(Formatting.GREEN));
-
-                for (var text : trusted) {
-                    icon.addLoreLine(new LiteralText("   ").append(text));
-                }
-            }
+            var lore = ClaimUtils.getClaimText(server, entry.getValue());
+            lore.remove(0);
+            icon.setLore(lore);
 
             icon.setCallback((x, y, z) -> {
                if (Permissions.check(this.player, "goml.teleport", 3)) {
@@ -96,30 +74,5 @@ public class ClaimListGui extends PagedGui {
         return DisplayElement.empty();
     }
 
-    public static final List<Text> getPlayerNames(MinecraftServer server, Collection<UUID> uuids) {
-        var list = new ArrayList<Text>();
 
-        var builder = new StringBuilder();
-        var iterator = uuids.iterator();
-        while (iterator.hasNext()) {
-            var gameProfile = server.getUserCache().getByUuid(iterator.next());
-            if (gameProfile.isPresent()) {
-                builder.append(gameProfile.get().getName());
-
-                if (iterator.hasNext()) {
-                    builder.append(", ");
-                }
-
-                if (builder.length() > 32) {
-                    list.add(new LiteralText(builder.toString()).formatted(Formatting.WHITE));
-                    builder = new StringBuilder();
-                }
-            }
-        }
-        if (!builder.isEmpty()) {
-            list.add(new LiteralText(builder.toString()).formatted(Formatting.WHITE));
-        }
-
-        return list;
-    }
 }

@@ -12,6 +12,7 @@ import draylar.goml.block.entity.ClaimAnchorBlockEntity;
 import eu.pb4.polymer.api.block.PolymerBlockUtils;
 import net.fabricmc.fabric.api.event.player.*;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.Tameable;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.util.ActionResult;
@@ -46,6 +47,10 @@ public class EventHandlers {
         UseEntityCallback.EVENT.register((playerEntity, world, hand, entity, entityHitResult) -> {
 
             if (GetOffMyLawn.CONFIG.allowedEntityInteraction.contains(Registry.ENTITY_TYPE.getId(entity.getType()))) {
+                return ActionResult.PASS;
+            }
+
+            if (entity instanceof Tameable tameable && tameable.getOwner() == playerEntity) {
                 return ActionResult.PASS;
             }
 

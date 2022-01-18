@@ -45,6 +45,7 @@ public class WorldClaimComponent implements ClaimComponent {
             ClaimBox box = boxFromTag((NbtCompound) childCompound.get("Box"));
             Claim claimInfo = Claim.fromNbt((NbtCompound) childCompound.get("Info"));
             claimInfo.internal_setWorld(world);
+            claimInfo.internal_setRadius(box.getRadius());
             add(box, claimInfo);
         });
     }

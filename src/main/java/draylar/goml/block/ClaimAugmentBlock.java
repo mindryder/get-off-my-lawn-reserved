@@ -4,6 +4,7 @@ import draylar.goml.api.Augment;
 import draylar.goml.api.Claim;
 import draylar.goml.block.entity.ClaimAnchorBlockEntity;
 import draylar.goml.block.entity.ClaimAugmentBlockEntity;
+import draylar.goml.registry.GOMLEntities;
 import draylar.goml.registry.GOMLTextures;
 import eu.pb4.polymer.api.block.PolymerHeadBlock;
 import net.minecraft.block.Block;
@@ -16,6 +17,13 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
@@ -40,9 +48,38 @@ public class ClaimAugmentBlock extends Block implements Augment, BlockEntityProv
         this.texture = texture;
     }
 
+    @Override
+    public MutableText getName() {
+        return new TranslatableText("block.goml.anchor_augment", new TranslatableText(this.getTranslationKey()));
+    }
+
+    @Override
+    public Text getAugmentName() {
+        return new TranslatableText(this.getTranslationKey());
+    }
+
     @ApiStatus.Internal
     public void setEnabledCheck(BooleanSupplier check) {
         this.isEnabled = check;
+    }
+
+    @Override
+    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity playerEntity, Hand hand, BlockHitResult hit) {
+        if (playerEntity instanceof ServerPlayerEntity player && this.hasSettings()) {
+            var blockEntity = world.getBlockEntity(pos, GOMLEntities.CLAIM_AUGMENT);
+
+            if (blockEntity.isPresent() && blockEntity.get().getParent() != null) {
+                var claim = blockEntity.get().getParent().getClaim();
+
+                if (claim != null && claim.isOwner(player)) {
+                    this.openSettings(claim, player, null);
+                }
+
+                return ActionResult.SUCCESS;
+            }
+        }
+
+        return super.onUse(state, world, pos, playerEntity, hand, hit);
     }
 
     @Override

@@ -10,9 +10,12 @@ import draylar.goml.registry.GOMLBlocks;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.world.World;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
@@ -28,7 +31,6 @@ public class GOMLConfig {
             .create();
 
 
-    public Set<Identifier> dimensionBlacklist = new HashSet<>();
     public int makeshiftRadius = 10;
     public int reinforcedRadius = 25;
     public int glisteningRadius = 50;
@@ -36,11 +38,21 @@ public class GOMLConfig {
     public int emeradicRadius = 125;
     public int witheredRadius = 200;
 
+    public Set<Identifier> dimensionBlacklist = new HashSet<>();
+    public Map<Identifier, List<Box>> regionBlacklist = new HashMap<>();
+
     public Map<Identifier, Boolean> enabledAugments = new HashMap<>();
 
     public Set<Identifier> allowedBlockInteraction = new HashSet<>();
 
     public Set<Identifier> allowedEntityInteraction = new HashSet<>();
+
+
+    public WrappedText placeholderNoClaimInfo = WrappedText.of("<gray><italic>Wilderness");
+    public WrappedText placeholderNoClaimOwners = WrappedText.of("<gray><italic>Nobody");
+    public WrappedText placeholderNoClaimTrusted = WrappedText.of("<gray><italic>Nobody");
+    public WrappedText placeholderClaimCanBuildInfo = WrappedText.of("${owners} <gray>(<green>${anchor}</green>)");
+    public WrappedText placeholderClaimCantBuildInfo = WrappedText.of("${owners} <gray>(<red>${anchor}</red>)");
 
     public boolean canInteract(Block block) {
         return this.allowedBlockInteraction.contains(Registry.BLOCK.getId(block));
@@ -48,6 +60,23 @@ public class GOMLConfig {
 
     public boolean canInteract(Entity entity) {
         return this.allowedEntityInteraction.contains(Registry.ENTITY_TYPE.getId(entity.getType()));
+    }
+
+    public boolean isBlacklisted(World world, Box claimBox) {
+        if (this.dimensionBlacklist.contains(world.getRegistryKey().getValue())) {
+            return true;
+        }
+
+        var list = this.regionBlacklist.get(world.getRegistryKey().getValue());
+        if (list != null) {
+            for (var box : list) {
+                if (box.intersectsClosed(claimBox)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     public static GOMLConfig loadOrCreateConfig() {
@@ -124,5 +153,4 @@ public class GOMLConfig {
             return new JsonPrimitive(src.input());
         }
     }
-
 }

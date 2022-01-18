@@ -1,5 +1,6 @@
 package draylar.goml.block;
 
+import com.jamieswhiteshirt.rtree3i.Box;
 import draylar.goml.GetOffMyLawn;
 import draylar.goml.api.Claim;
 import draylar.goml.api.ClaimBox;
@@ -56,16 +57,15 @@ public class ClaimAnchorBlock extends Block implements BlockEntityProvider, Poly
         }
 
         if (!world.isClient()) {
-            Claim claimInfo = new Claim(new HashSet<>(Collections.singleton(placer.getUuid())), pos);
+            Claim claimInfo = new Claim(Collections.singleton(placer.getUuid()), Collections.emptySet(), pos, radius.getAsInt());
             claimInfo.internal_setIcon(new ItemStack(itemStack.getItem()));
             claimInfo.internal_setWorld(world.getRegistryKey().getValue());
             GetOffMyLawn.CLAIM.get(world).add(new ClaimBox(pos, radius.getAsInt()), claimInfo);
 
             // Assign claim to BE
             BlockEntity be = world.getBlockEntity(pos);
-            if (be instanceof ClaimAnchorBlockEntity) {
-                ClaimAnchorBlockEntity anchorBE = (ClaimAnchorBlockEntity) be;
-                anchorBE.setClaim(claimInfo);
+            if (be instanceof ClaimAnchorBlockEntity anchor) {
+                anchor.setClaim(claimInfo);
             }
         }
 
@@ -106,12 +106,13 @@ public class ClaimAnchorBlock extends Block implements BlockEntityProvider, Poly
 
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity playerEntity, Hand hand, BlockHitResult hit) {
-        if (playerEntity instanceof ServerPlayerEntity player) {
+        if (playerEntity instanceof ServerPlayerEntity player && !player.isSneaking()) {
             var blockEntity = world.getBlockEntity(pos, GOMLEntities.CLAIM_ANCHOR);
             if (blockEntity.isPresent()) {
-                blockEntity.get().showHologram(player);
-                ClaimPlayerListGui.open(player, blockEntity.get().getClaim(), ClaimUtils.isInAdminMode(player));
+                blockEntity.get().getClaim().openUi(player);
             }
+
+            return ActionResult.SUCCESS;
         }
         return super.onUse(state, world, pos, playerEntity, hand, hit);
     }
@@ -122,13 +123,15 @@ public class ClaimAnchorBlock extends Block implements BlockEntityProvider, Poly
             return true;
         }
 
-        if (worldView instanceof World) {
-            World world = (World) worldView;
-            if (GetOffMyLawn.CONFIG.dimensionBlacklist.contains(world.getRegistryKey().getValue())) {
+        var radius = this.radius.getAsInt();
+
+        if (worldView instanceof World world) {
+            Box checkBox = Box.create(pos.getX() - radius, pos.getY() - radius, pos.getZ() - radius, pos.getX() + radius, pos.getY() + radius, pos.getZ() + radius);
+
+            if (GetOffMyLawn.CONFIG.isBlacklisted(world, checkBox)) {
                 return false;
             }
         }
-        var radius = this.radius.getAsInt();
 
         return ClaimUtils.getClaimsInBox(worldView, pos.add(-radius, -radius, -radius), pos.add(radius, radius, radius)).isEmpty();
     }

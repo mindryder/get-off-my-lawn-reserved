@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "id": "goml",
   "version": "${version}",
-  "name": "Get Off My Lawn (Server Side Edition)",
+  "name": "Get Off My Lawn Upgraded",
   "description": "Keep people off your lawn with claims!",
   "authors": [
     "Draylar",
-    "Patbox (Server side port)"
+    "Patbox"
   ],
   "contact": {
     "homepage": "https://www.curseforge.com/minecraft/mc-mods/get-off-my-lawn",

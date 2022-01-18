@@ -11,13 +11,21 @@ import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 public class ClaimUtils {
@@ -172,6 +180,67 @@ public class ClaimUtils {
         }
 
         return claimAnchor;
+    }
+    
+    public static List<Text> getClaimText(MinecraftServer server, Claim claim) {
+        var owners = getPlayerNames(server, claim.getOwners());
+        var trusted = getPlayerNames(server, claim.getTrusted());
+
+        var texts = new ArrayList<Text>();
+
+        texts.add(new TranslatableText("text.goml.position",
+                new LiteralText(claim.getOrigin().toShortString())
+                        .append(new LiteralText(" (" + claim.getWorld().toString() + ")").formatted(Formatting.GRAY)).formatted(Formatting.WHITE)
+        ).formatted(Formatting.BLUE));
+
+        texts.add(new TranslatableText("text.goml.radius",
+                new LiteralText("" + claim.getRadius()).formatted(Formatting.WHITE)
+        ).formatted(Formatting.YELLOW));
+
+        if (!owners.isEmpty()) {
+            texts.add(new TranslatableText("text.goml.owners", owners.remove(0)).formatted(Formatting.GOLD));
+
+            for (var text : owners) {
+                texts.add(new LiteralText("   ").append(text));
+            }
+        }
+
+        if (!trusted.isEmpty()) {
+            texts.add(new TranslatableText("text.goml.trusted", trusted.remove(0)).formatted(Formatting.GREEN));
+
+            for (var text : trusted) {
+                texts.add(new LiteralText("   ").append(text));
+            }
+        }
+
+        return texts;
+    }
+
+    protected static final List<Text> getPlayerNames(MinecraftServer server, Collection<UUID> uuids) {
+        var list = new ArrayList<Text>();
+
+        var builder = new StringBuilder();
+        var iterator = uuids.iterator();
+        while (iterator.hasNext()) {
+            var gameProfile = server.getUserCache().getByUuid(iterator.next());
+            if (gameProfile.isPresent()) {
+                builder.append(gameProfile.get().getName());
+
+                if (iterator.hasNext()) {
+                    builder.append(", ");
+                }
+
+                if (builder.length() > 32) {
+                    list.add(new LiteralText(builder.toString()).formatted(Formatting.WHITE));
+                    builder = new StringBuilder();
+                }
+            }
+        }
+        if (!builder.isEmpty()) {
+            list.add(new LiteralText(builder.toString()).formatted(Formatting.WHITE));
+        }
+
+        return list;
     }
 
     @Deprecated

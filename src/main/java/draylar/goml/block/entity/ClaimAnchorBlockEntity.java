@@ -32,7 +32,7 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
 
     private static final String AUGMENT_LIST_KEY = "AugmentPositions";
 
-    private final Map<BlockPos, ClaimAugmentBlockEntity> augmentEntities = new HashMap<>();
+    private final Map<BlockPos, Augment> augmentEntities = new HashMap<>();
     private final List<BlockPos> loadPositions = new ArrayList<>();
     private final List<PlayerEntity> previousTickPlayers = new ArrayList<>();
     private Claim claim;
@@ -60,12 +60,19 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
         super.readNbt(tag);
     }
 
-    public void addChild(BlockPos pos, ClaimAugmentBlockEntity augment) {
+    public void addChild(BlockPos pos, ClaimAugmentBlockEntity augmentBlockEntity) {
+        var augment = augmentBlockEntity.getAugment();
         augmentEntities.put(pos, augment);
+        for (var player : this.previousTickPlayers) {
+            augment.onPlayerEnter(this.claim, player);
+        }
     }
 
     public void removeChild(BlockPos pos) {
-        augmentEntities.remove(pos);
+        var augment = augmentEntities.remove(pos);
+        for (var player : this.previousTickPlayers) {
+            augment.onPlayerExit(this.claim, player);
+        }
     }
 
     public void setClaim(Claim claim) {
@@ -97,7 +104,7 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
                     BlockEntity foundEntity = anchor.world.getBlockEntity(foundPos);
 
                     if (foundEntity instanceof ClaimAugmentBlockEntity) {
-                        anchor.augmentEntities.put(foundPos, (ClaimAugmentBlockEntity) foundEntity);
+                        anchor.augmentEntities.put(foundPos, ((ClaimAugmentBlockEntity) foundEntity).getAugment());
                     } else {
                         GetOffMyLawn.LOGGER.warn(String.format("A Claim Anchor at %s tried to load a child at %s, but none were found!", anchor.pos.toString(), foundPos.toString()));
                     }
@@ -111,12 +118,11 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
             List<PlayerEntity> playersInClaim = anchor.world.getEntitiesByClass(PlayerEntity.class, new Box(anchor.pos.add(-radius, -radius, -radius), anchor.pos.add(radius, radius, radius)), entity -> true);
 
             // Tick all augments
-            for (var augmentBE : anchor.augmentEntities.values()) {
-                Augment augment = augmentBE.getAugment();
+            for (var augment : anchor.augmentEntities.values()) {
 
                 if (augment != null && augment.isEnabled(anchor.claim, world)) {
                     if (augment.ticks()) {
-                        augment.tick(anchor.claim, anchor.world, augmentBE);
+                        augment.tick(anchor.claim, anchor.world);
                         for (PlayerEntity playerEntity : playersInClaim) {
                             augment.playerTick(anchor.claim, playerEntity);
                         }
@@ -147,7 +153,7 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
     public boolean hasAugment(ClaimAugmentBlock augment) {
         assert world != null;
 
-        for (Map.Entry<BlockPos, ClaimAugmentBlockEntity> entry : augmentEntities.entrySet()) {
+        for (var entry : augmentEntities.entrySet()) {
             BlockPos position = entry.getKey();
             ClaimAugmentBlock block = (ClaimAugmentBlock) world.getBlockState(position).getBlock();
 
@@ -163,7 +169,7 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
         return augmentEntities.size() > 0;
     }
 
-    public Map<BlockPos, ClaimAugmentBlockEntity> getAugmentEntities() {
+    public Map<BlockPos, Augment> getAugments() {
         return augmentEntities;
     }
 
@@ -173,7 +179,7 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
 
     public void from(ClaimAnchorBlockEntity be) {
         this.previousTickPlayers.addAll(be.getPreviousTickPlayers());
-        this.augmentEntities.putAll(be.getAugmentEntities());
+        this.augmentEntities.putAll(be.getAugments());
     }
 
     @Override
@@ -181,8 +187,7 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
 
         // Make sure exit logic is run after claim is removed from world
         // This can happen while teleporting
-        for (var augmentBE : this.augmentEntities.values()) {
-            Augment augment = augmentBE.getAugment();
+        for (var augment : this.augmentEntities.values()) {
 
             if (augment != null && augment.isEnabled(this.claim, this.world)) {
                 for (var player : this.previousTickPlayers) {

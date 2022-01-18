@@ -1,5 +1,12 @@
 package draylar.goml.api;
 
+import draylar.goml.registry.GOMLTextures;
+import draylar.goml.ui.ClaimAugmentGui;
+import draylar.goml.ui.ClaimPlayerListGui;
+import draylar.goml.ui.PagedGui;
+import eu.pb4.sgui.api.elements.AnimatedGuiElementBuilder;
+import eu.pb4.sgui.api.elements.GuiElementBuilder;
+import eu.pb4.sgui.api.gui.SimpleGui;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -8,8 +15,17 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.screen.ScreenHandlerType;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryKey;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,31 +44,24 @@ public class Claim {
     public static final String TRUSTED_KEY = "Trusted";
     public static final String ICON_KEY = "Icon";
     public static final String CUSTOM_DATA_KEY = "CustomData";
+    public static final String RADIUS_KEY = "Radius";
 
-    private final Set<UUID> owners;
+    private final Set<UUID> owners = new HashSet<>();
     private final Set<UUID> trusted = new HashSet<>();
     private final BlockPos origin;
+    private int radius;
     private Identifier world;
     @Nullable
     private ItemStack icon;
 
     private Map<DataKey<Object>, Object> customData = new HashMap<>();
 
-    /**
-     * Returns a {@link Claim} instance with the given owner and origin position.
-     *
-     * @param owners  list of {@link UUID}s of owners of the claim
-     * @param origin  origin {@link BlockPos} of claim
-     */
-    public Claim(Set<UUID> owners, BlockPos origin) {
-        this.owners = owners;
-        this.origin = origin;
-    }
-
-    public Claim(Set<UUID> owners, Set<UUID> trusted, BlockPos origin) {
-        this.owners = owners;
+    @ApiStatus.Internal
+    public Claim(Set<UUID> owners, Set<UUID> trusted, BlockPos origin, int radius) {
+        this.owners.addAll(owners);
         this.trusted.addAll(trusted);
         this.origin = origin;
+        this.radius = radius;
     }
 
     public boolean isOwner(PlayerEntity player) {
@@ -170,7 +179,7 @@ public class Claim {
     public static Claim fromNbt(NbtCompound nbt) {
         // Handle legacy data stored in "Owner" key, which is a single UUID
         if(nbt.containsUuid(OWNER_KEY)) {
-            return new Claim(new HashSet<>(Collections.singleton(nbt.getUuid(OWNER_KEY))), BlockPos.fromLong(nbt.getLong(POSITION_KEY)));
+            return new Claim(Collections.singleton(nbt.getUuid(OWNER_KEY)), Collections.emptySet(), BlockPos.fromLong(nbt.getLong(POSITION_KEY)), 0);
         }
 
         // Collect UUID of owners
@@ -183,7 +192,7 @@ public class Claim {
         NbtList trustedTag = nbt.getList(TRUSTED_KEY, NbtType.INT_ARRAY);
         trustedTag.forEach(trustedUUID -> trustedUUIDs.add(NbtHelper.toUuid(trustedUUID)));
 
-        var claim = new Claim(ownerUUIDs, trustedUUIDs, BlockPos.fromLong(nbt.getLong(POSITION_KEY)));
+        var claim = new Claim(ownerUUIDs, trustedUUIDs, BlockPos.fromLong(nbt.getLong(POSITION_KEY)), nbt.getInt(RADIUS_KEY));
 
         if (nbt.contains(ICON_KEY, NbtElement.COMPOUND_TYPE)) {
             claim.icon = ItemStack.fromNbt(nbt.getCompound(ICON_KEY));
@@ -229,6 +238,38 @@ public class Claim {
         setData(key, null);
     }
 
+    public void openUi(ServerPlayerEntity player) {
+        var gui = new SimpleGui(ScreenHandlerType.HOPPER, player, false);
+        gui.setTitle(new TranslatableText("text.goml.gui.claim.title"));
+
+        gui.setSlot(0, GuiElementBuilder.from(this.icon)
+                .setName(new TranslatableText("text.goml.gui.claim.about"))
+                .setLore(ClaimUtils.getClaimText(player.server, this))
+        );
+        gui.setSlot(1, new GuiElementBuilder(Items.PLAYER_HEAD)
+                .setName(new TranslatableText("text.goml.gui.claim.players").formatted(Formatting.WHITE))
+                .setCallback((x, y, z) -> {
+                    PagedGui.playClickSound(player);
+                    ClaimPlayerListGui.open(player, this, ClaimUtils.isInAdminMode(player), () -> openUi(player));
+                })
+        );
+
+        gui.setSlot(2, new GuiElementBuilder(Items.PLAYER_HEAD)
+                .setName(new TranslatableText("text.goml.gui.claim.augments").formatted(Formatting.WHITE))
+                .setSkullOwner(GOMLTextures.ANGELIC_AURA)
+                .setCallback((x, y, z) -> {
+                    PagedGui.playClickSound(player);
+                    new ClaimAugmentGui(player, this, ClaimUtils.isInAdminMode(player) || this.isOwner(player), () -> openUi(player));
+                })
+        );
+
+        while (gui.getFirstEmptySlot() != -1) {
+            gui.addSlot(PagedGui.DisplayElement.filler().element());
+        }
+
+        gui.open();
+    }
+
     @ApiStatus.Internal
     public void internal_setIcon(ItemStack stack) {
         this.icon = stack.copy();
@@ -237,5 +278,24 @@ public class Claim {
     @ApiStatus.Internal
     public void internal_setWorld(Identifier world) {
         this.world = world;
+    }
+
+    @ApiStatus.Internal
+    public void internal_setRadius(int i) {
+        this.radius = i;
+    }
+
+    public int getRadius() {
+        return this.radius;
+    }
+
+    public Collection<ServerPlayerEntity> getPlayersIn(MinecraftServer server) {
+        var world = server.getWorld(RegistryKey.of(Registry.WORLD_KEY, this.world));
+
+        if (world == null) {
+            return Collections.emptyList();
+        }
+
+        return world.getEntitiesByClass(ServerPlayerEntity.class, new Box(this.origin.add(-radius, -radius, -radius), this.origin.add(radius, radius, radius)), entity -> true);
     }
 }

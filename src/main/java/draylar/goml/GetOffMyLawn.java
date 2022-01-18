@@ -8,6 +8,7 @@ import draylar.goml.cca.ClaimComponent;
 import draylar.goml.cca.WorldClaimComponent;
 import draylar.goml.other.ClaimCommand;
 import draylar.goml.config.GOMLConfig;
+import draylar.goml.other.Placeholders;
 import draylar.goml.registry.GOMLBlocks;
 import draylar.goml.registry.GOMLEntities;
 import draylar.goml.registry.GOMLItems;
@@ -34,6 +35,7 @@ public class GetOffMyLawn implements ModInitializer, WorldComponentInitializer {
 		GOMLEntities.init();
 		EventHandlers.init();
 		ClaimCommand.init();
+		Placeholders.init();
 
 		ServerLifecycleEvents.SERVER_STARTING.register((s) -> {
 			GetOffMyLawn.CONFIG = GOMLConfig.loadOrCreateConfig();

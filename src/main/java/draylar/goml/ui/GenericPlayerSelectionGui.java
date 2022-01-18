@@ -1,39 +1,30 @@
 package draylar.goml.ui;
 
-import draylar.goml.api.Claim;
-import draylar.goml.registry.GOMLTextures;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import net.minecraft.item.Items;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Formatting;
+import net.minecraft.text.Text;
 
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
-public class PlayerAddGui extends PagedGui {
-    private final Claim claim;
+public class GenericPlayerSelectionGui extends PagedGui {
     private final PlayerManager playerManager;
-    private final Runnable postClose;
+    private final Predicate<ServerPlayerEntity> shouldDisplay;
+    private final Consumer<ServerPlayerEntity> onClick;
     private int ticker;
     private List<ServerPlayerEntity> cachedPlayers = Collections.emptyList();
 
-    public PlayerAddGui(ServerPlayerEntity player, Claim claim, Runnable postClose) {
-        super(player);
-        this.claim = claim;
-        this.postClose = postClose;
-        this.playerManager = player.getServer().getPlayerManager();
-        this.setTitle(new TranslatableText("text.goml.gui.player_add_gui.title"));
+    public GenericPlayerSelectionGui(ServerPlayerEntity player, Text title, Predicate<ServerPlayerEntity> shouldDisplay, Consumer<ServerPlayerEntity> onClick, Runnable postClose) {
+        super(player, postClose);
+        this.shouldDisplay = shouldDisplay;
+        this.onClick = onClick;
+        this.playerManager = Objects.requireNonNull(player.getServer()).getPlayerManager();
+        this.setTitle(title);
         this.updateDisplay();
         this.open();
-    }
-
-    @Override
-    public void onClose() {
-        this.postClose.run();
-        super.onClose();
     }
 
     @Override
@@ -45,7 +36,7 @@ public class PlayerAddGui extends PagedGui {
     protected void updateDisplay() {
         List<ServerPlayerEntity> list = new ArrayList<>();
         for (ServerPlayerEntity p : this.playerManager.getPlayerList()) {
-            if (!this.claim.hasPermission(p)) {
+            if (this.shouldDisplay.test(p)) {
                 list.add(p);
             }
         }
@@ -64,7 +55,7 @@ public class PlayerAddGui extends PagedGui {
                            .setSkullOwner(player.getGameProfile(), null)
                            .setCallback((x, y, z) -> {
                        playClickSound(this.player);
-                       this.claim.trust(player);
+                       this.onClick.accept(player);
                        this.close();
                    })
            );
