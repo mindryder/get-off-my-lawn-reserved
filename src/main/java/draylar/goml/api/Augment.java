@@ -15,6 +15,10 @@ import org.jetbrains.annotations.Nullable;
  */
 public interface Augment {
 
+    static Augment noop() {
+        return new Augment() {};
+    }
+
     default void onPlayerEnter(Claim claim, PlayerEntity player) {
 
     }

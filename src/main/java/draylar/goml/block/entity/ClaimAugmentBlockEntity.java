@@ -61,7 +61,7 @@ public class ClaimAugmentBlockEntity extends BlockEntity implements PolymerObjec
 
     public void setParent(ClaimAnchorBlockEntity parent) {
         this.parent = parent;
-        parent.addChild(pos, this);
+        parent.addChild(pos, this.getAugment());
     }
 
     @Nullable
@@ -74,7 +74,11 @@ public class ClaimAugmentBlockEntity extends BlockEntity implements PolymerObjec
     }
 
     public Augment getAugment() {
-        return augment;
+        if (this.augment != null) {
+            return augment;
+        } else {
+            return this.getCachedState().getBlock() instanceof Augment augment ? augment : Augment.noop();
+        }
     }
 
     public static <T extends BlockEntity> void tick(World world, BlockPos pos, BlockState state, T baseBlockEntity) {

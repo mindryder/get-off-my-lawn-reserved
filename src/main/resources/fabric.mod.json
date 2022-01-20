@@ -9,8 +9,8 @@
     "Patbox"
   ],
   "contact": {
-    "homepage": "https://www.curseforge.com/minecraft/mc-mods/get-off-my-lawn",
-    "sources": "https://github.com/Draylar/get-off-my-lawn"
+    "homepage": "https://pb4.eu",
+    "sources": "https://github.com/Patbox/get-off-my-lawn-server-sided"
   },
   "license": "MIT",
   "icon": "assets/goml/icon.png",

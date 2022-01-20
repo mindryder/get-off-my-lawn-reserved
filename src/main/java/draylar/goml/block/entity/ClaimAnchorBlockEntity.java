@@ -60,8 +60,7 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
         super.readNbt(tag);
     }
 
-    public void addChild(BlockPos pos, ClaimAugmentBlockEntity augmentBlockEntity) {
-        var augment = augmentBlockEntity.getAugment();
+    public void addChild(BlockPos pos, Augment augment) {
         augmentEntities.put(pos, augment);
         for (var player : this.previousTickPlayers) {
             augment.onPlayerEnter(this.claim, player);
@@ -70,8 +69,10 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
 
     public void removeChild(BlockPos pos) {
         var augment = augmentEntities.remove(pos);
-        for (var player : this.previousTickPlayers) {
-            augment.onPlayerExit(this.claim, player);
+        if (augment != null) {
+            for (var player : this.previousTickPlayers) {
+                augment.onPlayerExit(this.claim, player);
+            }
         }
     }
 
