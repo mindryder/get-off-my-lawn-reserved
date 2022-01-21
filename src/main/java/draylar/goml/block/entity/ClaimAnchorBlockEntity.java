@@ -6,7 +6,6 @@ import draylar.goml.api.Augment;
 import draylar.goml.api.Claim;
 import draylar.goml.api.ClaimBox;
 import draylar.goml.api.ClaimUtils;
-import draylar.goml.block.ClaimAnchorBlock;
 import draylar.goml.block.ClaimAugmentBlock;
 import draylar.goml.registry.GOMLEntities;
 import eu.pb4.polymer.api.utils.PolymerObject;
@@ -17,6 +16,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtLong;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
@@ -36,9 +36,84 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
     private final List<BlockPos> loadPositions = new ArrayList<>();
     private final List<PlayerEntity> previousTickPlayers = new ArrayList<>();
     private Claim claim;
+    private ClaimBox box;
 
     public ClaimAnchorBlockEntity(BlockPos pos, BlockState state) {
         super(GOMLEntities.CLAIM_ANCHOR, pos, state);
+    }
+
+    public static <T extends BlockEntity> void tick(World eWorld, BlockPos pos, BlockState state, T blockEntity) {
+        if (eWorld instanceof ServerWorld world && blockEntity instanceof ClaimAnchorBlockEntity anchor) {
+
+            // Claim is null, world probably just loaded, re-grab claim
+            if (anchor.claim == null) {
+                List<Entry<ClaimBox, Claim>> collect = ClaimUtils.getClaimsAt(anchor.world, anchor.pos).collect(Collectors.toList());
+
+                if (collect.isEmpty()) {
+                    GetOffMyLawn.LOGGER.warn(String.format("A Claim Anchor at %s tried to initialize its claim, but one could not be found! Was the claim removed without the anchor?", anchor.pos));
+                    world.breakBlock(pos, true);
+                    for (var lPos : anchor.loadPositions) {
+                        world.breakBlock(lPos, true);
+                    }
+                    return;
+                } else {
+                    var entry = collect.get(0);
+                    anchor.claim = entry.getValue();
+                    anchor.box = entry.getKey();
+                }
+            }
+
+            // no augments, some queued from fromTag
+            if (anchor.augmentEntities.isEmpty() && !anchor.loadPositions.isEmpty()) {
+                anchor.loadPositions.forEach(foundPos -> {
+                    BlockEntity foundEntity = anchor.world.getBlockEntity(foundPos);
+
+                    if (foundEntity instanceof ClaimAugmentBlockEntity) {
+                        anchor.augmentEntities.put(foundPos, ((ClaimAugmentBlockEntity) foundEntity).getAugment());
+                    } else {
+                        GetOffMyLawn.LOGGER.warn(String.format("A Claim Anchor at %s tried to load a child at %s, but none were found!", anchor.pos.toString(), foundPos.toString()));
+                    }
+                });
+
+                anchor.loadPositions.clear();
+            }
+
+            int sizeX = anchor.box.getX();
+            int sizeY = anchor.box.getY();
+            int sizeZ = anchor.box.getZ();
+            List<PlayerEntity> playersInClaim = anchor.world.getEntitiesByClass(PlayerEntity.class, new Box(anchor.pos.add(-sizeX, -sizeY, -sizeZ), anchor.pos.add(sizeX, sizeY, sizeZ)), entity -> true);
+
+            // Tick all augments
+            for (var augment : anchor.augmentEntities.values()) {
+
+                if (augment != null && augment.isEnabled(anchor.claim, world)) {
+                    if (augment.ticks()) {
+                        augment.tick(anchor.claim, anchor.world);
+                        for (PlayerEntity playerEntity : playersInClaim) {
+                            augment.playerTick(anchor.claim, playerEntity);
+                        }
+                    }
+
+                    // Enter/Exit behavior
+                    for (PlayerEntity playerEntity : playersInClaim) {
+                        // this player was NOT in the claim last tick, call entry method
+                        if (!anchor.previousTickPlayers.contains(playerEntity)) {
+                            augment.onPlayerEnter(anchor.claim, playerEntity);
+                        }
+                    }
+
+                    // Tick exit behavior
+                    anchor.previousTickPlayers.stream().filter(player -> !playersInClaim.contains(player)).forEach(player -> {
+                        augment.onPlayerExit(anchor.claim, player);
+                    });
+                }
+            }
+
+            // Reset players in claim
+            anchor.previousTickPlayers.clear();
+            anchor.previousTickPlayers.addAll(playersInClaim);
+
+        }
     }
 
     @Override
@@ -76,79 +151,19 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
         }
     }
 
-    public void setClaim(Claim claim) {
-        this.claim = claim;
-    }
-
     @Nullable
     public Claim getClaim() {
         return this.claim;
     }
 
-    public static <T extends BlockEntity> void tick(World world, BlockPos pos, BlockState state, T blockEntity) {
-        if (!world.isClient() && blockEntity instanceof ClaimAnchorBlockEntity anchor) {
+    @Nullable
+    public ClaimBox getBox() {
+        return this.box;
+    }
 
-            // Claim is null, world probably just loaded, re-grab claim
-            if (anchor.claim == null) {
-                List<Entry<ClaimBox, Claim>> collect = ClaimUtils.getClaimsAt(anchor.world, anchor.pos).collect(Collectors.toList());
-
-                if (collect.isEmpty()) {
-                    GetOffMyLawn.LOGGER.warn(String.format("A Claim Anchor at %s tried to initialize its claim, but one could not be found! Was the claim removed without the anchor?", anchor.pos.toString()));
-                } else {
-                    anchor.claim = collect.get(0).getValue();
-                }
-            }
-
-            // no augments, some queued from fromTag
-            if (anchor.augmentEntities.isEmpty() && !anchor.loadPositions.isEmpty()) {
-                anchor.loadPositions.forEach(foundPos -> {
-                    BlockEntity foundEntity = anchor.world.getBlockEntity(foundPos);
-
-                    if (foundEntity instanceof ClaimAugmentBlockEntity) {
-                        anchor.augmentEntities.put(foundPos, ((ClaimAugmentBlockEntity) foundEntity).getAugment());
-                    } else {
-                        GetOffMyLawn.LOGGER.warn(String.format("A Claim Anchor at %s tried to load a child at %s, but none were found!", anchor.pos.toString(), foundPos.toString()));
-                    }
-                });
-
-                anchor.loadPositions.clear();
-            }
-
-            ClaimAnchorBlock block = (ClaimAnchorBlock) anchor.world.getBlockState(anchor.pos).getBlock();
-            int radius = block.getRadius();
-            List<PlayerEntity> playersInClaim = anchor.world.getEntitiesByClass(PlayerEntity.class, new Box(anchor.pos.add(-radius, -radius, -radius), anchor.pos.add(radius, radius, radius)), entity -> true);
-
-            // Tick all augments
-            for (var augment : anchor.augmentEntities.values()) {
-
-                if (augment != null && augment.isEnabled(anchor.claim, world)) {
-                    if (augment.ticks()) {
-                        augment.tick(anchor.claim, anchor.world);
-                        for (PlayerEntity playerEntity : playersInClaim) {
-                            augment.playerTick(anchor.claim, playerEntity);
-                        }
-                    }
-
-                    // Enter/Exit behavior
-                    for (PlayerEntity playerEntity : playersInClaim) {
-                        // this player was NOT in the claim last tick, call entry method
-                        if (!anchor.previousTickPlayers.contains(playerEntity)) {
-                            augment.onPlayerEnter(anchor.claim, playerEntity);
-                        }
-                    }
-
-                    // Tick exit behavior
-                    anchor.previousTickPlayers.stream().filter(player -> !playersInClaim.contains(player)).forEach(player -> {
-                        augment.onPlayerExit(anchor.claim, player);
-                    });
-                }
-            }
-
-            // Reset players in claim
-            anchor.previousTickPlayers.clear();
-            anchor.previousTickPlayers.addAll(playersInClaim);
-
-        }
+    public void setClaim(Claim claim, ClaimBox box) {
+        this.claim = claim;
+        this.box = box;
     }
 
     public boolean hasAugment(ClaimAugmentBlock augment) {
@@ -199,7 +214,7 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
 
         // Reset players in claim
         this.previousTickPlayers.clear();
-        
+
         super.markRemoved();
     }
 

@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "id": "goml",
   "version": "${version}",
-  "name": "Get Off My Lawn Upgraded",
+  "name": "Get Off My Lawn ReServed",
   "description": "Keep people off your lawn with claims!",
   "authors": [
-    "Draylar",
+    "Draylar (Original author)",
     "Patbox"
   ],
   "contact": {

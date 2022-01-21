@@ -38,6 +38,8 @@ public class GOMLConfig {
     public int emeradicRadius = 125;
     public int witheredRadius = 200;
 
+    public boolean claimProtectsFullWorldHeight = false;
+
     public Set<Identifier> dimensionBlacklist = new HashSet<>();
     public Map<Identifier, List<Box>> regionBlacklist = new HashMap<>();
 
@@ -47,6 +49,7 @@ public class GOMLConfig {
 
     public Set<Identifier> allowedEntityInteraction = new HashSet<>();
 
+    public WrappedText messagePrefix = WrappedText.of("<dark_gray>[<#a1ff59>GOML</color>]");
 
     public WrappedText placeholderNoClaimInfo = WrappedText.of("<gray><italic>Wilderness");
     public WrappedText placeholderNoClaimOwners = WrappedText.of("<gray><italic>Nobody");

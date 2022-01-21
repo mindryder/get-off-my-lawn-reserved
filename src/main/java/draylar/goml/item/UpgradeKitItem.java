@@ -26,7 +26,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -75,8 +74,11 @@ public class UpgradeKitItem extends Item implements PolymerItem {
                 // if we have permission
                 if(!noPermission) {
 
+                    var radius = to.getRadius();
+                    var radiusY = GetOffMyLawn.CONFIG.claimProtectsFullWorldHeight ? Short.MAX_VALUE : radius;
+
                     // if we don't overlap with another claim
-                    if(ClaimUtils.getClaimsInBox(world, pos.add(-to.getRadius(), -to.getRadius(), -to.getRadius()), pos.add(to.getRadius(), to.getRadius(), to.getRadius()), currentClaim.get().getKey().toBox()).isEmpty()) {
+                    if(ClaimUtils.getClaimsInBox(world, pos.add(-radius, -radiusY, -radius), pos.add(radius, radiusY, radius), currentClaim.get().getKey().toBox()).isEmpty()) {
                         var claimInfo = currentClaim.get().getValue();
 
                         // remove claim
@@ -89,9 +91,9 @@ public class UpgradeKitItem extends Item implements PolymerItem {
                         if (this.to.asItem() != null) {
                             claimInfo.internal_setIcon(this.to.asItem().getDefaultStack());
                         }
-                        claimInfo.internal_setRadius(to.getRadius());
+                        claimInfo.internal_setRadius(radius);
                         claimInfo.internal_setWorld(currentClaim.get().getValue().getWorld());
-                        GetOffMyLawn.CLAIM.get(world).add(new ClaimBox(pos, to.getRadius()), claimInfo);
+                        GetOffMyLawn.CLAIM.get(world).add(new ClaimBox(pos, radius, radiusY), claimInfo);
 
                         // decrement stack
                         if(!context.getPlayer().isCreative() && !context.getPlayer().isSpectator()) {

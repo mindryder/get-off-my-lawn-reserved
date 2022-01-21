@@ -8,7 +8,6 @@ import draylar.goml.api.ClaimUtils;
 import draylar.goml.block.entity.ClaimAnchorBlockEntity;
 import draylar.goml.registry.GOMLEntities;
 import draylar.goml.registry.GOMLTextures;
-import draylar.goml.ui.ClaimPlayerListGui;
 import eu.pb4.polymer.api.block.PolymerHeadBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
@@ -30,7 +29,6 @@ import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.function.IntSupplier;
 
 @SuppressWarnings({"deprecation"})
@@ -60,12 +58,13 @@ public class ClaimAnchorBlock extends Block implements BlockEntityProvider, Poly
             Claim claimInfo = new Claim(Collections.singleton(placer.getUuid()), Collections.emptySet(), pos, radius.getAsInt());
             claimInfo.internal_setIcon(new ItemStack(itemStack.getItem()));
             claimInfo.internal_setWorld(world.getRegistryKey().getValue());
-            GetOffMyLawn.CLAIM.get(world).add(new ClaimBox(pos, radius.getAsInt()), claimInfo);
+            var box = new ClaimBox(pos, radius.getAsInt(), GetOffMyLawn.CONFIG.claimProtectsFullWorldHeight ? Short.MAX_VALUE : radius.getAsInt());
+            GetOffMyLawn.CLAIM.get(world).add(box, claimInfo);
 
             // Assign claim to BE
             BlockEntity be = world.getBlockEntity(pos);
             if (be instanceof ClaimAnchorBlockEntity anchor) {
-                anchor.setClaim(claimInfo);
+                anchor.setClaim(claimInfo, box);
             }
         }
 

@@ -82,28 +82,23 @@ public class ClaimAugmentBlockEntity extends BlockEntity implements PolymerObjec
     }
 
     public static <T extends BlockEntity> void tick(World world, BlockPos pos, BlockState state, T baseBlockEntity) {
-        if (world instanceof ServerWorld serverWorld && baseBlockEntity instanceof ClaimAugmentBlockEntity entity) {
+        if (world instanceof ServerWorld && baseBlockEntity instanceof ClaimAugmentBlockEntity entity) {
             // Parent is null and parent position is not null, assume we are just loading the augment from tags.
             if (entity.parent == null && entity.parentPosition != null) {
                 BlockEntity blockEntity = entity.world.getBlockEntity(entity.parentPosition);
 
                 if (blockEntity instanceof ClaimAnchorBlockEntity) {
                     entity.parent = (ClaimAnchorBlockEntity) blockEntity;
+                    entity.markDirty();
                 } else {
                     GetOffMyLawn.LOGGER.warn(String.format("An augment at %s tried to locate a parent at %s, but it could not be found!", entity.pos.toString(), entity.parentPosition.toString()));
-                    entity.world.setBlockState(entity.pos, Blocks.AIR.getDefaultState());
-                    var list = DefaultedList.<ItemStack>of();
-                    list.addAll(state.getDroppedStacks((new LootContext.Builder(serverWorld)).parameter(LootContextParameters.ORIGIN, Vec3d.ofCenter(pos)).parameter(LootContextParameters.BLOCK_STATE, state).optionalParameter(LootContextParameters.BLOCK_ENTITY, blockEntity).parameter(LootContextParameters.TOOL, ItemStack.EMPTY)));
-                    ItemScatterer.spawn(serverWorld, pos, list);
+                    world.breakBlock(pos, true);
                 }
             }
 
             if (entity.parent == null && entity.parentPosition == null) {
                 GetOffMyLawn.LOGGER.warn(String.format("An augment at %s has an invalid parent and parent position! Removing now.", entity.pos.toString()));
-                entity.world.setBlockState(entity.pos, Blocks.AIR.getDefaultState());
-                var list = DefaultedList.<ItemStack>of();
-                list.addAll(state.getDroppedStacks((new LootContext.Builder(serverWorld)).parameter(LootContextParameters.ORIGIN, Vec3d.ofCenter(pos)).parameter(LootContextParameters.BLOCK_STATE, state).parameter(LootContextParameters.TOOL, ItemStack.EMPTY)));
-                ItemScatterer.spawn(serverWorld, pos, list);
+                world.breakBlock(pos, true);
             }
         }
     }

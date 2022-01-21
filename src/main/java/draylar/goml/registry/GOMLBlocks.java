@@ -38,6 +38,7 @@ public class GOMLBlocks {
     public static final Pair<ClaimAugmentBlock, Item> WITHERING_SEAL = register("withering_seal", new WitheringSealAugmentBlock(FabricBlockSettings.of(Material.STONE).hardness(10).resistance(3600000.0F), GOMLTextures.WITHERING_SEAL), 2);
     public static final Pair<ClaimAugmentBlock, Item> CHAOS_ZONE = register("chaos_zone", new ChaosZoneAugmentBlock(FabricBlockSettings.of(Material.STONE).hardness(10).resistance(3600000.0F), GOMLTextures.CHAOS_ZONE), 2);
     public static final Pair<ClaimAugmentBlock, Item> GREETER = register("greeter", new GreeterAugmentBlock(FabricBlockSettings.of(Material.STONE).hardness(10).resistance(3600000.0F), GOMLTextures.GREETER), 2);
+    public static final Pair<ClaimAugmentBlock, Item> FORCE_FIELD = register("force_field", new ForceFieldAugmentBlock(FabricBlockSettings.of(Material.STONE).hardness(10).resistance(3600000.0F), GOMLTextures.MISSING_TEXTURE), 2);
 
     private static Pair<ClaimAnchorBlock, Item> register(String name, IntSupplier radius, float hardness, String texture) {
         var claimAnchorBlock = Registry.register(

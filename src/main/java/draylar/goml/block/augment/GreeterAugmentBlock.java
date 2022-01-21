@@ -29,7 +29,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class GreeterAugmentBlock extends ClaimAugmentBlock {
 
-    public static final DataKey<String> MESSAGE_KEY = DataKey.ofString("goml:greeter/message", "Welcome %player on my claim!");
+    public static final DataKey<String> MESSAGE_KEY = DataKey.ofString(GetOffMyLawn.id("greeter/message"), "Welcome %player on my claim!");
 
     public GreeterAugmentBlock(Settings settings, String texture) {
         super(settings, texture);
@@ -40,10 +40,10 @@ public class GreeterAugmentBlock extends ClaimAugmentBlock {
         var text = claim.getData(MESSAGE_KEY);
 
         if (text != null && !text.isBlank()) {
-            player.sendMessage(new LiteralText("[Claim] ").formatted(Formatting.GRAY).append(new LiteralText(text
+            player.sendMessage(GetOffMyLawn.CONFIG.messagePrefix.mutableText().append(new LiteralText(" " + (text
                             .replace("%player", player.getName().getString())
-                            .replace("%p", player.getName().getString())
-            ).formatted(Formatting.WHITE)), false);
+                            .replace("%p", player.getName().getString()))
+            ).formatted(Formatting.GRAY)), false);
         }
     }
 

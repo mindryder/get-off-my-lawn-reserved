@@ -4,7 +4,6 @@ import draylar.goml.registry.GOMLTextures;
 import draylar.goml.ui.ClaimAugmentGui;
 import draylar.goml.ui.ClaimPlayerListGui;
 import draylar.goml.ui.PagedGui;
-import eu.pb4.sgui.api.elements.AnimatedGuiElementBuilder;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import net.fabricmc.fabric.api.util.NbtType;
@@ -18,7 +17,6 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -36,9 +34,6 @@ import java.util.*;
  * <p>While this class stores information about the origin of a claim, the actual bounding box is stored by the world.
  */
 public class Claim {
-
-    @Deprecated public static final String OWNER_KEY = "Owner"; // Legacy key for single-UUID owner
-
     public static final String POSITION_KEY = "Pos";
     public static final String OWNERS_KEY = "Owners";
     public static final String TRUSTED_KEY = "Trusted";
@@ -156,7 +151,7 @@ public class Claim {
             var value = entry.getKey().serializer().apply(entry.getValue());
 
             if (value != null) {
-                customData.put(entry.getKey().key(), value);
+                customData.put(entry.getKey().key().toString(), value);
             }
         }
 
@@ -177,11 +172,6 @@ public class Claim {
      * @return  {@link Claim} instance with information from tag
      */
     public static Claim fromNbt(NbtCompound nbt) {
-        // Handle legacy data stored in "Owner" key, which is a single UUID
-        if(nbt.containsUuid(OWNER_KEY)) {
-            return new Claim(Collections.singleton(nbt.getUuid(OWNER_KEY)), Collections.emptySet(), BlockPos.fromLong(nbt.getLong(POSITION_KEY)), 0);
-        }
-
         // Collect UUID of owners
         Set<UUID> ownerUUIDs = new HashSet<>();
         NbtList ownersTag = nbt.getList(OWNERS_KEY, NbtType.INT_ARRAY);
@@ -198,11 +188,14 @@ public class Claim {
             claim.icon = ItemStack.fromNbt(nbt.getCompound(ICON_KEY));
         }
 
-        for (var key : nbt.getCompound(CUSTOM_DATA_KEY).getKeys()) {
+        var customData = nbt.getCompound(CUSTOM_DATA_KEY);
+
+        for (var stringKey : customData.getKeys()) {
+            var key = Identifier.tryParse(stringKey);
             var dataKey = DataKey.getKey(key);
 
             if (dataKey != null) {
-                claim.customData.put((DataKey<Object>) dataKey, dataKey.deserializer().apply(nbt.get(key)));
+                claim.customData.put((DataKey<Object>) dataKey, dataKey.deserializer().apply(customData.get(stringKey)));
             }
         }
 
@@ -236,6 +229,10 @@ public class Claim {
 
     public <T> void removeData(DataKey<T> key) {
         setData(key, null);
+    }
+
+    public Collection<DataKey<?>> getDataKeys() {
+        return Collections.unmodifiableCollection(this.customData.keySet());
     }
 
     public void openUi(ServerPlayerEntity player) {

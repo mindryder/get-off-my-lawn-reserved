@@ -8,12 +8,15 @@ import draylar.goml.GetOffMyLawn;
 import draylar.goml.api.Claim;
 import draylar.goml.api.ClaimBox;
 import draylar.goml.api.ClaimUtils;
+import draylar.goml.api.DataKey;
 import draylar.goml.config.GOMLConfig;
+import draylar.goml.registry.GOMLEntities;
 import draylar.goml.ui.ClaimListGui;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.command.argument.GameProfileArgumentType;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -22,8 +25,11 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static net.minecraft.server.command.CommandManager.literal;
@@ -39,65 +45,65 @@ public class ClaimCommand {
 
             dispatcher.register(literal("goml")
                     .then(literal("help")
-                            .requires(Permissions.require("goml.command.help", true))
+                            .requires(Permissions.require("text.goml.command.command.help", true))
                             .executes(ClaimCommand::help)
                     )
                     .then(literal("trust")
-                            .requires(Permissions.require("goml.command.trust", true))
+                            .requires(Permissions.require("text.goml.command.command.trust", true))
                             .then(CommandManager.argument("player", EntityArgumentType.player())
                                     .executes(context -> trust(context, false))
                             )
                     )
                     .then(literal("untrust")
-                            .requires(Permissions.require("goml.command.untrust", true))
+                            .requires(Permissions.require("text.goml.command.command.untrust", true))
                             .then(CommandManager.argument("player", EntityArgumentType.player())
                                     .executes(ClaimCommand::untrust))
                     )
                     .then(literal("addowner")
-                            .requires(Permissions.require("goml.command.addowner", true))
+                            .requires(Permissions.require("text.goml.command.command.addowner", true))
                             .then(CommandManager.argument("player", EntityArgumentType.player())
                                     .executes(context -> trust(context, true)))
                     )
 
                     .then(literal("list")
-                            .requires(Permissions.require("goml.command.list", true))
+                            .requires(Permissions.require("text.goml.command.command.list", true))
                             .executes(context -> openList(context, context.getSource().getPlayer().getGameProfile()))
                     )
 
                     .then(literal("gui")
-                            .requires(Permissions.require("goml.command.gui", true))
+                            .requires(Permissions.require("text.goml.command.command.gui", true))
                             .executes(context -> openGui(context))
                     )
 
 
                     .then(literal("admin")
-                            .requires(Permissions.require("goml.command.admin", 3))
+                            .requires(Permissions.require("text.goml.command.command.admin", 3))
                             .then(literal("adminmode")
-                                    .requires(Permissions.require("goml.command.admin.admin_mode", 3))
+                                    .requires(Permissions.require("text.goml.command.command.admin.admin_mode", 3))
                                     .executes(ClaimCommand::adminMode)
                             )
                             .then(literal("info")
-                                    .requires(Permissions.require("goml.command.admin.info", 3))
-                                    .executes(ClaimCommand::info)
+                                    .requires(Permissions.require("text.goml.command.command.admin.info", 3))
+                                    .executes(ClaimCommand::infoAdmin)
                             )
                             .then(literal("world")
-                                    .requires(Permissions.require("goml.command.admin.world", 3))
+                                    .requires(Permissions.require("text.goml.command.command.admin.world", 3))
                                     .executes(ClaimCommand::world)
                             )
                             .then(literal("general")
-                                    .requires(Permissions.require("goml.command.admin.general", 3))
+                                    .requires(Permissions.require("text.goml.command.command.admin.general", 3))
                                     .executes(ClaimCommand::general)
                             )
                             .then(literal("remove")
-                                    .requires(Permissions.require("goml.command.admin.remove", 3))
+                                    .requires(Permissions.require("text.goml.command.command.admin.remove", 3))
                                     .executes(ClaimCommand::remove)
                             )
                             .then(literal("reload")
-                                    .requires(Permissions.require("goml.command.admin.reload", 4))
+                                    .requires(Permissions.require("text.goml.command.command.admin.reload", 4))
                                     .executes(ClaimCommand::reload)
                             )
                             .then(literal("list")
-                                    .requires(Permissions.require("goml.command.list", true))
+                                    .requires(Permissions.require("text.goml.command.command.list", true))
                                     .then(CommandManager.argument("player", GameProfileArgumentType.gameProfile())
                                             .executes(context -> {
                                                 var player = GameProfileArgumentType.getProfileArgument(context, "player").toArray(new GameProfile[0]);
@@ -128,8 +134,8 @@ public class ClaimCommand {
     /**
      * Sends the player general information about all claims on the server.
      *
-     * @param context  context
-     * @return  success flag
+     * @param context context
+     * @return success flag
      */
     private static int general(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         MinecraftServer server = context.getSource().getServer();
@@ -143,10 +149,10 @@ public class ClaimCommand {
             int numberOfClaimsWorld = worldClaims.size();
             numberOfClaimsTotal.addAndGet(1);
 
-            player.sendMessage(prefix(new TranslatableText("goml.number_in", world.getRegistryKey().getValue(), numberOfClaimsWorld)), false);
+            player.sendMessage(prefix(new TranslatableText("text.goml.command.number_in", world.getRegistryKey().getValue(), numberOfClaimsWorld)), false);
         });
 
-        player.sendMessage(prefix(new TranslatableText("goml.number_all", numberOfClaimsTotal.get()).formatted(Formatting.WHITE)), false);
+        player.sendMessage(prefix(new TranslatableText("text.goml.command.number_all", numberOfClaimsTotal.get()).formatted(Formatting.WHITE)), false);
 
         return 1;
     }
@@ -154,60 +160,70 @@ public class ClaimCommand {
     /**
      * Sends the player information about the claim they are standing in, if it exists.
      *
-     * @param context  context
-     * @return  success flag
+     * @param context context
+     * @return success flag
      */
-    private static int info(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+    private static int infoAdmin(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         ServerWorld world = context.getSource().getWorld();
         ServerPlayerEntity player = context.getSource().getPlayer();
 
-        if(!world.isClient()) {
+        if (!world.isClient()) {
             ClaimUtils.getClaimsAt(world, player.getBlockPos()).forEach(claimedArea -> {
-                LiteralText owners = new LiteralText("Owners: ");
-
+                player.sendMessage(prefix(new LiteralText("Origin: " + claimedArea.getValue().getOrigin().toShortString())), false);
+                player.sendMessage(prefix(new LiteralText("Radius: " + claimedArea.getValue().getRadius() + " Height: " + claimedArea.getKey().getY())), false);
                 {
-                    var iter = claimedArea.getValue().getOwners().iterator();
+                    LiteralText owners = new LiteralText("Owners: ");
 
-                    while (iter.hasNext()){
-                        var uuid = iter.next();
-                        var gameProfile = context.getSource().getServer().getUserCache().getByUuid(uuid);
-                        owners.append(new LiteralText( (gameProfile.isPresent() ? gameProfile.get().getName() : "<unknown>") + " -> " + uuid.toString())
-                                .setStyle(Style.EMPTY
-                                        .withColor(Formatting.GRAY)
-                                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText("Click to copy")))
-                                        .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, uuid.toString()))
-                                )
-                        );
+                    {
+                        var iter = claimedArea.getValue().getOwners().iterator();
 
-                        if (iter.hasNext()) {
-                            owners.append(", ");
+                        while (iter.hasNext()) {
+                            var uuid = iter.next();
+                            var gameProfile = context.getSource().getServer().getUserCache().getByUuid(uuid);
+                            owners.append(new LiteralText((gameProfile.isPresent() ? gameProfile.get().getName() : "<unknown>") + " -> " + uuid.toString())
+                                    .setStyle(Style.EMPTY
+                                            .withColor(Formatting.GRAY)
+                                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText("Click to copy")))
+                                            .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, uuid.toString()))
+                                    )
+                            );
+
+                            if (iter.hasNext()) {
+                                owners.append(", ");
+                            }
                         }
                     }
-                }
 
-                LiteralText trusted = new LiteralText("Trusted: ");
+                    LiteralText trusted = new LiteralText("Trusted: ");
 
-                {
-                    var iter = claimedArea.getValue().getTrusted().iterator();
+                    {
+                        var iter = claimedArea.getValue().getTrusted().iterator();
 
-                    while (iter.hasNext()){
-                        var uuid = iter.next();
-                        var gameProfile = context.getSource().getServer().getUserCache().getByUuid(uuid);
-                        trusted.append(new LiteralText( (gameProfile.isPresent() ? gameProfile.get().getName() : "<unknown>") + " -> " + uuid.toString())
-                                .setStyle(Style.EMPTY
-                                        .withColor(Formatting.GRAY)
-                                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText("Click to copy")))
-                                        .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, uuid.toString()))
-                                )
-                        );
+                        while (iter.hasNext()) {
+                            var uuid = iter.next();
+                            var gameProfile = context.getSource().getServer().getUserCache().getByUuid(uuid);
+                            trusted.append(new LiteralText((gameProfile.isPresent() ? gameProfile.get().getName() : "<unknown>") + " -> " + uuid.toString())
+                                    .setStyle(Style.EMPTY
+                                            .withColor(Formatting.GRAY)
+                                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText("Click to copy")))
+                                            .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, uuid.toString()))
+                                    )
+                            );
 
-                        if (iter.hasNext()) {
-                            owners.append(", ");
+                            if (iter.hasNext()) {
+                                owners.append(", ");
+                            }
                         }
                     }
+
+                    player.sendMessage(prefix(owners), false);
+                    player.sendMessage(prefix(trusted), false);
                 }
-                player.sendMessage(prefix(owners), false);
-                player.sendMessage(prefix(trusted), false);
+                player.sendMessage(prefix(new LiteralText("ClaimData: ")), false);
+                for (var key : (Collection<DataKey<Object>>) (Object) claimedArea.getValue().getDataKeys()) {
+                    player.sendMessage(new LiteralText("- " + key.key() + " -> ").append(NbtHelper.toPrettyPrintedText(key.serializer().apply(claimedArea.getValue().getData(key)))), false);
+                }
+
             });
         }
 
@@ -217,8 +233,8 @@ public class ClaimCommand {
     /**
      * Sends the player general information about all claims in the given world.
      *
-     * @param context  context
-     * @return  success flag
+     * @param context context
+     * @return success flag
      */
     private static int world(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         ServerWorld world = context.getSource().getWorld();
@@ -227,7 +243,7 @@ public class ClaimCommand {
         RTreeMap<ClaimBox, Claim> worldClaims = GetOffMyLawn.CLAIM.get(world).getClaims();
         int numberOfClaims = worldClaims.size();
 
-        player.sendMessage(prefix(new TranslatableText("goml.number_in", world.getRegistryKey().getValue(), numberOfClaims)), false);
+        player.sendMessage(prefix(new TranslatableText("text.goml.command.number_in", world.getRegistryKey().getValue(), numberOfClaims)), false);
 
         return 1;
     }
@@ -235,17 +251,26 @@ public class ClaimCommand {
     /**
      * Removes the claim the player is currently standing in, if it exists.
      *
-     * @param context  context
-     * @return  success flag
+     * @param context context
+     * @return success flag
      */
     private static int remove(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         ServerWorld world = context.getSource().getWorld();
         ServerPlayerEntity player = context.getSource().getPlayer();
 
-        if(!world.isClient()) {
+        if (!world.isClient()) {
             ClaimUtils.getClaimsAt(world, player.getBlockPos()).forEach(claimedArea -> {
                 GetOffMyLawn.CLAIM.get(world).remove(claimedArea.getKey());
-                player.sendMessage(prefix(new TranslatableText("goml.removed_claim", world.getRegistryKey().getValue(), claimedArea.getValue().getOrigin())), false);
+                player.sendMessage(prefix(new TranslatableText("text.goml.command.removed_claim", world.getRegistryKey().getValue(), claimedArea.getValue().getOrigin())), false);
+                var blockEntity = world.getBlockEntity(claimedArea.getValue().getOrigin(), GOMLEntities.CLAIM_ANCHOR);
+
+                if (blockEntity.isPresent()) {
+                    world.breakBlock(claimedArea.getValue().getOrigin(), true);
+                    for (var lPos : new ArrayList<>(blockEntity.get().getAugments().keySet())) {
+                        world.breakBlock(lPos, true);
+                    }
+                }
+
             });
         }
 
@@ -255,27 +280,30 @@ public class ClaimCommand {
     /**
      * Sends the player information on using the /goml command.
      *
-     * @param context  context
-     * @return  success flag
+     * @param context context
+     * @return success flag
      */
     private static int help(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         ServerPlayerEntity player = context.getSource().getPlayer();
 
-        // TODO: translatable text
-        player.sendMessage(new LiteralText("[Get Off My Lawn Help] ").formatted(Formatting.BLUE), false);
-        player.sendMessage(new LiteralText("-------------------------------------").formatted(Formatting.BLUE), false);
-        player.sendMessage(new LiteralText("/goml - base command."), false);
-        //player.sendMessage(new LiteralText("/goml general - prints the status of all claims on the server."), false);
-        player.sendMessage(new LiteralText("/goml help - prints this message."), false);
-        player.sendMessage(new LiteralText("/goml info - prints information about any claims at the user's position."), false);
-        //player.sendMessage(new LiteralText("/goml remove - removes any claims at the user's position."), false);
-        //player.sendMessage(new LiteralText("/goml world - prints an overview of claims in the user's world."), false);
-        player.sendMessage(new LiteralText("/goml addowner - adds an owner to the current claim."), false);
-        player.sendMessage(new LiteralText("/goml trust - adds a trusted member to the current claim."), false);
-        player.sendMessage(new LiteralText("/goml untrust - removes a trusted member from the current claim."), false);
-        player.sendMessage(new LiteralText("/goml list - displays all claims you have access to."), false);
-        player.sendMessage(new LiteralText("-------------------------------------").formatted(Formatting.BLUE), false);
-        player.sendMessage(new LiteralText("GitHub repository: https://github.com/Patbox/get-off-my-lawn-server-sided"), false);
+        Function<String, Text> write = (command) -> new LiteralText("/goml " + command)
+                .append(new LiteralText(" - ").formatted(Formatting.GRAY))
+                .append(new TranslatableText("text.goml.command.help." + command).setStyle(Style.EMPTY.withColor(0xededed)));
+
+        player.sendMessage(new LiteralText("[").formatted(Formatting.DARK_GRAY).append(new LiteralText("Get Off My Lawn").setStyle(Style.EMPTY.withColor(0xa1ff59))).append("]"), false);
+        player.sendMessage(new LiteralText("-------------------------------------").formatted(Formatting.DARK_GRAY), false);
+
+        for (var cmd : context.getSource().getServer().getCommandManager().getDispatcher().findNode(Collections.singleton("goml")).getChildren()) {
+            if (cmd.canUse(context.getSource())) {
+                player.sendMessage(write.apply(cmd.getName()), false);
+            }
+        }
+        player.sendMessage(new LiteralText("-------------------------------------").formatted(Formatting.DARK_GRAY), false);
+        player.sendMessage(new LiteralText("GitHub: ")
+                .append(
+                        new LiteralText("https://github.com/Patbox/get-off-my-lawn-server-sided")
+                                .setStyle(Style.EMPTY.withColor(Formatting.BLUE).withUnderline(true).withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/Patbox/get-off-my-lawn-server-sided")))
+                ), false);
 
         return 1;
     }
@@ -293,7 +321,7 @@ public class ClaimCommand {
         var claim = ClaimUtils.getClaimsAt(player.getWorld(), player.getBlockPos());
 
         if (claim.isEmpty()) {
-            player.sendMessage(new TranslatableText("text.goml.command.no_claims").formatted(Formatting.RED), false);
+            player.sendMessage(prefix(new TranslatableText("text.goml.command.no_claims").formatted(Formatting.RED)), false);
             return 0;
         }
 
@@ -307,25 +335,20 @@ public class ClaimCommand {
         ServerPlayerEntity player = context.getSource().getPlayer();
         ServerPlayerEntity toAdd = EntityArgumentType.getPlayer(context, "player");
 
-        // Owner/trusted tried to add them self to the claim
-        if(toAdd.getUuid().equals(player.getUuid())) {
-            player.sendMessage(new TranslatableText("goml.add_self"), true);
-            return 1;
-        }
 
-        if(!world.isClient()) {
+        if (!world.isClient()) {
             var skipChecks = ClaimUtils.isInAdminMode(player);
             ClaimUtils.getClaimsAt(world, player.getBlockPos()).forEach(claimedArea -> {
-                if(skipChecks || claimedArea.getValue().isOwner(player)) {
-                    if(owner) {
+                if (skipChecks || claimedArea.getValue().isOwner(player)) {
+                    if (owner && !claimedArea.getValue().isOwner(toAdd)) {
                         claimedArea.getValue().addOwner(toAdd);
-                        player.sendMessage(prefix(new TranslatableText("goml.owner_added", toAdd.getDisplayName())), false);
-                    } else {
+                        player.sendMessage(prefix(new TranslatableText("text.goml.command.owner_added", toAdd.getDisplayName())), false);
+                    } else if (!owner && !claimedArea.getValue().getTrusted().contains(toAdd.getUuid())) {
                         claimedArea.getValue().trust(toAdd);
-                        player.sendMessage(prefix(new TranslatableText("goml.trusted", toAdd.getDisplayName())), false);
+                        player.sendMessage(prefix(new TranslatableText("text.goml.command.trusted", toAdd.getDisplayName())), false);
+                    } else {
+                        player.sendMessage(prefix(new TranslatableText("text.goml.command.already_added")), false);
                     }
-
-                    GetOffMyLawn.CLAIM.sync(player.world);
                 }
             });
         }
@@ -339,17 +362,16 @@ public class ClaimCommand {
         ServerPlayerEntity toRemove = EntityArgumentType.getPlayer(context, "player");
 
         // Owner/trusted tried to remove themselves from the claim
-        if(toRemove.getUuid().equals(player.getUuid())) {
-            player.sendMessage(new TranslatableText("goml.remove_self"), true);
+        if (toRemove.getUuid().equals(player.getUuid())) {
+            player.sendMessage(prefix(new TranslatableText("text.goml.command.remove_self")), false);
             return 1;
         }
 
-        if(!world.isClient()) {
+        if (!world.isClient()) {
             ClaimUtils.getClaimsAt(world, player.getBlockPos()).forEach(claimedArea -> {
-                if(claimedArea.getValue().isOwner(player)) {
+                if (claimedArea.getValue().isOwner(player)) {
                     claimedArea.getValue().untrust(toRemove);
-                    player.sendMessage(prefix(new TranslatableText("goml.untrusted", toRemove.getDisplayName())), false);
-                    GetOffMyLawn.CLAIM.sync(player.world);
+                    player.sendMessage(prefix(new TranslatableText("text.goml.command.untrusted", toRemove.getDisplayName())), false);
                 }
             });
         }
@@ -359,7 +381,7 @@ public class ClaimCommand {
 
     private static int reload(CommandContext<ServerCommandSource> context) {
         GetOffMyLawn.CONFIG = GOMLConfig.loadOrCreateConfig();
-        context.getSource().sendFeedback(new LiteralText("[GOML] Reloaded config"), true);
+        context.getSource().sendFeedback(prefix(new LiteralText("Reloaded config")), false);
         return 1;
     }
 
@@ -367,11 +389,7 @@ public class ClaimCommand {
         player.sendMessage(new LiteralText(" "), false);
     }
 
-    private static MutableText createPrefix() {
-        return new TranslatableText("goml.prefix").formatted(Formatting.BLUE);
-    }
-
     private static MutableText prefix(MutableText text) {
-        return createPrefix().append(new LiteralText(" ")).append(text).formatted(Formatting.WHITE);
+        return GetOffMyLawn.CONFIG.messagePrefix.mutableText().append(new LiteralText(" ")).append(text).formatted(Formatting.WHITE);
     }
 }

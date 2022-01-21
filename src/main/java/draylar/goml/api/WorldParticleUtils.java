@@ -16,7 +16,7 @@ public class WorldParticleUtils {
         Edge[] edges = edges(min, max);
 
         int maxInterval = 5;
-        int maxCount = 20;
+        int maxCount = 40;
 
         for (Edge edge : edges) {
             int length = edge.length();
@@ -40,13 +40,13 @@ public class WorldParticleUtils {
     private static void spawnParticleIfVisible(ServerPlayerEntity player, ParticleEffect effect, double x, double y, double z) {
         ServerWorld world = player.getWorld();
 
-        /*Vec3d delta = player.getPos().subtract(x, y, z);
+        Vec3d delta = player.getPos().subtract(x, y, z);
         double length2 = delta.lengthSquared();
-        if (length2 > 256 * 256) {
+        if (length2 > 512 * 512) {
             return;
         }
 
-        Vec3d rotation = player.getRotationVec(1.0F);
+        /*Vec3d rotation = player.getRotationVec(1.0F);
         double dot = (delta.multiply(1.0 / Math.sqrt(length2))).dotProduct(rotation);
         if (dot > 0.0) {
             return;

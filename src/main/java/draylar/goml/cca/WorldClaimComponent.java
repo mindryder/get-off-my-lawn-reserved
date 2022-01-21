@@ -71,13 +71,14 @@ public class WorldClaimComponent implements ClaimComponent {
 
         boxTag.putLong("OriginPos", box.getOrigin().asLong());
         boxTag.putInt("Radius", box.getRadius());
+        boxTag.putInt("Height", box.getY());
 
         return boxTag;
     }
 
     public ClaimBox boxFromTag(NbtCompound tag) {
         BlockPos originPos = BlockPos.fromLong(tag.getLong("OriginPos"));
-        int radius = tag.getInt("Radius");
-        return new ClaimBox(originPos, radius);
+        var radius = tag.getInt("Radius");
+        return new ClaimBox(originPos, radius, tag.contains("Height") ? tag.getInt("Height") : radius);
     }
 }

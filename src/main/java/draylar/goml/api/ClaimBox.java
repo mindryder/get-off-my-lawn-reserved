@@ -3,40 +3,30 @@ package draylar.goml.api;
 import com.jamieswhiteshirt.rtree3i.Box;
 import net.minecraft.util.math.BlockPos;
 
-public class ClaimBox {
-
-    private BlockPos origin;
-    private int radius;
-
-    public ClaimBox(BlockPos origin, int radius) {
-        this.origin = origin;
-        this.radius = radius;
-    }
-
+public record ClaimBox(BlockPos origin, int radius, int radiusY) {
     public Box toBox() {
-        BlockPos lower = origin.add(-radius, -radius, -radius);
-        BlockPos upper = origin.add(radius, radius, radius);
+        BlockPos lower = origin.add(-radius, -radiusY, -radius);
+        BlockPos upper = origin.add(radius, radiusY, radius);
         return Box.create(lower.getX(), lower.getY(), lower.getZ(), upper.getX(), upper.getY(), upper.getZ());
     }
 
     public BlockPos getOrigin() {
-        return origin;
+        return this.origin;
     }
 
     public int getRadius() {
-        return radius;
+        return this.radius;
     }
 
-    public void setOrigin(BlockPos origin) {
-        this.origin = origin;
+    public int getX() {
+        return this.radius;
     }
 
-    public void setRadius(int radius) {
-        this.radius = radius;
+    public int getY() {
+        return this.radiusY;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        return super.equals(obj);
+    public int getZ() {
+        return this.radius;
     }
 }

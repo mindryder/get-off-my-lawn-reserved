@@ -8,16 +8,18 @@ import draylar.goml.api.ClaimUtils;
 import draylar.goml.api.PermissionReason;
 import draylar.goml.api.event.ClaimEvents;
 import draylar.goml.block.ClaimAnchorBlock;
+import draylar.goml.block.ClaimAugmentBlock;
 import draylar.goml.block.entity.ClaimAnchorBlockEntity;
+import draylar.goml.block.entity.ClaimAugmentBlockEntity;
 import eu.pb4.polymer.api.block.PolymerBlockUtils;
 import net.fabricmc.fabric.api.event.player.*;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Tameable;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.registry.Registry;
 
 public class EventHandlers {
@@ -32,15 +34,6 @@ public class EventHandlers {
         registerAttackEntityCallback();
         registerInteractEntityCallback();
         registerAnchorAttackCallback();
-        registerPolymerMiningCallback();
-    }
-
-    private static void registerPolymerMiningCallback() {
-        PolymerBlockUtils.SERVER_SIDE_MINING_CHECK.register((player, pos, state) -> {
-            Selection<Entry<ClaimBox, Claim>> claimsFound = ClaimUtils.getClaimsAt(player.getWorld(), pos);
-
-            return testPermission(claimsFound, player, Hand.MAIN_HAND, pos, PermissionReason.AREA_PROTECTED) == ActionResult.FAIL;
-        });
     }
 
     private static void registerInteractEntityCallback() {
@@ -110,13 +103,11 @@ public class EventHandlers {
 
     private static void registerAnchorAttackCallback() {
         AttackBlockCallback.EVENT.register((playerEntity, world, hand, blockPos, direction) -> {
-            if(world.getBlockState(blockPos).getBlock() instanceof ClaimAnchorBlock) {
-                BlockEntity be = world.getBlockEntity(blockPos);
+            var be = world.getBlockEntity(blockPos);
 
-                if(be instanceof ClaimAnchorBlockEntity) {
-                    if(((ClaimAnchorBlockEntity) be).hasAugment()) {
-                        return ActionResult.FAIL;
-                    }
+            if (be instanceof ClaimAnchorBlockEntity) {
+                if (((ClaimAnchorBlockEntity) be).hasAugment()) {
+                    return ActionResult.FAIL;
                 }
             }
 
@@ -125,13 +116,13 @@ public class EventHandlers {
     }
 
     private static ActionResult testPermission(Selection<Entry<ClaimBox, Claim>> claims, PlayerEntity player, Hand hand, BlockPos pos, PermissionReason reason) {
-        if(!claims.isEmpty()) {
+        if (!claims.isEmpty()) {
             boolean noPermission = claims.anyMatch((Entry<ClaimBox, Claim> boxInfo) -> !boxInfo.getValue().hasPermission(player));
 
-            if(noPermission && !ClaimUtils.isInAdminMode(player)) {
+            if (noPermission && !ClaimUtils.isInAdminMode(player)) {
                 ActionResult check = ClaimEvents.PERMISSION_DENIED.invoker().check(player, player.world, hand, pos, reason);
 
-                if(check.isAccepted() || check.equals(ActionResult.PASS)) {
+                if (check.isAccepted() || check.equals(ActionResult.PASS)) {
                     player.sendMessage(reason.getReason(), true);
                     return ActionResult.FAIL;
                 }
