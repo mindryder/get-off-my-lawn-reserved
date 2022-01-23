@@ -129,7 +129,7 @@ curseforge {
 
 		project {
 			id = "572651"
-			//releaseType = "beta"
+			releaseType = "release"
 			changelog = System.getenv("CHANGELOG")
 			changelogType = "markdown"
 			addGameVersion ((String) project.minecraft_version)
