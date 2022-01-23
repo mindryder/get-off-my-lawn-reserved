@@ -5,12 +5,12 @@
   "name": "Get Off My Lawn ReServed",
   "description": "Keep people off your lawn with claims!",
   "authors": [
-    "Draylar (Original author)",
-    "Patbox"
+    "Patbox",
+    "Draylar (Original author)"
   ],
   "contact": {
     "homepage": "https://pb4.eu",
-    "sources": "https://github.com/Patbox/get-off-my-lawn-server-sided"
+    "sources": "https://github.com/Patbox/get-off-my-lawn-reserved"
   },
   "license": "MIT",
   "icon": "assets/goml/icon.png",

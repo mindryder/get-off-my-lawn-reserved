@@ -1,46 +1,74 @@
-*This README is little outdated/not updated to server sided version, new one will be available soon™* 
+# Get Off My Lawn ReServed
 
-# Get Off My Lawn
+*Get Off My Lawn ReServer* is a take on the popular concept of player claims for Survival/Freebuild Fabric servers. 
+This mod works fully server side (no client mod required!) while being compatible with major Fabric modpacks
 
-*Get Off My Lawn* is a take on the popular concept of claims. It helps protect your stuff! It is built for [Fabric](https://fabricmc.net/use/) on 1.15.2.
+This project is a fork [Get Off My Lawn by Draylar](https://github.com/Draylar/get-off-my-lawn), with main focus on improving and building on top of original.
 
-**To get started**, you'll have to craft a *Claim Anchor*. Each anchor has a different claim radius; after placing one, a box around it will be formed. This box is yours!
 
-**Makeshift**, radius of 10
+# Getting started
 
-![](resources/makeshift_claim_anchor_recipe.png)
+To get started, you'll have to craft a *Claim Anchor*. Each anchor has a different (configurable by admin) claim radius; after placing one, a box around it will be formed. This box is yours!
 
-**Reinforced**, radius of 25
+### **Makeshift**, default radius of 10
 
-![](resources/reinforced_claim_anchor_recipe.png)
+![](https://imgur.com/sIQXEy3.png)
 
-**Glistening**, radius of 50
+### **Reinforced**, default radius of 25
 
-![](resources/glistening_claim_anchor_recipe.png)
+![](https://imgur.com/3hTueto.png)
 
-**Crystal**, radius of 75
+Upgrade:
 
-![](resources/crystal_claim_anchor_recipe.png)
+![](https://imgur.com/VFewmBO.png)
 
-**Emeradic**, radius of 125
+### **Glistening**, default radius of 50
 
-![](resources/emeradic_claim_anchor_recipe.png)
+![](https://imgur.com/Su5SCS2.png)
 
-**Withered**, radius of 200
+Upgrade:
 
-![](resources/withered_claim_anchor_recipe.png)
+![](https://imgur.com/JIVbMMn.png)
 
-[NYI] **To configure your claim**, you can interact with the anchor block. A UI will appear that offers several configuration options:
-- The general settings tab can be used to define blanket permissions for non-specified players.
-- The player list can be used to define permissions for individual players
+### **Crystal**, default radius of 75
 
-[NYI] **To upgrade your claim**, place an Anchor Augment next to the core Claim Anchor. Anchor Augments available include:
-- Creeper Explosion Nullifier: Prevents Creeper explosions from damaging terrain
+![](https://imgur.com/2NOZz3S.png)
+
+Upgrade:
+
+![](https://imgur.com/DkLlxAU.png)
+
+### **Emeradic**, default radius of 125
+
+![](https://imgur.com/W9Y4Qr1.png)
+
+Upgrade:
+
+![](https://imgur.com/RoRbqaV.png)
+### **Withered**, default radius of 200
+
+![](https://imgur.com/WhbQtAE.png)
+
+Upgrade:
+
+![](https://imgur.com/dINKXct.png)
+
+To see claim areas, you'll have to craft a *Goggles of (Claim) Revealing*:
+
+![](https://imgur.com/WowJvmJ.png)
+
+When this item equipped in the helmet, mainhand or offhand slot, claim outlines become visible.
+
+## Claim configuration:
+To configure your claim, you can interact with the anchor block. A UI will appear that offers several configuration options:
+- The player list can be used to add and remove access of players to your claim
+- The Augment list, that can be used for checking and configuring active augments
+
+## Claim upgrades:
+To upgrade your claim, place an Anchor Augment next to the core Claim Anchor. Anchor Augments available include:
 - Ender Binding: Prevents Enddermen from teleporting
 - Villager Core: Prevents Zombies from damaging Villagers
-- Missile Defense: Shoots trespassers in range
 - Visitor Greeter: MOTD to visitors
-- Trespasser Alarm: Alert when non-whitelisted people enter the claim
 - Angelic Aura: Regen to all players inside region
 - Withering Seal: Prevents wither status effect
 - Forceful Ejection: non-whitelisted players get launched out of the claim
@@ -49,56 +77,59 @@
 - Defender's Right: pets & golems do 100% more damage to hostile mobs
 - Chaos Zone: Strength to all players inside region
 
-**To see claim areas**, you'll have to craft a *Goggles of (Claim) Revealing*:
+## Config:
+You can find config file in `./config/getoffmylawn.json`. To reload it, just type `/goml admin reload` in chat/console.
 
-![](resources/recipe.png)
-
-When this item equipped in the helmet slot, claim outlines become visible. 
-
-## Protection Checks
-
-*Get Off My Lawn* currently checks for claims when the following actions occur:
-- Player block break
-- Player block interaction
-- Player entity damage
-- Player entity interaction
-- TNT explodes
-
-If the player does not own the claim, they are not allowed to finish (/start) the action. In the case of explosions, no blocks break.
-
-## Installation: Users
-
-You'll need to install the [Fabric Loader](https://fabricmc.net/use/), [Fabric API](https://www.curseforge.com/minecraft/mc-mods/fabric-api/files), and appropriate mod jar from the releases tab (or the CurseForge page).
-
-Drop the mod jar and Fabric API into your `/mods` folder and boot up the game. 
-
-## Installation: Developers
-
-[NYI] *Get Off My Lawn* offers an API that allows you to:
-- Check areas for claims
-- Add custom Anchor Augments
-
-To install the mod to your development environment:
- 
-`build.gradle`
-```groovy
-repositories {
-    maven { url 'https://jitpack.io' }
+```json5
+{
+  "makeshiftRadius": 10,                // Radius of makeshift claim
+  "reinforcedRadius": 25,               // Radius of reinforced claim
+  "glisteningRadius": 50,               // Radius of glistening claim
+  "crystalRadius": 75,                  // Radius of crystal claim
+  "emeradicRadius": 125,                // Radius of emeradic claim
+  "witheredRadius": 200,                // Radius of withered claim
+  "claimProtectsFullWorldHeight": false,// Makes claim protect area from bottom of the world to top
+  "dimensionBlacklist": [               // Allows to blacklist specific dimensions
+    "example:dim"
+  ],             
+  "regionBlacklist": {                  // Allows to blacklist specific regions
+    "example:dim": [
+      {
+        x1: -200,
+        y1: -64,
+        z1: -200,
+        x2: 200,
+        y2: 512,
+        z2: 200,
+      }
+    ]
+  },
+  "enabledAugments": {                  // Allows to enable/disable augments per their id
+    "goml:lake_spirit_grace": true,
+    "goml:angelic_aura": true,
+    "goml:greeter": true,
+    "goml:force_field": true,
+    "goml:village_core": true,
+    "goml:withering_seal": true,
+    "goml:ender_binding": true,
+    "goml:heaven_wings": true,
+    "goml:chaos_zone": true
+  },
+  "allowedBlockInteraction": [          // Allows to interact with specific blocks in claim
+    "somemod:store"
+  ],
+  "allowedEntityInteraction": [         // Allows to interact with specific entities in claim
+    "minecraft:villager"
+  ],
+  "messagePrefix": "<dark_gray>[<#a1ff59>GOML</color>]", // Default prefix used in messages
+  "placeholderNoClaimInfo": "<gray><italic>Wilderness",
+  "placeholderNoClaimOwners": "<gray><italic>Nobody",
+  "placeholderNoClaimTrusted": "<gray><italic>Nobody",
+  "placeholderClaimCanBuildInfo": "${owners} <gray>(<green>${anchor}</green>)",
+  "placeholderClaimCantBuildInfo": "${owners} <gray>(<red>${anchor}</red>)"
 }
 ```
 
-`build.gradle`
-```groovy
-dependencies {
-    modImplementation 'com.github.Draylar:get-off-my-lawn:${project.goml_version}'
-}
-```
-
-`gradle.properties`
-```groovy
-goml_version=master-SNAPSHOT
-```
 
 ## License
-
-*Get Off My Lawn*  is available under the MIT license. The project, code, and assets found in this repository are available for free public use.
+*Get Off My Lawn ReServed* is available under the MIT license. The project, code, and assets found in this repository are available for free public use (as long as credited).

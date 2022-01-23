@@ -1,0 +1,44 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "goml:angelic_aura",
+      "goml:chaos_zone",
+      "goml:crystal_claim_anchor",
+      "goml:crystal_upgrade_kit",
+      "goml:emeradic_claim_anchor",
+      "goml:emeradic_upgrade_kit",
+      "goml:ender_binding",
+      "goml:glistening_claim_anchor",
+      "goml:glistening_upgrade_kit",
+      "goml:goggles",
+      "goml:greeter",
+      "goml:heaven_wings",
+      "goml:lake_spirit_grace",
+      "goml:makeshift_claim_anchor",
+      "goml:reinforced_claim_anchor",
+      "goml:reinforced_upgrade_kit",
+      "goml:village_core",
+      "goml:withered_claim_anchor",
+      "goml:withered_upgrade_kit",
+      "goml:withering_seal"
+    ]
+  },
+  "criteria": {
+    "has_chest": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "minecraft:beds"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_chest"
+    ]
+  ]
+}
