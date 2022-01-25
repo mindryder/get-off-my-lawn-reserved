@@ -12,6 +12,7 @@ public class GOMLMixinPlugin implements IMixinConfigPlugin {
 
     public static final boolean BLAST_LOADED = FabricLoader.getInstance().isModLoaded("blast");
     public static final boolean AE2_LOADED = FabricLoader.getInstance().isModLoaded("appliedenergistics2");
+    public static final boolean BOTANIA_LOADED = FabricLoader.getInstance().isModLoaded("botania");
 
     @Override
     public void onLoad(String mixinPackage) {
@@ -29,6 +30,8 @@ public class GOMLMixinPlugin implements IMixinConfigPlugin {
             return BLAST_LOADED;
         } else if (targetClassName.startsWith("AE2")) {
             return AE2_LOADED;
+        } else if (targetClassName.startsWith("Botania")) {
+            return BOTANIA_LOADED;
         }
 
         return true;

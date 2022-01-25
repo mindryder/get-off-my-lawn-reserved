@@ -23,6 +23,13 @@ repositories {
 	maven { url = "https://maven.nucleoid.xyz/" }
 	maven { url = 'https://jitpack.io' }
 	maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+	maven { url 'https://maven.blamejared.com' }
+	maven { url "https://maven.shedaniel.me" }
+
+	maven {
+		name = "TerraformersMC"
+		url = "https://maven.terraformersmc.com/"
+	}
 
 	maven {
 		url = "https://maven.jamieswhiteshirt.com/libs-release/"
@@ -63,6 +70,7 @@ dependencies {
 	// Dev testing
 	modCompileOnly 'curse.maven:BLAST-349938:3543409'
 	modCompileOnly files("./modsWithCompat/appliedenergistics2-10.0.0-beta.2.jar")
+	modCompileOnly 'vazkii.botania:Botania:1.18.1-427-FABRIC'
 
 
 	// Server side stuff

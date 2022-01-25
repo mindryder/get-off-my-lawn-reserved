@@ -153,7 +153,7 @@ public class ClaimUtils {
         return claimsFound.isEmpty();
     }
 
-    public static boolean canModify(World world, BlockPos pos, PlayerEntity player) {
+    public static boolean canModify(World world, BlockPos pos, @Nullable PlayerEntity player) {
         Selection<Entry<ClaimBox, Claim>> claimsFound = ClaimUtils.getClaimsAt(world, pos);
         if (player != null && claimsFound.isNotEmpty()) {
             return !claimsFound.anyMatch((Entry<ClaimBox, Claim> boxInfo) -> !canModifyClaimAt(world, pos, boxInfo, player));
