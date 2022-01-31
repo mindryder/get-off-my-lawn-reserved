@@ -15,7 +15,9 @@
     "augment.EndermanEntityMixin",
     "augment.VillagerEntityMixin",
     "compat.AE2TinyTNTEntityMixin",
-    "compat.BlastExplosionMixin"
+    "compat.BlastExplosionMixin",
+    "compat.BotaniaEntityManaBurstMixin",
+    "compat.BotaniaItemLaputaShardMixin"
   ],
   "injectors": {
     "defaultRequire": 1
