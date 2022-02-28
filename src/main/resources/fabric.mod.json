@@ -35,6 +35,9 @@
   "custom": {
     "cardinal-components": [
       "goml:claims"
-    ]
+    ],
+    "polydex:entry/goml": {
+      "icon": "goml:withered_claim_anchor"
+    }
   }
 }
