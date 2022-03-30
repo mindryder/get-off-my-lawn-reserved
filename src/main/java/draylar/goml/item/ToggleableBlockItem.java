@@ -1,11 +1,15 @@
 package draylar.goml.item;
 
+import draylar.goml.GetOffMyLawn;
+import draylar.goml.api.ClaimUtils;
+import draylar.goml.block.ClaimAnchorBlock;
 import eu.pb4.polymer.api.block.PolymerHeadBlock;
 import eu.pb4.polymer.api.item.PolymerHeadBlockItem;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
@@ -24,7 +28,9 @@ public class ToggleableBlockItem extends TooltippedBlockItem {
 
     @Override
     protected boolean canPlace(ItemPlacementContext context, BlockState state) {
-        return isEnabled.getAsBoolean() ? super.canPlace(context, state) : false;
+        return isEnabled.getAsBoolean()
+                ? super.canPlace(context, state)
+                : false;
     }
 
     public boolean isEnabled() {

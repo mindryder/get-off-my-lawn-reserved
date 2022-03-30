@@ -3,7 +3,7 @@ package draylar.goml.api;
 import com.jamieswhiteshirt.rtree3i.Box;
 import com.jamieswhiteshirt.rtree3i.Entry;
 import com.jamieswhiteshirt.rtree3i.Selection;
-import draylar.goml.other.AdminModePlayer;
+import draylar.goml.other.GomlPlayer;
 import draylar.goml.GetOffMyLawn;
 import draylar.goml.api.event.ClaimEvents;
 import draylar.goml.block.entity.ClaimAnchorBlockEntity;
@@ -130,7 +130,7 @@ public class ClaimUtils {
     }
 
     public static boolean isInAdminMode(PlayerEntity player) {
-        return Permissions.check(player, "goml.modify_others", 3) && (player instanceof AdminModePlayer adminModePlayer && adminModePlayer.goml_getAdminMode());
+        return Permissions.check(player, "goml.modify_others", 3) && (player instanceof GomlPlayer adminModePlayer && adminModePlayer.goml_getAdminMode());
     }
 
     public static boolean canExplosionDestroy(World world, BlockPos pos, @Nullable Entity causingEntity) {

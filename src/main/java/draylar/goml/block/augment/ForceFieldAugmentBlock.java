@@ -6,6 +6,7 @@ import draylar.goml.api.ClaimUtils;
 import draylar.goml.api.DataKey;
 import draylar.goml.block.ClaimAugmentBlock;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -22,17 +23,32 @@ public class ForceFieldAugmentBlock extends ClaimAugmentBlock {
         super(settings, texture);
     }
 
+    @Override
+    public void onPlayerEnter(Claim claim, PlayerEntity player) {
+        if (shouldBlock(claim, player)) {
+            var claimPos = claim.getOrigin();
+
+            var dir = player.getPos().subtract(Vec3d.ofCenter(claimPos));
+
+            var l = dir.length();
+
+            var move = dir.multiply(0.5 / l);
+
+            //player.setVelocity(move.x, move.y, move.z);
+            player.velocityModified = true;
+        }
+    }
 
     @Override
     public void playerTick(Claim claim, PlayerEntity player) {
         if (shouldBlock(claim, player)) {
             var claimPos = claim.getOrigin();
 
-            var delta = player.getPos().subtract(Vec3d.ofCenter(claimPos));
+            var dir = player.getPos().subtract(Vec3d.ofCenter(claimPos));
 
-            var dist = Math.max(Math.max(Math.abs(delta.x), Math.abs(delta.y)), delta.z);
+            var l = claim.getRadius() / dir.length();
 
-            var move = delta.multiply(1 / dist);
+            var move = dir.multiply(0.8 * l, 0.3 * l, 0.8 * l);
 
             player.setVelocity(move.x, move.y, move.z);
             player.velocityModified = true;

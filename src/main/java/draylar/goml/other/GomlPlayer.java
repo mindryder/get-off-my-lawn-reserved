@@ -1,6 +1,8 @@
 package draylar.goml.other;
 
-public interface AdminModePlayer {
+import net.minecraft.util.math.BlockPos;
+
+public interface GomlPlayer {
     void goml_setAdminMode(boolean value);
     boolean goml_getAdminMode();
 }

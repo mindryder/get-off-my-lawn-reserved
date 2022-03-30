@@ -18,6 +18,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
@@ -55,7 +56,7 @@ public class UpgradeKitItem extends Item implements PolymerItem {
 
         if(block.getBlock().equals(from)) {
             // get claims at block position
-            Selection<Entry<ClaimBox, Claim>> claimsFound =  GetOffMyLawn.CLAIM.get(world).getClaims().entries(box ->
+            Selection<Entry<ClaimBox, Claim>> claimsFound = GetOffMyLawn.CLAIM.get(world).getClaims().entries(box ->
                     box.contains(Box.create(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1))
             );
 
@@ -73,12 +74,12 @@ public class UpgradeKitItem extends Item implements PolymerItem {
 
                 // if we have permission
                 if(!noPermission) {
-
                     var radius = to.getRadius();
                     var radiusY = GetOffMyLawn.CONFIG.claimProtectsFullWorldHeight ? Short.MAX_VALUE : radius;
 
                     // if we don't overlap with another claim
-                    if(ClaimUtils.getClaimsInBox(world, pos.add(-radius, -radiusY, -radius), pos.add(radius, radiusY, radius), currentClaim.get().getKey().toBox()).isEmpty()) {
+                    var claims = ClaimUtils.getClaimsInBox(world, pos.add(-radius, -radiusY, -radius), pos.add(radius, radiusY, radius), currentClaim.get().getKey().toBox());
+                    if (claims.isEmpty()) {
                         var claimInfo = currentClaim.get().getValue();
 
                         // remove claim
@@ -105,6 +106,23 @@ public class UpgradeKitItem extends Item implements PolymerItem {
                         if(oldBE instanceof ClaimAnchorBlockEntity && newBE instanceof ClaimAnchorBlockEntity) {
                             ((ClaimAnchorBlockEntity) newBE).from(((ClaimAnchorBlockEntity) oldBE));
                         }
+
+                        return ActionResult.SUCCESS;
+                    } else {
+                        var list = new LiteralText("");
+
+                        claims.forEach((c) -> {
+                            var box = c.getKey().toBox();
+
+                            list.append(new LiteralText("[").formatted(Formatting.GRAY)
+                                    .append(new LiteralText(box.x1() + ", " + box.y1() + ", " + box.z1()).formatted(Formatting.WHITE))
+                                    .append(" | ")
+                                    .append(new LiteralText(box.x2() + ", " + box.y2() + ", " + box.z2()).formatted(Formatting.WHITE))
+                                    .append("] ")
+                            );
+                        });
+
+                        context.getPlayer().sendMessage(GetOffMyLawn.CONFIG.prefix(new TranslatableText("text.goml.cant_upgrade_claim.collides_with", list).formatted(Formatting.RED)), false);
                     }
                 }
             }

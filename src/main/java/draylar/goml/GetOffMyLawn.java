@@ -6,6 +6,7 @@ import dev.onyxstudios.cca.api.v3.world.WorldComponentFactoryRegistry;
 import dev.onyxstudios.cca.api.v3.world.WorldComponentInitializer;
 import draylar.goml.cca.ClaimComponent;
 import draylar.goml.cca.WorldClaimComponent;
+import draylar.goml.other.CardboardWarning;
 import draylar.goml.other.ClaimCommand;
 import draylar.goml.config.GOMLConfig;
 import draylar.goml.other.Placeholders;
@@ -30,6 +31,7 @@ public class GetOffMyLawn implements ModInitializer, WorldComponentInitializer {
 
 	@Override
 	public void onInitialize() {
+		CardboardWarning.checkAndAnnounce();
 		GOMLBlocks.init();
 		GOMLItems.init();
 		GOMLEntities.init();
@@ -38,6 +40,7 @@ public class GetOffMyLawn implements ModInitializer, WorldComponentInitializer {
 		Placeholders.init();
 
 		ServerLifecycleEvents.SERVER_STARTING.register((s) -> {
+			CardboardWarning.checkAndAnnounce();
 			GetOffMyLawn.CONFIG = GOMLConfig.loadOrCreateConfig();
 		});
 

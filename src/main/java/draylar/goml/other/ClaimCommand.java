@@ -57,7 +57,7 @@ public class ClaimCommand {
                     .then(literal("untrust")
                             .requires(Permissions.require("text.goml.command.command.untrust", true))
                             .then(CommandManager.argument("player", EntityArgumentType.player())
-                                    .executes(ClaimCommand::untrust))
+                                    .executes((ctx) -> ClaimCommand.untrust(ctx, false)))
                     )
                     .then(literal("addowner")
                             .requires(Permissions.require("text.goml.command.command.addowner", true))
@@ -81,6 +81,11 @@ public class ClaimCommand {
                             .then(literal("adminmode")
                                     .requires(Permissions.require("text.goml.command.command.admin.admin_mode", 3))
                                     .executes(ClaimCommand::adminMode)
+                            )
+                            .then(literal("removeowner")
+                                    .requires(Permissions.require("text.goml.command.command.admin.removeowner", true))
+                                    .then(CommandManager.argument("player", EntityArgumentType.player())
+                                            .executes((ctx) -> ClaimCommand.untrust(ctx, true)))
                             )
                             .then(literal("info")
                                     .requires(Permissions.require("text.goml.command.command.admin.info", 3))
@@ -124,8 +129,8 @@ public class ClaimCommand {
     private static int adminMode(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         ServerPlayerEntity player = context.getSource().getPlayer();
 
-        var newMode = !((AdminModePlayer) player).goml_getAdminMode();
-        ((AdminModePlayer) player).goml_setAdminMode(newMode);
+        var newMode = !((GomlPlayer) player).goml_getAdminMode();
+        ((GomlPlayer) player).goml_setAdminMode(newMode);
         context.getSource().sendFeedback(prefix(new TranslatableText(newMode ? "text.goml.admin_mode.enabled" : "text.goml.admin_mode.disabled")), false);
 
         return 1;
@@ -356,25 +361,28 @@ public class ClaimCommand {
         return 1;
     }
 
-    private static int untrust(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+    private static int untrust(CommandContext<ServerCommandSource> context, boolean owner) throws CommandSyntaxException {
         ServerWorld world = context.getSource().getWorld();
         ServerPlayerEntity player = context.getSource().getPlayer();
         ServerPlayerEntity toRemove = EntityArgumentType.getPlayer(context, "player");
 
         // Owner/trusted tried to remove themselves from the claim
-        if (toRemove.getUuid().equals(player.getUuid())) {
+        if (toRemove.getUuid().equals(player.getUuid()) && !ClaimUtils.isInAdminMode(player)) {
             player.sendMessage(prefix(new TranslatableText("text.goml.command.remove_self")), false);
             return 1;
         }
 
-        if (!world.isClient()) {
-            ClaimUtils.getClaimsAt(world, player.getBlockPos()).forEach(claimedArea -> {
-                if (claimedArea.getValue().isOwner(player)) {
+        ClaimUtils.getClaimsAt(world, player.getBlockPos()).forEach(claimedArea -> {
+            if (claimedArea.getValue().isOwner(player)) {
+                if (owner) {
+                    claimedArea.getValue().getOwners().remove(toRemove.getUuid());
+                } else {
                     claimedArea.getValue().untrust(toRemove);
-                    player.sendMessage(prefix(new TranslatableText("text.goml.command.untrusted", toRemove.getDisplayName())), false);
                 }
-            });
-        }
+                player.sendMessage(prefix(new TranslatableText("text.goml.command." + (owner ? "owner_removed" : "untrusted"), toRemove.getDisplayName())), false);
+            }
+        });
+
 
         return 1;
     }
@@ -390,6 +398,6 @@ public class ClaimCommand {
     }
 
     private static MutableText prefix(MutableText text) {
-        return GetOffMyLawn.CONFIG.messagePrefix.mutableText().append(new LiteralText(" ")).append(text).formatted(Formatting.WHITE);
+        return GetOffMyLawn.CONFIG.prefix(text);
     }
 }

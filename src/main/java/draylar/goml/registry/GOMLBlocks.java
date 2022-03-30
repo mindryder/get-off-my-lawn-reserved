@@ -5,9 +5,8 @@ import draylar.goml.GetOffMyLawn;
 import draylar.goml.block.ClaimAnchorBlock;
 import draylar.goml.block.ClaimAugmentBlock;
 import draylar.goml.block.augment.*;
+import draylar.goml.item.ClaimAnchorBlockItem;
 import draylar.goml.item.ToggleableBlockItem;
-import draylar.goml.item.TooltippedBlockItem;
-import eu.pb4.polymer.api.item.PolymerHeadBlockItem;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.Material;
 import net.minecraft.item.Item;
@@ -38,7 +37,7 @@ public class GOMLBlocks {
     public static final Pair<ClaimAugmentBlock, Item> WITHERING_SEAL = register("withering_seal", new WitheringSealAugmentBlock(FabricBlockSettings.of(Material.STONE).hardness(10).resistance(3600000.0F), GOMLTextures.WITHERING_SEAL), 2);
     public static final Pair<ClaimAugmentBlock, Item> CHAOS_ZONE = register("chaos_zone", new ChaosZoneAugmentBlock(FabricBlockSettings.of(Material.STONE).hardness(10).resistance(3600000.0F), GOMLTextures.CHAOS_ZONE), 2);
     public static final Pair<ClaimAugmentBlock, Item> GREETER = register("greeter", new GreeterAugmentBlock(FabricBlockSettings.of(Material.STONE).hardness(10).resistance(3600000.0F), GOMLTextures.GREETER), 2);
-    public static final Pair<ClaimAugmentBlock, Item> FORCE_FIELD = register("force_field", new ForceFieldAugmentBlock(FabricBlockSettings.of(Material.STONE).hardness(10).resistance(3600000.0F), GOMLTextures.MISSING_TEXTURE), 2);
+    public static final Pair<ClaimAugmentBlock, Item> FORCE_FIELD = register("force_field", new ForceFieldAugmentBlock(FabricBlockSettings.of(Material.STONE).hardness(10).resistance(3600000.0F), GOMLTextures.MISSING_TEXTURE), 2, false);
 
     private static Pair<ClaimAnchorBlock, Item> register(String name, IntSupplier radius, float hardness, String texture) {
         var claimAnchorBlock = Registry.register(
@@ -48,7 +47,7 @@ public class GOMLBlocks {
             );
 
 
-        var registeredItem = Registry.register(Registry.ITEM, GetOffMyLawn.id(name), new PolymerHeadBlockItem(claimAnchorBlock, new Item.Settings().group(GetOffMyLawn.GROUP)));
+        var registeredItem = Registry.register(Registry.ITEM, GetOffMyLawn.id(name), new ClaimAnchorBlockItem(claimAnchorBlock, new Item.Settings().group(GetOffMyLawn.GROUP), 0));
         ANCHORS.add(claimAnchorBlock);
         return Pair.of(claimAnchorBlock, registeredItem);
     }
@@ -58,6 +57,10 @@ public class GOMLBlocks {
     }
 
     private static Pair<ClaimAugmentBlock, Item> register(String name, ClaimAugmentBlock augment, int tooltipLines) {
+        return register(name, augment, tooltipLines, true);
+    }
+
+    private static Pair<ClaimAugmentBlock, Item> register(String name, ClaimAugmentBlock augment, int tooltipLines, boolean withGroup) {
         var id = GetOffMyLawn.id(name);
         BooleanSupplier check = () -> GetOffMyLawn.CONFIG.enabledAugments.getOrDefault(id, true);
         ClaimAugmentBlock registered = Registry.register(
@@ -68,7 +71,7 @@ public class GOMLBlocks {
 
         augment.setEnabledCheck(check);
 
-        Item registeredItem = Registry.register(Registry.ITEM, id, new ToggleableBlockItem(augment, new Item.Settings().group(GetOffMyLawn.GROUP), tooltipLines, check));
+        Item registeredItem = Registry.register(Registry.ITEM, id, new ToggleableBlockItem(augment, new Item.Settings().group(withGroup ? GetOffMyLawn.GROUP : null), tooltipLines, check));
         AUGMENTS.add(registered);
         return Pair.of(augment, registeredItem);
     }

@@ -21,7 +21,8 @@
     ],
     "cardinal-components-world": [
       "draylar.goml.GetOffMyLawn"
-    ]
+    ],
+    "preLaunch": ["draylar.goml.other.CardboardWarning"]
   },
   "mixins": [
     "goml.mixins.json"

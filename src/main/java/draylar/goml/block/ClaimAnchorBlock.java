@@ -6,6 +6,7 @@ import draylar.goml.api.Claim;
 import draylar.goml.api.ClaimBox;
 import draylar.goml.api.ClaimUtils;
 import draylar.goml.block.entity.ClaimAnchorBlockEntity;
+import draylar.goml.item.UpgradeKitItem;
 import draylar.goml.registry.GOMLEntities;
 import draylar.goml.registry.GOMLTextures;
 import eu.pb4.polymer.api.block.PolymerHeadBlock;
@@ -105,7 +106,7 @@ public class ClaimAnchorBlock extends Block implements BlockEntityProvider, Poly
 
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity playerEntity, Hand hand, BlockHitResult hit) {
-        if (playerEntity instanceof ServerPlayerEntity player && !player.isSneaking()) {
+        if (playerEntity instanceof ServerPlayerEntity player && !player.isSneaking() && hand == Hand.MAIN_HAND && !(player.getStackInHand(hand).getItem() instanceof UpgradeKitItem)) {
             var blockEntity = world.getBlockEntity(pos, GOMLEntities.CLAIM_ANCHOR);
             if (blockEntity.isPresent()) {
                 blockEntity.get().getClaim().openUi(player);

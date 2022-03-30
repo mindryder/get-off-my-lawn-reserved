@@ -47,7 +47,7 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
 
             // Claim is null, world probably just loaded, re-grab claim
             if (anchor.claim == null) {
-                List<Entry<ClaimBox, Claim>> collect = ClaimUtils.getClaimsAt(anchor.world, anchor.pos).collect(Collectors.toList());
+                var collect = ClaimUtils.getClaimsAt(anchor.world, anchor.pos).collect(Collectors.toList());
 
                 if (collect.isEmpty()) {
                     GetOffMyLawn.LOGGER.warn(String.format("A Claim Anchor at %s tried to initialize its claim, but one could not be found! Was the claim removed without the anchor?", anchor.pos));
@@ -65,7 +65,7 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
 
             // no augments, some queued from fromTag
             if (anchor.augmentEntities.isEmpty() && !anchor.loadPositions.isEmpty()) {
-                anchor.loadPositions.forEach(foundPos -> {
+                for (BlockPos foundPos : anchor.loadPositions) {
                     BlockEntity foundEntity = anchor.world.getBlockEntity(foundPos);
 
                     if (foundEntity instanceof ClaimAugmentBlockEntity) {
@@ -73,7 +73,7 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
                     } else {
                         GetOffMyLawn.LOGGER.warn(String.format("A Claim Anchor at %s tried to load a child at %s, but none were found!", anchor.pos.toString(), foundPos.toString()));
                     }
-                });
+                }
 
                 anchor.loadPositions.clear();
             }
@@ -81,7 +81,7 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
             int sizeX = anchor.box.getX();
             int sizeY = anchor.box.getY();
             int sizeZ = anchor.box.getZ();
-            List<PlayerEntity> playersInClaim = anchor.world.getEntitiesByClass(PlayerEntity.class, new Box(anchor.pos.add(-sizeX, -sizeY, -sizeZ), anchor.pos.add(sizeX, sizeY, sizeZ)), entity -> true);
+            var playersInClaim = anchor.world.getEntitiesByClass(PlayerEntity.class, new Box(anchor.pos.add(-sizeX, -sizeY, -sizeZ), anchor.pos.add(sizeX, sizeY, sizeZ)), entity -> true);
 
             // Tick all augments
             for (var augment : anchor.augmentEntities.values()) {
@@ -119,7 +119,13 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
     @Override
     protected void writeNbt(NbtCompound tag) {
         NbtList positions = new NbtList();
-        augmentEntities.forEach((pos, be) -> positions.add(NbtLong.of(pos.asLong())));
+        for (BlockPos loadPosition : this.loadPositions) {
+            positions.add(NbtLong.of(loadPosition.asLong()));
+        }
+        for (Map.Entry<BlockPos, Augment> entry : this.augmentEntities.entrySet()) {
+            positions.add(NbtLong.of(entry.getKey().asLong()));
+        }
+
         tag.put(AUGMENT_LIST_KEY, positions);
         super.writeNbt(tag);
     }
@@ -129,21 +135,21 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
         NbtList positions = tag.getList(AUGMENT_LIST_KEY, NbtType.LONG);
         positions.forEach(sub -> {
             BlockPos foundPos = BlockPos.fromLong(((NbtLong) sub).longValue());
-            loadPositions.add(foundPos);
+            this.loadPositions.add(foundPos);
         });
 
         super.readNbt(tag);
     }
 
     public void addChild(BlockPos pos, Augment augment) {
-        augmentEntities.put(pos, augment);
+        this.augmentEntities.put(pos, augment);
         for (var player : this.previousTickPlayers) {
             augment.onPlayerEnter(this.claim, player);
         }
     }
 
     public void removeChild(BlockPos pos) {
-        var augment = augmentEntities.remove(pos);
+        var augment = this.augmentEntities.remove(pos);
         if (augment != null) {
             for (var player : this.previousTickPlayers) {
                 augment.onPlayerExit(this.claim, player);
@@ -204,7 +210,6 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
         // Make sure exit logic is run after claim is removed from world
         // This can happen while teleporting
         for (var augment : this.augmentEntities.values()) {
-
             if (augment != null && augment.isEnabled(this.claim, this.world)) {
                 for (var player : this.previousTickPlayers) {
                     augment.onPlayerExit(this.claim, player);
@@ -216,8 +221,5 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
         this.previousTickPlayers.clear();
 
         super.markRemoved();
-    }
-
-    public void showHologram(PlayerEntity player) {
     }
 }
