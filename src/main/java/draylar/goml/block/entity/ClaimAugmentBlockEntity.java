@@ -28,10 +28,10 @@ public class ClaimAugmentBlockEntity extends BlockEntity implements PolymerObjec
         if (world instanceof ServerWorld && baseBlockEntity instanceof ClaimAugmentBlockEntity entity) {
             // Parent is null and parent position is not null, assume we are just loading the augment from tags.
             if (entity.parent == null && entity.parentPosition != null) {
-                BlockEntity blockEntity = entity.world.getBlockEntity(entity.parentPosition);
+                var blockEntity = entity.world.getChunk(entity.parentPosition).getBlockEntity(entity.parentPosition);
 
-                if (blockEntity instanceof ClaimAnchorBlockEntity) {
-                    entity.parent = (ClaimAnchorBlockEntity) blockEntity;
+                if (blockEntity instanceof ClaimAnchorBlockEntity claimAnchorBlockEntity) {
+                    entity.parent = claimAnchorBlockEntity;
                     entity.markDirty();
                 } else {
                     GetOffMyLawn.LOGGER.warn(String.format("An augment at %s tried to locate a parent at %s, but it could not be found!", entity.pos.toString(), entity.parentPosition.toString()));
@@ -48,8 +48,11 @@ public class ClaimAugmentBlockEntity extends BlockEntity implements PolymerObjec
 
     @Override
     protected void writeNbt(NbtCompound tag) {
-        if (parent != null) {
-            tag.putLong(PARENT_POSITION_KEY, parent.getPos().asLong());
+        if (this.parent != null) {
+            tag.putLong(PARENT_POSITION_KEY, this.parent.getPos().asLong());
+        } else if (this.parentPosition != null) {
+            tag.putLong(PARENT_POSITION_KEY, this.parentPosition.asLong());
+
         }
 
         super.writeNbt(tag);

@@ -6,7 +6,6 @@ import draylar.goml.api.Augment;
 import draylar.goml.api.Claim;
 import draylar.goml.api.ClaimBox;
 import draylar.goml.api.ClaimUtils;
-import draylar.goml.block.ClaimAugmentBlock;
 import draylar.goml.registry.GOMLEntities;
 import eu.pb4.polymer.api.utils.PolymerObject;
 import net.fabricmc.fabric.api.util.NbtType;
@@ -172,14 +171,14 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
         this.box = box;
     }
 
-    public boolean hasAugment(ClaimAugmentBlock augment) {
+    public boolean hasAugment(Augment augment) {
         assert world != null;
 
-        for (var entry : augmentEntities.entrySet()) {
+        for (var entry : this.augmentEntities.entrySet()) {
             BlockPos position = entry.getKey();
-            ClaimAugmentBlock block = (ClaimAugmentBlock) world.getBlockState(position).getBlock();
+            var block = world.getBlockState(position).getBlock();
 
-            if (block.equals(augment)) {
+            if (block instanceof Augment && block.equals(augment)) {
                 return true;
             }
         }
