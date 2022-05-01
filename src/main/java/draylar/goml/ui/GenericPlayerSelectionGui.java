@@ -5,11 +5,13 @@ import net.minecraft.item.Items;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+@ApiStatus.Internal
 public class GenericPlayerSelectionGui extends PagedGui {
     private final PlayerManager playerManager;
     private final Predicate<ServerPlayerEntity> shouldDisplay;

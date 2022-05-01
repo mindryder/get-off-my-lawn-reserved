@@ -11,6 +11,8 @@ import draylar.goml.block.ClaimAnchorBlock;
 import draylar.goml.block.ClaimAugmentBlock;
 import draylar.goml.block.entity.ClaimAnchorBlockEntity;
 import draylar.goml.block.entity.ClaimAugmentBlockEntity;
+import draylar.goml.other.StatusEnum;
+import draylar.goml.registry.GOMLBlocks;
 import eu.pb4.polymer.api.block.PolymerBlockUtils;
 import net.fabricmc.fabric.api.event.player.*;
 import net.minecraft.entity.Tameable;
@@ -21,8 +23,10 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.registry.Registry;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.ApiStatus;
 
+@ApiStatus.Internal
 public class EventHandlers {
 
     private EventHandlers() {
@@ -39,6 +43,9 @@ public class EventHandlers {
 
     private static void registerInteractEntityCallback() {
         UseEntityCallback.EVENT.register((playerEntity, world, hand, entity, entityHitResult) -> {
+            if (entity instanceof PlayerEntity) {
+                return GetOffMyLawn.CONFIG.enablePvPinClaims || ClaimUtils.isInAdminMode(playerEntity) ? ActionResult.PASS : ActionResult.FAIL;
+            }
 
             if (GetOffMyLawn.CONFIG.allowedEntityInteraction.contains(Registry.ENTITY_TYPE.getId(entity.getType()))) {
                 return ActionResult.PASS;
@@ -55,6 +62,39 @@ public class EventHandlers {
 
     private static void registerAttackEntityCallback() {
         AttackEntityCallback.EVENT.register((playerEntity, world, hand, entity, entityHitResult) -> {
+            if (ClaimUtils.isInAdminMode(playerEntity)) {
+                return ActionResult.PASS;
+            }
+
+            if (entity instanceof PlayerEntity attackedPlayer) {
+                var claims = ClaimUtils.getClaimsAt(world, entity.getBlockPos())
+                        .filter((e) -> e.getValue().getBlockEntityInstance(playerEntity.getServer()).hasAugment(GOMLBlocks.PVP_ARENA.getFirst()));
+
+                if (claims.isEmpty()) {
+                    return GetOffMyLawn.CONFIG.enablePvPinClaims ? ActionResult.PASS : ActionResult.FAIL;
+                } else {
+                    var obj = new MutableObject<ActionResult>();
+
+                    claims.forEach((e) -> {
+                        var claim = e.getValue();
+                        if (obj.getValue() == ActionResult.FAIL) {
+                            return;
+                        }
+
+                        obj.setValue(switch (claim.getData(GOMLBlocks.PVP_ARENA.getFirst().key)) {
+                            case EVERYONE -> ActionResult.PASS;
+                            case DISABLED -> ClaimUtils.isInAdminMode(playerEntity) ? ActionResult.PASS : ActionResult.FAIL ;
+                            case TRUSTED -> claim.hasPermission(playerEntity) && claim.hasPermission(attackedPlayer)
+                                    ? ActionResult.PASS : ActionResult.FAIL;
+                            case UNTRUSTED -> !claim.hasPermission(playerEntity) && !claim.hasPermission(attackedPlayer)
+                                    ? ActionResult.PASS : ActionResult.FAIL;
+                        });
+                    });
+
+                    return obj.getValue();
+                }
+            }
+
             Selection<Entry<ClaimBox, Claim>> claimsFound = ClaimUtils.getClaimsAt(world, entity.getBlockPos());
             return testPermission(claimsFound, playerEntity, hand, entity.getBlockPos(), PermissionReason.ENTITY_PROTECTED);
         });

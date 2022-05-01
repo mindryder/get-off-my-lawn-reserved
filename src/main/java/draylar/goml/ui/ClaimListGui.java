@@ -15,12 +15,14 @@ import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+@ApiStatus.Internal
 public class ClaimListGui extends PagedGui {
 
     private final List<Entry<ClaimBox, Claim>> claimList = new ArrayList<>();

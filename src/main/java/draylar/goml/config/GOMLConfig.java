@@ -41,6 +41,7 @@ public class GOMLConfig {
     public int witheredRadius = 200;
 
     public int maxClaimsPerPlayer = -1;
+    public boolean enablePvPinClaims = false;
 
     public boolean claimProtectsFullWorldHeight = false;
 

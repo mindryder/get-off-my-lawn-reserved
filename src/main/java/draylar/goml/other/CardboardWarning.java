@@ -4,7 +4,9 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.ApiStatus;
 
+@ApiStatus.Internal
 public class CardboardWarning implements PreLaunchEntrypoint {
     public static final String MOD_NAME = "Get Off My Lawn ReServed";
     public static final Logger LOGGER = LogManager.getLogger(MOD_NAME);

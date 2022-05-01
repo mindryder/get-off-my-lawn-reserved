@@ -1,14 +1,13 @@
-package draylar.goml.block;
+package draylar.goml.block.augment;
 
 import draylar.goml.GetOffMyLawn;
 import draylar.goml.api.Claim;
 import draylar.goml.api.DataKey;
+import draylar.goml.block.ClaimAugmentBlock;
 import draylar.goml.other.StatusEnum;
 import draylar.goml.ui.PagedGui;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.SimpleGui;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -17,37 +16,12 @@ import net.minecraft.util.Formatting;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 
-public class SelectiveClaimAugmentBlock extends ClaimAugmentBlock {
+public class ExplosionControllerAugmentBlock extends ClaimAugmentBlock {
+    public static final DataKey<StatusEnum.Toggle> KEY = DataKey.ofEnum(GetOffMyLawn.id("explosion_control"), StatusEnum.Toggle.class, StatusEnum.Toggle.ENABLED);
 
-    public final DataKey<StatusEnum.TargetPlayer> key;
-
-    public SelectiveClaimAugmentBlock(String key, AbstractBlock.Settings settings, String texture) {
+    public ExplosionControllerAugmentBlock(Settings settings, String texture) {
         super(settings, texture);
-        this.key = DataKey.ofEnum(GetOffMyLawn.id(key + "/mode"), StatusEnum.TargetPlayer.class, StatusEnum.TargetPlayer.EVERYONE);
     }
-
-    @Override
-    public void onPlayerEnter(Claim claim, PlayerEntity player) {
-        if (this.canApply(claim, player)) {
-            this.applyEffect(player);
-        }
-    }
-
-    protected boolean canApply(Claim claim, PlayerEntity player) {
-        var mode = claim.getData(key);
-        return mode == StatusEnum.TargetPlayer.EVERYONE
-                || (mode == StatusEnum.TargetPlayer.TRUSTED && claim.hasPermission(player))
-                || (mode == StatusEnum.TargetPlayer.UNTRUSTED && !claim.hasPermission(player));
-    }
-
-    @Override
-    public void onPlayerExit(Claim claim, PlayerEntity player) {
-        this.removeEffect(player);
-    }
-
-    public void applyEffect(PlayerEntity player) {};
-
-    public void removeEffect(PlayerEntity player) {};
 
     @Override
     public boolean hasSettings() {
@@ -70,21 +44,14 @@ public class SelectiveClaimAugmentBlock extends ClaimAugmentBlock {
 
         var change = new MutableObject<Runnable>();
         change.setValue(() -> {
-            var currentMode = claim.getData(key);
+            var currentMode = claim.getData(KEY);
             gui.setSlot(0, new GuiElementBuilder(currentMode.getIcon())
-                    .setName(new TranslatableText("text.goml.mode_toggle", currentMode.getName()))
+                    .setName(new TranslatableText("text.goml.explosion_control_toggle", currentMode.getName()))
                     .addLoreLine(new TranslatableText("text.goml.mode_toggle.help").formatted(Formatting.GRAY))
                     .setCallback((x, y, z) -> {
                         PagedGui.playClickSound(player);
                         var mode = currentMode.getNext();
-                        claim.setData(key, mode);
-                        for (var p : claim.getPlayersIn(player.server)) {
-                            this.removeEffect(player);
-
-                            if (this.canApply(claim, p)) {
-                                this.applyEffect(player);
-                            }
-                        }
+                        claim.setData(KEY, mode);
                         change.getValue().run();
                     })
             );

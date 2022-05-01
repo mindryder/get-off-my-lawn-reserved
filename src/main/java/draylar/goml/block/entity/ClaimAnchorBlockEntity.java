@@ -1,6 +1,5 @@
 package draylar.goml.block.entity;
 
-import com.jamieswhiteshirt.rtree3i.Entry;
 import draylar.goml.GetOffMyLawn;
 import draylar.goml.api.Augment;
 import draylar.goml.api.Claim;

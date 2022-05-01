@@ -9,10 +9,12 @@ import eu.pb4.placeholders.TextParser;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+@ApiStatus.Internal
 public class Placeholders {
     public static void init() {
         PlaceholderAPI.register(new Identifier("goml", "claim_owners"), (ctx) -> {

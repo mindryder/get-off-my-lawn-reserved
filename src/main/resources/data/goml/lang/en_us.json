@@ -7,6 +7,7 @@
   "block.goml.crystal_claim_anchor": "Crystal Claim Anchor",
   "block.goml.emeradic_claim_anchor": "Emeradic Claim Anchor",
   "block.goml.withered_claim_anchor": "Withered Claim Anchor",
+  "block.goml.admin_claim_anchor": "Admin Claim Anchor",
 
   "block.goml.anchor_augment": "Anchor Augment: %s",
 
@@ -46,6 +47,14 @@
   "block.goml.greeter.description.1": "Sends message to players",
   "block.goml.greeter.description.2": "entering your claim.",
 
+  "block.goml.pvp_arena": "PvP Arena",
+  "block.goml.pvp_arena.description.1": "Toggle ability for players",
+  "block.goml.pvp_arena.description.2": "to fight between each other.",
+
+  "block.goml.explosion_controller": "Explosion Controller",
+  "block.goml.explosion_controller.description.1": "Allows to toggle prevention of",
+  "block.goml.explosion_controller.description.2": "natural/non-player caused explosions.",
+
   "item.goml.goggles": "Goggles of (Claim) Revealing",
   "item.goml.reinforced_upgrade_kit": "Reinforced Upgrade Kit",
   "item.goml.glistening_upgrade_kit": "Glistening Upgrade Kit",
@@ -69,13 +78,20 @@
   "text.goml.gui.claim.players": "Trusted players...",
   "text.goml.gui.claim.augments": "Anchor Augments...",
   "text.goml.gui.click_to_modify": "Click to modify settings...",
+  "text.goml.gui.admin_settings": "Modify Admin Claim...",
   "text.goml.gui.augment_list.title": "Anchor Augments",
+  "text.goml.gui.admin_settings.title": "Modify Admin Claim",
 
   "text.goml.mode.everyone": "Everyone",
   "text.goml.mode.trusted": "Trusted Only",
+  "text.goml.mode.untrusted": "Untrusted Only",
   "text.goml.mode.disabled": "Disabled",
+  "text.goml.mode.enabled": "Enabled",
   "text.goml.mode_toggle": "Mode: %s",
   "text.goml.mode_toggle.help": "Click to change current mode",
+  "text.goml.explosion_control_toggle": "Explosion Prevention: %s",
+
+  "text.goml.augment": "Augment: %s",
 
   "text.goml.command.no_claims": "You aren't standing in any claim!",
   "text.goml.command.already_added": "Player %s is already added to the claim!",
@@ -94,8 +110,9 @@
   "text.goml.area_protected": "This area is protected by a claim!",
 
   "text.goml.cant_place_claim.max_count_reached": "You can't place any more claims! You have %s claims already!",
-  "text.goml.cant_place_claim.blacklisted_area": "You can't place claim in %s at %s! This area is blacklisted!",
-  "text.goml.cant_place_claim.collides_with": "You can't place claim, because it would collide with others! Colliding claims: %s",
+  "text.goml.cant_place_claim.blacklisted_area": "You can't place this claim in %s at %s! This area is blacklisted!",
+  "text.goml.cant_place_claim.collides_with": "You can't place this claim, because it would collide with others! Colliding claims: %s",
+  "text.goml.cant_place_claim.admin_only": "You can't place this claim, because it requires enabled Admin Mode!",
 
   "text.goml.cant_upgrade_claim.collides_with": "You can't upgrade this claim, because it would collide with others! Colliding claims: %s",
 
@@ -110,11 +127,13 @@
 
   "text.goml.position": "Position: %s",
   "text.goml.radius": "Radius: %s",
+  "text.goml.height": "Height: %s",
   "text.goml.owners": "Owners: %s",
   "text.goml.trusted": "Trusted: %s",
   "text.goml.your_claims": "Your claims",
   "text.goml.someones_claims": "%s's claims",
   "text.goml.owner": "Owner",
+  "text.goml.apply": "Apply changes",
 
   "text.goml.admin_mode.enabled": "Enabled Admin Mode! You can now modify claims of other players!",
   "text.goml.admin_mode.disabled": "Disabled Admin Mode! You can no longer modify claims of other players!",

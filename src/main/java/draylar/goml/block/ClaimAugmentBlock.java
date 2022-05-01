@@ -53,6 +53,10 @@ public class ClaimAugmentBlock extends Block implements Augment, BlockEntityProv
         return new TranslatableText("block.goml.anchor_augment", new TranslatableText(this.getTranslationKey()));
     }
 
+    public MutableText getGuiName() {
+        return new TranslatableText("text.goml.augment", new TranslatableText(this.getTranslationKey()));
+    }
+
     @Override
     public Text getAugmentName() {
         return new TranslatableText(this.getTranslationKey());

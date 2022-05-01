@@ -65,9 +65,9 @@ public class WorldParticleUtils {
         int minX = min.getX();
         int minY = min.getY();
         int minZ = min.getZ();
-        int maxX = max.getX() - 1;
-        int maxY = max.getY() - 1;
-        int maxZ = max.getZ() - 1;
+        int maxX = max.getX();
+        int maxY = max.getY();
+        int maxZ = max.getZ();
 
         return new Edge[] {
                 // edges

@@ -9,6 +9,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 public class WorldClaimComponent implements ClaimComponent {
 
@@ -36,17 +37,19 @@ public class WorldClaimComponent implements ClaimComponent {
 
     @Override
     public void readFromNbt(NbtCompound tag) {
-        this.claims = RTreeMap.create(new ConfigurationBuilder().star().build(), ClaimBox::toBox);
+        this.claims = RTreeMap.create(new ConfigurationBuilder().star().build(), ClaimBox::rtree3iBox);
         var world = this.world.getRegistryKey().getValue();
         NbtList NbtList = tag.getList("Claims", NbtType.COMPOUND);
 
         NbtList.forEach(child -> {
             NbtCompound childCompound = (NbtCompound) child;
             ClaimBox box = boxFromTag((NbtCompound) childCompound.get("Box"));
-            Claim claimInfo = Claim.fromNbt((NbtCompound) childCompound.get("Info"));
-            claimInfo.internal_setWorld(world);
-            claimInfo.internal_setRadius(box.getRadius());
-            add(box, claimInfo);
+            if (box != null) {
+                Claim claimInfo = Claim.fromNbt((NbtCompound) childCompound.get("Info"));
+                claimInfo.internal_setWorld(world);
+                claimInfo.internal_setClaimBox(box);
+                add(box, claimInfo);
+            }
         });
     }
 
@@ -76,9 +79,14 @@ public class WorldClaimComponent implements ClaimComponent {
         return boxTag;
     }
 
+    @Nullable
     public ClaimBox boxFromTag(NbtCompound tag) {
         BlockPos originPos = BlockPos.fromLong(tag.getLong("OriginPos"));
         var radius = tag.getInt("Radius");
-        return new ClaimBox(originPos, radius, tag.contains("Height") ? tag.getInt("Height") : radius);
+        var height = tag.contains("Height") ? tag.getInt("Height") : radius;
+        if (radius > 0 && height > 0) {
+            return new ClaimBox(originPos, radius, height);
+        }
+        return null;
     }
 }

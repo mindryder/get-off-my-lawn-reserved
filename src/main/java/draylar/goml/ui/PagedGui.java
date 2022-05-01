@@ -16,8 +16,10 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+@ApiStatus.Internal
 public abstract class PagedGui extends SimpleGui {
     public static final int PAGE_SIZE = 9 * 4;
     protected final Runnable closeCallback;

@@ -3,10 +3,13 @@ package draylar.goml.api;
 import com.jamieswhiteshirt.rtree3i.Box;
 import com.jamieswhiteshirt.rtree3i.Entry;
 import com.jamieswhiteshirt.rtree3i.Selection;
+import draylar.goml.block.augment.ExplosionControllerAugmentBlock;
 import draylar.goml.other.GomlPlayer;
 import draylar.goml.GetOffMyLawn;
 import draylar.goml.api.event.ClaimEvents;
 import draylar.goml.block.entity.ClaimAnchorBlockEntity;
+import draylar.goml.other.StatusEnum;
+import draylar.goml.registry.GOMLBlocks;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.CreeperEntity;
@@ -138,7 +141,7 @@ public class ClaimUtils {
 
         PlayerEntity player;
 
-        if (causingEntity instanceof PlayerEntity playerEntity){
+        if (causingEntity instanceof PlayerEntity playerEntity) {
             player = playerEntity;
         } else if (causingEntity instanceof CreeperEntity creeperEntity && creeperEntity.getTarget() instanceof PlayerEntity playerEntity){
             player = playerEntity;
@@ -150,7 +153,17 @@ public class ClaimUtils {
             return !claimsFound.anyMatch((Entry<ClaimBox, Claim> boxInfo) -> !canModifyClaimAt(world, pos, boxInfo, player));
         }
 
-        return claimsFound.isEmpty();
+        return claimsFound.isEmpty() || claimsFound.anyMatch((c) -> {
+            if (world.getServer() != null) {
+                if (c.getValue().getBlockEntityInstance(world.getServer()).hasAugment(GOMLBlocks.EXPLOSION_CONTROLLER.getFirst())) {
+                    if (c.getValue().getData(ExplosionControllerAugmentBlock.KEY) == StatusEnum.Toggle.DISABLED) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        });
     }
 
     public static boolean canModify(World world, BlockPos pos, @Nullable PlayerEntity player) {

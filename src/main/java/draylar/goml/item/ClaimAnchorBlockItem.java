@@ -32,6 +32,12 @@ public class ClaimAnchorBlockItem extends TooltippedBlockItem {
     protected boolean canPlace(ItemPlacementContext context, BlockState state) {
         var pos = context.getBlockPos();
         var radius = this.claimBlock.getRadius();
+        if (radius <= 0 && !ClaimUtils.isInAdminMode(context.getPlayer())) {
+            context.getPlayer().sendMessage(GetOffMyLawn.CONFIG.prefix(new TranslatableText("text.goml.cant_place_claim.admin_only").formatted(Formatting.RED)), false);
+            return false;
+        }
+
+        radius = Math.max(radius, 1);
         var vertRadius = GetOffMyLawn.CONFIG.claimProtectsFullWorldHeight ? Short.MAX_VALUE : radius;
         var checkBox = Box.create(pos.getX() - radius, pos.getY() - vertRadius, pos.getZ() - radius, pos.getX() + radius, pos.getY() + vertRadius, pos.getZ() + radius);
 

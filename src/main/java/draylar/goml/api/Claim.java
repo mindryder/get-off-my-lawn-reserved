@@ -1,6 +1,10 @@
 package draylar.goml.api;
 
+import draylar.goml.block.ClaimAnchorBlock;
+import draylar.goml.block.entity.ClaimAnchorBlockEntity;
+import draylar.goml.registry.GOMLBlocks;
 import draylar.goml.registry.GOMLTextures;
+import draylar.goml.ui.AdminAugmentGui;
 import draylar.goml.ui.ClaimAugmentGui;
 import draylar.goml.ui.ClaimPlayerListGui;
 import draylar.goml.ui.PagedGui;
@@ -17,6 +21,7 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -38,25 +43,25 @@ public class Claim {
     public static final String OWNERS_KEY = "Owners";
     public static final String TRUSTED_KEY = "Trusted";
     public static final String ICON_KEY = "Icon";
+    public static final String TYPE_KEY = "Type";
     public static final String CUSTOM_DATA_KEY = "CustomData";
-    public static final String RADIUS_KEY = "Radius";
 
     private final Set<UUID> owners = new HashSet<>();
     private final Set<UUID> trusted = new HashSet<>();
     private final BlockPos origin;
-    private int radius;
+    private ClaimAnchorBlock type = GOMLBlocks.MAKESHIFT_CLAIM_ANCHOR.getFirst();
     private Identifier world;
     @Nullable
     private ItemStack icon;
 
     private Map<DataKey<Object>, Object> customData = new HashMap<>();
+    private ClaimBox claimBox;
 
     @ApiStatus.Internal
-    public Claim(Set<UUID> owners, Set<UUID> trusted, BlockPos origin, int radius) {
+    public Claim(Set<UUID> owners, Set<UUID> trusted, BlockPos origin) {
         this.owners.addAll(owners);
         this.trusted.addAll(trusted);
         this.origin = origin;
-        this.radius = radius;
     }
 
     public boolean isOwner(PlayerEntity player) {
@@ -144,6 +149,7 @@ public class Claim {
         if (this.icon != null) {
             nbt.put(ICON_KEY, this.icon.writeNbt(new NbtCompound()));
         }
+        nbt.putString(TYPE_KEY, Registry.BLOCK.getId(this.type).toString());
 
         var customData = new NbtCompound();
 
@@ -182,10 +188,17 @@ public class Claim {
         NbtList trustedTag = nbt.getList(TRUSTED_KEY, NbtType.INT_ARRAY);
         trustedTag.forEach(trustedUUID -> trustedUUIDs.add(NbtHelper.toUuid(trustedUUID)));
 
-        var claim = new Claim(ownerUUIDs, trustedUUIDs, BlockPos.fromLong(nbt.getLong(POSITION_KEY)), nbt.getInt(RADIUS_KEY));
+        var claim = new Claim(ownerUUIDs, trustedUUIDs, BlockPos.fromLong(nbt.getLong(POSITION_KEY)));
 
         if (nbt.contains(ICON_KEY, NbtElement.COMPOUND_TYPE)) {
             claim.icon = ItemStack.fromNbt(nbt.getCompound(ICON_KEY));
+        } else if (nbt.contains(ICON_KEY, NbtElement.COMPOUND_TYPE)) {
+            claim.icon = ItemStack.fromNbt(nbt.getCompound(ICON_KEY));
+        } else if (nbt.contains(TYPE_KEY, NbtElement.STRING_TYPE)) {
+            var block = Registry.BLOCK.get(Identifier.tryParse(nbt.getString(TYPE_KEY)));
+            if (block instanceof ClaimAnchorBlock anchorBlock) {
+                claim.type = anchorBlock;
+            }
         }
 
         var customData = nbt.getCompound(CUSTOM_DATA_KEY);
@@ -204,6 +217,19 @@ public class Claim {
 
     public Identifier getWorld() {
         return this.world != null ? this.world : new Identifier("undefined");
+    }
+
+    @Nullable
+    public ServerWorld getWorldInstance(MinecraftServer server) {
+        return server.getWorld(RegistryKey.of(Registry.WORLD_KEY, getWorld()));
+    }
+
+    @Nullable
+    public ClaimAnchorBlockEntity getBlockEntityInstance(MinecraftServer server) {
+        if (server.getWorld(RegistryKey.of(Registry.WORLD_KEY, getWorld())).getBlockEntity(this.origin) instanceof ClaimAnchorBlockEntity claimAnchorBlock) {
+            return claimAnchorBlock;
+        }
+        return null;
     }
 
     public ItemStack getIcon() {
@@ -239,11 +265,12 @@ public class Claim {
         var gui = new SimpleGui(ScreenHandlerType.HOPPER, player, false);
         gui.setTitle(new TranslatableText("text.goml.gui.claim.title"));
 
-        gui.setSlot(0, GuiElementBuilder.from(this.icon)
+        gui.addSlot(GuiElementBuilder.from(this.icon)
                 .setName(new TranslatableText("text.goml.gui.claim.about"))
                 .setLore(ClaimUtils.getClaimText(player.server, this))
         );
-        gui.setSlot(1, new GuiElementBuilder(Items.PLAYER_HEAD)
+
+        gui.addSlot(new GuiElementBuilder(Items.PLAYER_HEAD)
                 .setName(new TranslatableText("text.goml.gui.claim.players").formatted(Formatting.WHITE))
                 .setCallback((x, y, z) -> {
                     PagedGui.playClickSound(player);
@@ -251,7 +278,7 @@ public class Claim {
                 })
         );
 
-        gui.setSlot(2, new GuiElementBuilder(Items.PLAYER_HEAD)
+        gui.addSlot(new GuiElementBuilder(Items.PLAYER_HEAD)
                 .setName(new TranslatableText("text.goml.gui.claim.augments").formatted(Formatting.WHITE))
                 .setSkullOwner(GOMLTextures.ANGELIC_AURA)
                 .setCallback((x, y, z) -> {
@@ -260,11 +287,26 @@ public class Claim {
                 })
         );
 
+        if (this.type == GOMLBlocks.ADMIN_CLAIM_ANCHOR.getFirst()) {
+            gui.addSlot(new GuiElementBuilder(Items.PLAYER_HEAD)
+                    .setName(new TranslatableText("text.goml.gui.admin_settings").formatted(Formatting.WHITE))
+                    .setSkullOwner("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmY3YTQyMmRiMzVkMjhjZmI2N2U2YzE2MTVjZGFjNGQ3MzAwNzI0NzE4Nzc0MGJhODY1Mzg5OWE0NGI3YjUyMCJ9fX0=")
+                    .setCallback((x, y, z) -> {
+                        PagedGui.playClickSound(player);
+                        new AdminAugmentGui(this, player, () -> openUi(player));
+                    })
+            );
+        }
+
         while (gui.getFirstEmptySlot() != -1) {
             gui.addSlot(PagedGui.DisplayElement.filler().element());
         }
 
         gui.open();
+    }
+
+    public ClaimAnchorBlock getType() {
+        return this.type;
     }
 
     @ApiStatus.Internal
@@ -273,17 +315,26 @@ public class Claim {
     }
 
     @ApiStatus.Internal
+    public void internal_setType(ClaimAnchorBlock anchorBlock) {
+        this.type = anchorBlock;
+    }
+
+    @ApiStatus.Internal
     public void internal_setWorld(Identifier world) {
         this.world = world;
     }
 
     @ApiStatus.Internal
-    public void internal_setRadius(int i) {
-        this.radius = i;
+    public void internal_setClaimBox(ClaimBox box) {
+        this.claimBox = box;
+    }
+
+    public ClaimBox getClaimBox() {
+        return this.claimBox != null ? this.claimBox : ClaimBox.EMPTY;
     }
 
     public int getRadius() {
-        return this.radius;
+        return this.claimBox != null ? this.claimBox.radius() : 0;
     }
 
     public Collection<ServerPlayerEntity> getPlayersIn(MinecraftServer server) {
@@ -293,6 +344,6 @@ public class Claim {
             return Collections.emptyList();
         }
 
-        return world.getEntitiesByClass(ServerPlayerEntity.class, new Box(this.origin.add(-radius, -radius, -radius), this.origin.add(radius, radius, radius)), entity -> true);
+        return world.getEntitiesByClass(ServerPlayerEntity.class, this.getClaimBox().minecraftBox(), entity -> true);
     }
 }

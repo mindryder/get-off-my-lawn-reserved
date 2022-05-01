@@ -24,6 +24,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
 
 import static net.minecraft.server.command.CommandManager.literal;
 
+@ApiStatus.Internal
 public class ClaimCommand {
 
     private ClaimCommand() {

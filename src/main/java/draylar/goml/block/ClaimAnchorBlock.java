@@ -56,10 +56,14 @@ public class ClaimAnchorBlock extends Block implements BlockEntityProvider, Poly
         }
 
         if (!world.isClient()) {
-            Claim claimInfo = new Claim(Collections.singleton(placer.getUuid()), Collections.emptySet(), pos, radius.getAsInt());
+            var radius = Math.max(this.radius.getAsInt(), 1);
+
+            Claim claimInfo = new Claim(Collections.singleton(placer.getUuid()), Collections.emptySet(), pos);
             claimInfo.internal_setIcon(new ItemStack(itemStack.getItem()));
+            claimInfo.internal_setType(this);
             claimInfo.internal_setWorld(world.getRegistryKey().getValue());
-            var box = new ClaimBox(pos, radius.getAsInt(), GetOffMyLawn.CONFIG.claimProtectsFullWorldHeight ? Short.MAX_VALUE : radius.getAsInt());
+            var box = new ClaimBox(pos, radius, GetOffMyLawn.CONFIG.claimProtectsFullWorldHeight ? Short.MAX_VALUE : radius);
+            claimInfo.internal_setClaimBox(box);
             GetOffMyLawn.CLAIM.get(world).add(box, claimInfo);
 
             // Assign claim to BE
@@ -123,7 +127,7 @@ public class ClaimAnchorBlock extends Block implements BlockEntityProvider, Poly
             return true;
         }
 
-        var radius = this.radius.getAsInt();
+        var radius = Math.max(this.radius.getAsInt(), 1);
 
         if (worldView instanceof World world) {
             Box checkBox = Box.create(pos.getX() - radius, pos.getY() - radius, pos.getZ() - radius, pos.getX() + radius, pos.getY() + radius, pos.getZ() + radius);
