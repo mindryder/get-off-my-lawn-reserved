@@ -7,13 +7,8 @@ import draylar.goml.api.ClaimBox;
 import draylar.goml.api.ClaimUtils;
 import draylar.goml.api.PermissionReason;
 import draylar.goml.api.event.ClaimEvents;
-import draylar.goml.block.ClaimAnchorBlock;
-import draylar.goml.block.ClaimAugmentBlock;
 import draylar.goml.block.entity.ClaimAnchorBlockEntity;
-import draylar.goml.block.entity.ClaimAugmentBlockEntity;
-import draylar.goml.other.StatusEnum;
 import draylar.goml.registry.GOMLBlocks;
-import eu.pb4.polymer.api.block.PolymerBlockUtils;
 import net.fabricmc.fabric.api.event.player.*;
 import net.minecraft.entity.Tameable;
 import net.minecraft.entity.player.PlayerEntity;
@@ -21,7 +16,6 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.util.registry.Registry;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.ApiStatus;
@@ -67,31 +61,36 @@ public class EventHandlers {
             }
 
             if (entity instanceof PlayerEntity attackedPlayer) {
-                var claims = ClaimUtils.getClaimsAt(world, entity.getBlockPos())
-                        .filter((e) -> e.getValue().getBlockEntityInstance(playerEntity.getServer()).hasAugment(GOMLBlocks.PVP_ARENA.getFirst()));
+                var claims = ClaimUtils.getClaimsAt(world, entity.getBlockPos());
 
                 if (claims.isEmpty()) {
-                    return GetOffMyLawn.CONFIG.enablePvPinClaims ? ActionResult.PASS : ActionResult.FAIL;
+                    return ActionResult.PASS;
                 } else {
-                    var obj = new MutableObject<ActionResult>();
+                    claims = claims.filter((e) -> e.getValue().getBlockEntityInstance(playerEntity.getServer()).hasAugment(GOMLBlocks.PVP_ARENA.getFirst()));
 
-                    claims.forEach((e) -> {
-                        var claim = e.getValue();
-                        if (obj.getValue() == ActionResult.FAIL) {
-                            return;
-                        }
+                    if (claims.isEmpty()) {
+                        return GetOffMyLawn.CONFIG.enablePvPinClaims ? ActionResult.PASS : ActionResult.FAIL;
+                    } else {
+                        var obj = new MutableObject<>(ActionResult.PASS);
 
-                        obj.setValue(switch (claim.getData(GOMLBlocks.PVP_ARENA.getFirst().key)) {
-                            case EVERYONE -> ActionResult.PASS;
-                            case DISABLED -> ClaimUtils.isInAdminMode(playerEntity) ? ActionResult.PASS : ActionResult.FAIL ;
-                            case TRUSTED -> claim.hasPermission(playerEntity) && claim.hasPermission(attackedPlayer)
-                                    ? ActionResult.PASS : ActionResult.FAIL;
-                            case UNTRUSTED -> !claim.hasPermission(playerEntity) && !claim.hasPermission(attackedPlayer)
-                                    ? ActionResult.PASS : ActionResult.FAIL;
+                        claims.forEach((e) -> {
+                            var claim = e.getValue();
+                            if (obj.getValue() == ActionResult.FAIL) {
+                                return;
+                            }
+
+                            obj.setValue(switch (claim.getData(GOMLBlocks.PVP_ARENA.getFirst().key)) {
+                                case EVERYONE -> ActionResult.PASS;
+                                case DISABLED -> ClaimUtils.isInAdminMode(playerEntity) ? ActionResult.PASS : ActionResult.FAIL;
+                                case TRUSTED -> claim.hasPermission(playerEntity) && claim.hasPermission(attackedPlayer)
+                                        ? ActionResult.PASS : ActionResult.FAIL;
+                                case UNTRUSTED -> !claim.hasPermission(playerEntity) && !claim.hasPermission(attackedPlayer)
+                                        ? ActionResult.PASS : ActionResult.FAIL;
+                            });
                         });
-                    });
 
-                    return obj.getValue();
+                        return obj.getValue();
+                    }
                 }
             }
 
