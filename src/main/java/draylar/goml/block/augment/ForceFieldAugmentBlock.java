@@ -6,10 +6,7 @@ import draylar.goml.api.ClaimUtils;
 import draylar.goml.api.DataKey;
 import draylar.goml.block.ClaimAugmentBlock;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.LiteralText;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
 
 import java.util.Set;
 import java.util.UUID;

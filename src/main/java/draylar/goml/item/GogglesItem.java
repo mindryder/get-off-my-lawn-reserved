@@ -5,17 +5,14 @@ import draylar.goml.api.ClaimUtils;
 import draylar.goml.api.WorldParticleUtils;
 import eu.pb4.polymer.api.item.PolymerItem;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.*;
 import net.minecraft.particle.BlockStateParticleEffect;
-import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -43,20 +40,20 @@ public class GogglesItem extends ArmorItem implements PolymerItem {
                         world,
                         entity.getBlockPos().add(-distance, -distance, -distance),
                         entity.getBlockPos().add(distance, distance, distance)).forEach(
-                                claim -> {
-                    BlockPos claimPos = claim.getKey().getOrigin();
-                    int xSize = claim.getKey().getX();
-                    int ySize = claim.getKey().getY();
-                    int zSize = claim.getKey().getZ();
+                        claim -> {
+                            BlockPos claimPos = claim.getKey().getOrigin();
+                            int xSize = claim.getKey().getX();
+                            int ySize = claim.getKey().getY();
+                            int zSize = claim.getKey().getZ();
 
-                    var minPos = new BlockPos(claimPos.getX() - xSize, Math.max(claimPos.getY() - ySize, world.getBottomY()), claimPos.getZ() - zSize);
-                    var maxPos = new BlockPos(claimPos.getX() + xSize, Math.min(claimPos.getY() + ySize, world.getTopY()), claimPos.getZ() + zSize);
+                            var minPos = new BlockPos(claimPos.getX() - xSize, Math.max(claimPos.getY() - ySize, world.getBottomY()), claimPos.getZ() - zSize);
+                            var maxPos = new BlockPos(claimPos.getX() + xSize, Math.min(claimPos.getY() + ySize, world.getTopY()), claimPos.getZ() + zSize);
 
-                    WorldParticleUtils.render(player, minPos, maxPos,
-                            //new DustParticleEffect(new Vec3f(0.8f, 0.8f, 0.8f), 2)
-                            new BlockStateParticleEffect(ParticleTypes.BLOCK_MARKER, STATES[(claim.getValue().getOrigin().hashCode() & 0xFFFF) % STATES.length])
-                    );
-                });
+                            WorldParticleUtils.render(player, minPos, maxPos,
+                                    //new DustParticleEffect(new Vec3f(0.8f, 0.8f, 0.8f), 2)
+                                    new BlockStateParticleEffect(ParticleTypes.BLOCK_MARKER, STATES[(claim.getValue().getOrigin().hashCode() & 0xFFFF) % STATES.length])
+                            );
+                        });
             }
         }
     }

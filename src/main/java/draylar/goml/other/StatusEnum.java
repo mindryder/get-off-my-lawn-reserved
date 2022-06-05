@@ -3,7 +3,6 @@ package draylar.goml.other;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Locale;
@@ -49,7 +48,7 @@ public interface StatusEnum<T> {
         }
 
         public Text getName() {
-            return new TranslatableText("text.goml.mode." + this.name().toLowerCase(Locale.ROOT));
+            return Text.translatable("text.goml.mode." + this.name().toLowerCase(Locale.ROOT));
         }
     }
 
@@ -74,7 +73,7 @@ public interface StatusEnum<T> {
         }
 
         public Text getName() {
-            return new TranslatableText("text.goml.mode." + this.name().toLowerCase(Locale.ROOT));
+            return Text.translatable("text.goml.mode." + this.name().toLowerCase(Locale.ROOT));
         }
     }
 }

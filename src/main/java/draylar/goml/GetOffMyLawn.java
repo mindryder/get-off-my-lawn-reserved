@@ -9,7 +9,7 @@ import draylar.goml.cca.WorldClaimComponent;
 import draylar.goml.other.CardboardWarning;
 import draylar.goml.other.ClaimCommand;
 import draylar.goml.config.GOMLConfig;
-import draylar.goml.other.Placeholders;
+import draylar.goml.other.PlaceholdersReg;
 import draylar.goml.registry.GOMLBlocks;
 import draylar.goml.registry.GOMLEntities;
 import draylar.goml.registry.GOMLItems;
@@ -17,7 +17,7 @@ import eu.pb4.polymer.api.item.PolymerItemGroup;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,7 +26,7 @@ public class GetOffMyLawn implements ModInitializer, WorldComponentInitializer {
 
 	public static final ComponentKey<ClaimComponent> CLAIM = ComponentRegistryV3.INSTANCE.getOrCreate(id("claims"), ClaimComponent.class);
 	public static GOMLConfig CONFIG = new GOMLConfig();
-	public static final PolymerItemGroup GROUP = PolymerItemGroup.create(id("group"), new TranslatableText("itemGroup.goml.group"));
+	public static final PolymerItemGroup GROUP = PolymerItemGroup.create(id("group"), Text.translatable("itemGroup.goml.group"));
 	public static final Logger LOGGER = LogManager.getLogger();
 
 	@Override
@@ -37,7 +37,7 @@ public class GetOffMyLawn implements ModInitializer, WorldComponentInitializer {
 		GOMLEntities.init();
 		EventHandlers.init();
 		ClaimCommand.init();
-		Placeholders.init();
+		PlaceholdersReg.init();
 
 		ServerLifecycleEvents.SERVER_STARTING.register((s) -> {
 			CardboardWarning.checkAndAnnounce();

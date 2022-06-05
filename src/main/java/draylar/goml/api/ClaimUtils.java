@@ -3,11 +3,11 @@ package draylar.goml.api;
 import com.jamieswhiteshirt.rtree3i.Box;
 import com.jamieswhiteshirt.rtree3i.Entry;
 import com.jamieswhiteshirt.rtree3i.Selection;
-import draylar.goml.block.augment.ExplosionControllerAugmentBlock;
-import draylar.goml.other.GomlPlayer;
 import draylar.goml.GetOffMyLawn;
 import draylar.goml.api.event.ClaimEvents;
+import draylar.goml.block.augment.ExplosionControllerAugmentBlock;
 import draylar.goml.block.entity.ClaimAnchorBlockEntity;
+import draylar.goml.other.GomlPlayer;
 import draylar.goml.other.StatusEnum;
 import draylar.goml.registry.GOMLBlocks;
 import me.lucko.fabric.api.permissions.v0.Permissions;
@@ -15,9 +15,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
@@ -143,7 +141,7 @@ public class ClaimUtils {
 
         if (causingEntity instanceof PlayerEntity playerEntity) {
             player = playerEntity;
-        } else if (causingEntity instanceof CreeperEntity creeperEntity && creeperEntity.getTarget() instanceof PlayerEntity playerEntity){
+        } else if (causingEntity instanceof CreeperEntity creeperEntity && creeperEntity.getTarget() instanceof PlayerEntity playerEntity) {
             player = playerEntity;
         } else {
             player = null;
@@ -156,9 +154,7 @@ public class ClaimUtils {
         return claimsFound.isEmpty() || claimsFound.anyMatch((c) -> {
             if (world.getServer() != null) {
                 if (c.getValue().getBlockEntityInstance(world.getServer()).hasAugment(GOMLBlocks.EXPLOSION_CONTROLLER.getFirst())) {
-                    if (c.getValue().getData(ExplosionControllerAugmentBlock.KEY) == StatusEnum.Toggle.DISABLED) {
-                        return true;
-                    }
+                    return c.getValue().getData(ExplosionControllerAugmentBlock.KEY) == StatusEnum.Toggle.DISABLED;
                 }
             }
 
@@ -194,35 +190,35 @@ public class ClaimUtils {
 
         return claimAnchor;
     }
-    
+
     public static List<Text> getClaimText(MinecraftServer server, Claim claim) {
         var owners = getPlayerNames(server, claim.getOwners());
         var trusted = getPlayerNames(server, claim.getTrusted());
 
         var texts = new ArrayList<Text>();
 
-        texts.add(new TranslatableText("text.goml.position",
-                new LiteralText(claim.getOrigin().toShortString())
-                        .append(new LiteralText(" (" + claim.getWorld().toString() + ")").formatted(Formatting.GRAY)).formatted(Formatting.WHITE)
+        texts.add(Text.translatable("text.goml.position",
+                Text.literal(claim.getOrigin().toShortString())
+                        .append(Text.literal(" (" + claim.getWorld().toString() + ")").formatted(Formatting.GRAY)).formatted(Formatting.WHITE)
         ).formatted(Formatting.BLUE));
 
-        texts.add(new TranslatableText("text.goml.radius",
-                new LiteralText("" + claim.getRadius()).formatted(Formatting.WHITE)
+        texts.add(Text.translatable("text.goml.radius",
+                Text.literal("" + claim.getRadius()).formatted(Formatting.WHITE)
         ).formatted(Formatting.YELLOW));
 
         if (!owners.isEmpty()) {
-            texts.add(new TranslatableText("text.goml.owners", owners.remove(0)).formatted(Formatting.GOLD));
+            texts.add(Text.translatable("text.goml.owners", owners.remove(0)).formatted(Formatting.GOLD));
 
             for (var text : owners) {
-                texts.add(new LiteralText("   ").append(text));
+                texts.add(Text.literal("   ").append(text));
             }
         }
 
         if (!trusted.isEmpty()) {
-            texts.add(new TranslatableText("text.goml.trusted", trusted.remove(0)).formatted(Formatting.GREEN));
+            texts.add(Text.translatable("text.goml.trusted", trusted.remove(0)).formatted(Formatting.GREEN));
 
             for (var text : trusted) {
-                texts.add(new LiteralText("   ").append(text));
+                texts.add(Text.literal("   ").append(text));
             }
         }
 
@@ -244,13 +240,13 @@ public class ClaimUtils {
                 }
 
                 if (builder.length() > 32) {
-                    list.add(new LiteralText(builder.toString()).formatted(Formatting.WHITE));
+                    list.add(Text.literal(builder.toString()).formatted(Formatting.WHITE));
                     builder = new StringBuilder();
                 }
             }
         }
         if (!builder.isEmpty()) {
-            list.add(new LiteralText(builder.toString()).formatted(Formatting.WHITE));
+            list.add(Text.literal(builder.toString()).formatted(Formatting.WHITE));
         }
 
         return list;

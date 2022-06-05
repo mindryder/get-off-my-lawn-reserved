@@ -8,8 +8,7 @@ import draylar.goml.item.TooltippedBlockItem;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
@@ -31,7 +30,7 @@ public class ClaimAugmentGui extends PagedGui {
         this.claim = claim;
         this.blockEntity = ClaimUtils.getAnchor(player.server.getWorld(RegistryKey.of(Registry.WORLD_KEY, claim.getWorld())), claim);
         this.canModify = canModify;
-        this.setTitle(new TranslatableText("text.goml.gui.augment_list.title"));
+        this.setTitle(Text.translatable("text.goml.gui.augment_list.title"));
         this.updateDisplay();
         this.open();
     }
@@ -61,8 +60,8 @@ public class ClaimAugmentGui extends PagedGui {
             var builder = new GuiElementBuilder();
             var item = entry.getValue() instanceof Block block ? block.asItem() : null;
             builder.hideFlags();
-            builder.addLoreLine(new TranslatableText("text.goml.position",
-                    new LiteralText(entry.getKey().toShortString()).formatted(Formatting.WHITE)
+            builder.addLoreLine(Text.translatable("text.goml.position",
+                    Text.literal(entry.getKey().toShortString()).formatted(Formatting.WHITE)
             ).formatted(Formatting.BLUE));
 
             builder.setName(entry.getValue().getAugmentName());
@@ -71,15 +70,15 @@ public class ClaimAugmentGui extends PagedGui {
                 builder.setItem(item);
 
                 if (item instanceof TooltippedBlockItem tooltipped) {
-                    builder.addLoreLine(LiteralText.EMPTY);
+                    builder.addLoreLine(Text.empty());
 
                     tooltipped.addLines(builder::addLoreLine);
                 }
             }
 
             if (this.canModify && entry.getValue().hasSettings()) {
-                builder.addLoreLine(LiteralText.EMPTY);
-                builder.addLoreLine(new TranslatableText("text.goml.gui.click_to_modify").formatted(Formatting.RED));
+                builder.addLoreLine(Text.empty());
+                builder.addLoreLine(Text.translatable("text.goml.gui.click_to_modify").formatted(Formatting.RED));
                 builder.setCallback((x, y, z) -> {
                     playClickSound(this.player);
                     entry.getValue().openSettings(this.claim, this.player, () -> {

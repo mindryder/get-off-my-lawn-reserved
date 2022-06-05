@@ -1,17 +1,11 @@
 package draylar.goml.item;
 
-import draylar.goml.GetOffMyLawn;
-import draylar.goml.api.ClaimUtils;
-import draylar.goml.block.ClaimAnchorBlock;
 import eu.pb4.polymer.api.block.PolymerHeadBlock;
-import eu.pb4.polymer.api.item.PolymerHeadBlockItem;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 
@@ -42,7 +36,7 @@ public class ToggleableBlockItem extends TooltippedBlockItem {
         if (isEnabled.getAsBoolean()) {
             super.appendTooltip(stack, world, tooltip, context);
         } else {
-            tooltip.add(new TranslatableText(String.format("text.goml.disabled_augment")).formatted(Formatting.RED, Formatting.BOLD));
+            tooltip.add(Text.translatable(String.format("text.goml.disabled_augment")).formatted(Formatting.RED, Formatting.BOLD));
         }
     }
 }

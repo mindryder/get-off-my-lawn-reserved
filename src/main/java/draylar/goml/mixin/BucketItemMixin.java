@@ -11,14 +11,12 @@ import net.minecraft.fluid.Fluids;
 import net.minecraft.item.BucketItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Final;
@@ -53,7 +51,7 @@ public class BucketItemMixin extends Item {
             boolean noPermission = claimsFound.anyMatch((Entry<ClaimBox, Claim> boxInfo) -> !boxInfo.getValue().hasPermission(user));
 
             if(noPermission) {
-                user.sendMessage(new LiteralText("This block is protected by a claim."), true);
+                user.sendMessage(Text.literal("This block is protected by a claim."), true);
                 cir.setReturnValue(TypedActionResult.fail(user.getStackInHand(hand)));
             }
         }

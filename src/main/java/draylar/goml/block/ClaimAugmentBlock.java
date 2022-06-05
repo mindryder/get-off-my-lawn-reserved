@@ -20,7 +20,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -50,16 +49,16 @@ public class ClaimAugmentBlock extends Block implements Augment, BlockEntityProv
 
     @Override
     public MutableText getName() {
-        return new TranslatableText("block.goml.anchor_augment", new TranslatableText(this.getTranslationKey()));
+        return Text.translatable("block.goml.anchor_augment", Text.translatable(this.getTranslationKey()));
     }
 
     public MutableText getGuiName() {
-        return new TranslatableText("text.goml.augment", new TranslatableText(this.getTranslationKey()));
+        return Text.translatable("text.goml.augment", Text.translatable(this.getTranslationKey()));
     }
 
     @Override
     public Text getAugmentName() {
-        return new TranslatableText(this.getTranslationKey());
+        return Text.translatable(this.getTranslationKey());
     }
 
     @ApiStatus.Internal

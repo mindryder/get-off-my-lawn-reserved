@@ -3,10 +3,13 @@ package draylar.goml.ui;
 import draylar.goml.api.Claim;
 import draylar.goml.registry.GOMLTextures;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
+import fr.catcore.server.translations.api.LocalizationTarget;
+import fr.catcore.server.translations.api.ServerTranslations;
+import fr.catcore.server.translations.api.text.LocalizableText;
 import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -30,7 +33,7 @@ public class ClaimPlayerListGui extends PagedGui {
         this.canModifyOwners = canModifyOwners;
         this.canModifyTrusted = canModifyTrusted;
         this.isAdmin = isAdmin;
-        this.setTitle(new TranslatableText("text.goml.gui.player_list.title"));
+        this.setTitle(Text.translatable("text.goml.gui.player_list.title"));
         this.updateDisplay();
         this.open();
     }
@@ -72,14 +75,14 @@ public class ClaimPlayerListGui extends PagedGui {
         return switch (id) {
             case 5 -> this.canModifyTrusted
                     ? DisplayElement.of(new GuiElementBuilder(Items.PLAYER_HEAD)
-                    .setName(new TranslatableText("text.goml.gui.player_list.add_player").formatted(Formatting.GREEN))
+                    .setName(Text.translatable("text.goml.gui.player_list.add_player").formatted(Formatting.GREEN))
                     .setSkullOwner(GOMLTextures.GUI_ADD)
                     .setCallback((x, y, z) -> {
                         playClickSound(this.player);
 
                         new GenericPlayerSelectionGui(
                                 this.player,
-                                new TranslatableText("text.goml.gui.player_add_gui.title"),
+                                Text.translatable("text.goml.gui.player_add_gui.title"),
                                 (p) -> !this.claim.hasPermission(p),
                                 this.claim::trust,
                                 () -> open(player, this.claim, this.isAdmin, this.closeCallback));
@@ -97,19 +100,19 @@ public class ClaimPlayerListGui extends PagedGui {
         var canRemove = owner ? this.canModifyOwners : this.canModifyTrusted;
 
         var builder = new GuiElementBuilder(exist ? Items.PLAYER_HEAD : Items.SKELETON_SKULL)
-                .setName(new LiteralText(exist ? gameProfile.getName() : uuid.toString())
+                .setName(Text.literal(exist ? gameProfile.getName() : uuid.toString())
                         .formatted(owner ? Formatting.GOLD : Formatting.WHITE)
                         .append(owner
-                                        ? new LiteralText(" (").formatted(Formatting.DARK_GRAY)
-                                                .append(new TranslatableText("text.goml.owner").formatted(Formatting.WHITE))
-                                                .append(new LiteralText(")").formatted(Formatting.DARK_GRAY))
+                                        ? Text.literal(" (").formatted(Formatting.DARK_GRAY)
+                                                .append(((MutableText) LocalizableText.asLocalizedFor(Text.translatable("text.goml.owner"), (LocalizationTarget) this.player)).formatted(Formatting.WHITE))
+                                                .append(Text.literal(")").formatted(Formatting.DARK_GRAY))
 
-                                        : LiteralText.EMPTY
+                                        : Text.empty()
                                 )
                 );
 
         if (canRemove) {
-            builder.addLoreLine(new TranslatableText("text.goml.gui.click_to_remove"));
+            builder.addLoreLine(Text.translatable("text.goml.gui.click_to_remove"));
             builder.setCallback((x, y, z) -> {
                 playClickSound(player);
                 (owner ? this.claim.getOwners() : this.claim.getTrusted()).remove(uuid);

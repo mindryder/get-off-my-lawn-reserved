@@ -13,8 +13,7 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -101,7 +100,7 @@ public abstract class PagedGui extends SimpleGui {
             case 3 -> DisplayElement.nextPage(this);
             case 7 -> DisplayElement.of(
                     new GuiElementBuilder(Items.BARRIER)
-                            .setName(new TranslatableText(this.closeCallback != null ? "text.goml.gui.back" : "text.goml.gui.close").formatted(Formatting.RED))
+                            .setName(Text.translatable(this.closeCallback != null ? "text.goml.gui.back" : "text.goml.gui.close").formatted(Formatting.RED))
                             .hideFlags()
                             .setCallback((x, y, z) -> {
                                 playClickSound(this.player);
@@ -116,7 +115,7 @@ public abstract class PagedGui extends SimpleGui {
         private static final DisplayElement EMPTY = DisplayElement.of(new GuiElement(ItemStack.EMPTY, GuiElementInterface.EMPTY_CALLBACK));
         private static final DisplayElement FILLER = DisplayElement.of(
                 new GuiElementBuilder(Items.WHITE_STAINED_GLASS_PANE)
-                        .setName(new LiteralText(""))
+                        .setName(Text.empty())
                         .hideFlags()
         );
 
@@ -136,7 +135,7 @@ public abstract class PagedGui extends SimpleGui {
             if (gui.canNextPage()) {
                 return DisplayElement.of(
                         new GuiElementBuilder(Items.PLAYER_HEAD)
-                                .setName(new TranslatableText("text.goml.gui.next_page").formatted(Formatting.WHITE))
+                                .setName(Text.translatable("text.goml.gui.next_page").formatted(Formatting.WHITE))
                                 .hideFlags()
                                 .setSkullOwner(GOMLTextures.GUI_NEXT_PAGE)
                                 .setCallback((x, y, z) -> {
@@ -147,7 +146,7 @@ public abstract class PagedGui extends SimpleGui {
             } else {
                 return DisplayElement.of(
                         new GuiElementBuilder(Items.PLAYER_HEAD)
-                                .setName(new TranslatableText("text.goml.gui.next_page").formatted(Formatting.DARK_GRAY))
+                                .setName(Text.translatable("text.goml.gui.next_page").formatted(Formatting.DARK_GRAY))
                                 .hideFlags()
                                 .setSkullOwner(GOMLTextures.GUI_NEXT_PAGE_BLOCKED)
                 );
@@ -158,7 +157,7 @@ public abstract class PagedGui extends SimpleGui {
             if (gui.canPreviousPage()) {
                 return DisplayElement.of(
                         new GuiElementBuilder(Items.PLAYER_HEAD)
-                                .setName(new TranslatableText("text.goml.gui.previous_page").formatted(Formatting.WHITE))
+                                .setName(Text.translatable("text.goml.gui.previous_page").formatted(Formatting.WHITE))
                                 .hideFlags()
                                 .setSkullOwner(GOMLTextures.GUI_PREVIOUS_PAGE)
                                 .setCallback((x, y, z) -> {
@@ -169,7 +168,7 @@ public abstract class PagedGui extends SimpleGui {
             } else {
                 return DisplayElement.of(
                         new GuiElementBuilder(Items.PLAYER_HEAD)
-                                .setName(new TranslatableText("text.goml.gui.previous_page").formatted(Formatting.DARK_GRAY))
+                                .setName(Text.translatable("text.goml.gui.previous_page").formatted(Formatting.DARK_GRAY))
                                 .hideFlags()
                                 .setSkullOwner(GOMLTextures.GUI_PREVIOUS_PAGE_BLOCKED)
                 );

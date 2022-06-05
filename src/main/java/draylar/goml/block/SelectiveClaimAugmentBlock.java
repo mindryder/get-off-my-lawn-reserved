@@ -12,7 +12,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
@@ -72,8 +72,8 @@ public class SelectiveClaimAugmentBlock extends ClaimAugmentBlock {
         change.setValue(() -> {
             var currentMode = claim.getData(key);
             gui.setSlot(0, new GuiElementBuilder(currentMode.getIcon())
-                    .setName(new TranslatableText("text.goml.mode_toggle", currentMode.getName()))
-                    .addLoreLine(new TranslatableText("text.goml.mode_toggle.help").formatted(Formatting.GRAY))
+                    .setName(Text.translatable("text.goml.mode_toggle", currentMode.getName()))
+                    .addLoreLine(Text.translatable("text.goml.mode_toggle.help").formatted(Formatting.GRAY))
                     .setCallback((x, y, z) -> {
                         PagedGui.playClickSound(player);
                         var mode = currentMode.getNext();
@@ -93,7 +93,7 @@ public class SelectiveClaimAugmentBlock extends ClaimAugmentBlock {
         change.getValue().run();
 
         gui.setSlot(4, new GuiElementBuilder(Items.BARRIER)
-                .setName(new TranslatableText(closeCallback != null ? "text.goml.gui.back" : "text.goml.gui.close").formatted(Formatting.RED))
+                .setName(Text.translatable(closeCallback != null ? "text.goml.gui.back" : "text.goml.gui.close").formatted(Formatting.RED))
                 .setCallback((x, y, z) -> {
                     PagedGui.playClickSound(player);
                     gui.close();

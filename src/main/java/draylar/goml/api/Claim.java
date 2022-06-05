@@ -22,7 +22,7 @@ import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -263,15 +263,15 @@ public class Claim {
 
     public void openUi(ServerPlayerEntity player) {
         var gui = new SimpleGui(ScreenHandlerType.HOPPER, player, false);
-        gui.setTitle(new TranslatableText("text.goml.gui.claim.title"));
+        gui.setTitle(Text.translatable("text.goml.gui.claim.title"));
 
         gui.addSlot(GuiElementBuilder.from(this.icon)
-                .setName(new TranslatableText("text.goml.gui.claim.about"))
+                .setName(Text.translatable("text.goml.gui.claim.about"))
                 .setLore(ClaimUtils.getClaimText(player.server, this))
         );
 
         gui.addSlot(new GuiElementBuilder(Items.PLAYER_HEAD)
-                .setName(new TranslatableText("text.goml.gui.claim.players").formatted(Formatting.WHITE))
+                .setName(Text.translatable("text.goml.gui.claim.players").formatted(Formatting.WHITE))
                 .setCallback((x, y, z) -> {
                     PagedGui.playClickSound(player);
                     ClaimPlayerListGui.open(player, this, ClaimUtils.isInAdminMode(player), () -> openUi(player));
@@ -279,7 +279,7 @@ public class Claim {
         );
 
         gui.addSlot(new GuiElementBuilder(Items.PLAYER_HEAD)
-                .setName(new TranslatableText("text.goml.gui.claim.augments").formatted(Formatting.WHITE))
+                .setName(Text.translatable("text.goml.gui.claim.augments").formatted(Formatting.WHITE))
                 .setSkullOwner(GOMLTextures.ANGELIC_AURA)
                 .setCallback((x, y, z) -> {
                     PagedGui.playClickSound(player);
@@ -289,7 +289,7 @@ public class Claim {
 
         if (this.type == GOMLBlocks.ADMIN_CLAIM_ANCHOR.getFirst()) {
             gui.addSlot(new GuiElementBuilder(Items.PLAYER_HEAD)
-                    .setName(new TranslatableText("text.goml.gui.admin_settings").formatted(Formatting.WHITE))
+                    .setName(Text.translatable("text.goml.gui.admin_settings").formatted(Formatting.WHITE))
                     .setSkullOwner("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmY3YTQyMmRiMzVkMjhjZmI2N2U2YzE2MTVjZGFjNGQ3MzAwNzI0NzE4Nzc0MGJhODY1Mzg5OWE0NGI3YjUyMCJ9fX0=")
                     .setCallback((x, y, z) -> {
                         PagedGui.playClickSound(player);

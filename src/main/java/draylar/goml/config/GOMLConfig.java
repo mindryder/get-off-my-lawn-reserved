@@ -11,7 +11,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -88,7 +87,7 @@ public class GOMLConfig {
     }
 
     public MutableText prefix(Text text) {
-        return this.messagePrefix.mutableText().append(new LiteralText(" ")).append(text);
+        return this.messagePrefix.mutableText().append(Text.literal(" ")).append(text);
     }
 
     public static GOMLConfig loadOrCreateConfig() {
