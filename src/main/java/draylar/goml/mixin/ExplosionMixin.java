@@ -1,6 +1,7 @@
 package draylar.goml.mixin;
 
 import draylar.goml.api.ClaimUtils;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.BlockPos;
@@ -21,7 +22,7 @@ import java.util.List;
 public abstract class ExplosionMixin {
     @Shadow
     @Final
-    private List<BlockPos> affectedBlocks;
+    private ObjectArrayList<BlockPos> affectedBlocks;
 
     @Shadow @Final public World world;
 

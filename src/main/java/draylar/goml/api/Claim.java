@@ -68,7 +68,7 @@ public class Claim {
         return isOwner(player.getUuid());
     }
 
-    protected boolean isOwner(UUID uuid) {
+    public boolean isOwner(UUID uuid) {
         return owners.contains(uuid);
     }
 
@@ -80,7 +80,7 @@ public class Claim {
         return hasPermission(player.getUuid());
     }
 
-    protected boolean hasPermission(UUID uuid) {
+    public boolean hasPermission(UUID uuid) {
         return owners.contains(uuid) || trusted.contains(uuid);
     }
 
