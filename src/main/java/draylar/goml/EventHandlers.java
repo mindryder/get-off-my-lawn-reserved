@@ -11,6 +11,7 @@ import draylar.goml.block.entity.ClaimAnchorBlockEntity;
 import draylar.goml.registry.GOMLBlocks;
 import net.fabricmc.fabric.api.event.player.*;
 import net.minecraft.entity.Tameable;
+import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.util.ActionResult;
@@ -57,6 +58,10 @@ public class EventHandlers {
     private static void registerAttackEntityCallback() {
         AttackEntityCallback.EVENT.register((playerEntity, world, hand, entity, entityHitResult) -> {
             if (ClaimUtils.isInAdminMode(playerEntity)) {
+                return ActionResult.PASS;
+            }
+
+            if (GetOffMyLawn.CONFIG.allowDamagingUnnamedHostileMobs && entity instanceof HostileEntity && entity.getCustomName() == null) {
                 return ActionResult.PASS;
             }
 

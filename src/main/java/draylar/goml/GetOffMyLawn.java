@@ -4,6 +4,7 @@ import dev.onyxstudios.cca.api.v3.component.ComponentKey;
 import dev.onyxstudios.cca.api.v3.component.ComponentRegistryV3;
 import dev.onyxstudios.cca.api.v3.world.WorldComponentFactoryRegistry;
 import dev.onyxstudios.cca.api.v3.world.WorldComponentInitializer;
+import draylar.goml.api.GomlProtectionProvider;
 import draylar.goml.cca.ClaimComponent;
 import draylar.goml.cca.WorldClaimComponent;
 import draylar.goml.other.CardboardWarning;
@@ -13,6 +14,7 @@ import draylar.goml.other.PlaceholdersReg;
 import draylar.goml.registry.GOMLBlocks;
 import draylar.goml.registry.GOMLEntities;
 import draylar.goml.registry.GOMLItems;
+import eu.pb4.common.protection.api.CommonProtection;
 import eu.pb4.polymer.api.item.PolymerItemGroup;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -38,6 +40,8 @@ public class GetOffMyLawn implements ModInitializer, WorldComponentInitializer {
 		EventHandlers.init();
 		ClaimCommand.init();
 		PlaceholdersReg.init();
+
+		CommonProtection.register(new Identifier("goml", "claim_protection"), GomlProtectionProvider.INSTANCE);
 
 		ServerLifecycleEvents.SERVER_STARTING.register((s) -> {
 			CardboardWarning.checkAndAnnounce();

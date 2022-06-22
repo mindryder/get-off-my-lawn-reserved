@@ -3,6 +3,7 @@ package draylar.goml.api;
 import com.jamieswhiteshirt.rtree3i.Box;
 import com.jamieswhiteshirt.rtree3i.Entry;
 import com.jamieswhiteshirt.rtree3i.Selection;
+import com.mojang.authlib.GameProfile;
 import draylar.goml.GetOffMyLawn;
 import draylar.goml.api.event.ClaimEvents;
 import draylar.goml.block.augment.ExplosionControllerAugmentBlock;
@@ -132,6 +133,16 @@ public class ClaimUtils {
 
     public static boolean isInAdminMode(PlayerEntity player) {
         return Permissions.check(player, "goml.modify_others", 3) && (player instanceof GomlPlayer adminModePlayer && adminModePlayer.goml_getAdminMode());
+    }
+
+    public static boolean canFireDestroy(World world, BlockPos pos) {
+        return ClaimUtils.getClaimsAt(world, pos).isEmpty();
+    }
+
+    public static boolean canFluidFlow(World world, BlockPos cur, BlockPos dest) {
+        var claimsDest = ClaimUtils.getClaimsAt(world, dest);
+        var claimsCur = ClaimUtils.getClaimsAt(world, cur);
+        return claimsDest.isEmpty() || claimsCur.anyMatch(x -> claimsCur.anyMatch(y -> x.equals(y)));
     }
 
     public static boolean canExplosionDestroy(World world, BlockPos pos, @Nullable Entity causingEntity) {

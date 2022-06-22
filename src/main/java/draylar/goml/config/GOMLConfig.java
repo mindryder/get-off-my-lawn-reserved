@@ -41,6 +41,7 @@ public class GOMLConfig {
 
     public int maxClaimsPerPlayer = -1;
     public boolean enablePvPinClaims = false;
+    public boolean allowDamagingUnnamedHostileMobs = true;
 
     public boolean claimProtectsFullWorldHeight = false;
 
@@ -87,7 +88,7 @@ public class GOMLConfig {
     }
 
     public MutableText prefix(Text text) {
-        return this.messagePrefix.mutableText().append(Text.literal(" ")).append(text);
+        return Text.empty().append(messagePrefix.text()).append(Text.literal(" ")).append(text);
     }
 
     public static GOMLConfig loadOrCreateConfig() {

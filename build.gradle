@@ -80,6 +80,7 @@ dependencies {
 	modImplementation include("eu.pb4:placeholder-api:${project.placeholder_version}")
 	modImplementation include("fr.catcore:server-translations-api:${project.stapi_version}")
 	modImplementation include("me.lucko:fabric-permissions-api:0.1-SNAPSHOT")
+	modImplementation include("eu.pb4:common-protection-api:1.0.0")
 }
 
 processResources {
@@ -142,6 +143,7 @@ curseforge {
 			changelogType = "markdown"
 			addGameVersion ((String) project.minecraft_version)
 			addGameVersion "Fabric"
+			addGameVersion "Quilt"
 			mainArtifact(remapJar)
 
 			afterEvaluate {
@@ -165,7 +167,7 @@ if (System.getenv("MODRINTH")) {
 	modrinth {
 		token = System.getenv("MODRINTH")
 		projectId = 'j5niDupl'
-		versionNumber = version
+		versionNumber = "" + version
 
 		changelog = System.getenv("CHANGELOG")
 		// On fabric, use 'remapJar' instead of 'jar'
