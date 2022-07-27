@@ -21,10 +21,12 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.Nullable;
@@ -142,6 +144,15 @@ public class ClaimAnchorBlock extends Block implements BlockEntityProvider, Poly
 
     public int getRadius() {
         return this.radius.getAsInt();
+    }
+
+    @Override
+    public float calcBlockBreakingDelta(BlockState state, PlayerEntity player, BlockView world, BlockPos pos) {
+        if (ClaimUtils.isInAdminMode(player) || (world instanceof ServerWorld serverWorld && ClaimUtils.getClaimsAt(serverWorld, pos).anyMatch(x -> x.getValue().isOwner(player)))) {
+            return super.calcBlockBreakingDelta(state, player, world, pos);
+        } else {
+            return 0;
+        }
     }
 
     @Nullable

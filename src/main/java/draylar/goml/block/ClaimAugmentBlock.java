@@ -2,6 +2,7 @@ package draylar.goml.block;
 
 import draylar.goml.api.Augment;
 import draylar.goml.api.Claim;
+import draylar.goml.api.ClaimUtils;
 import draylar.goml.block.entity.ClaimAnchorBlockEntity;
 import draylar.goml.block.entity.ClaimAugmentBlockEntity;
 import draylar.goml.registry.GOMLEntities;
@@ -18,6 +19,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -25,6 +27,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.ApiStatus;
@@ -172,6 +175,15 @@ public class ClaimAugmentBlock extends Block implements Augment, BlockEntityProv
     @Override
     public boolean canPlace(Claim claim, World world, BlockPos pos, ClaimAnchorBlockEntity anchor) {
         return !anchor.hasAugment(this);
+    }
+
+    @Override
+    public float calcBlockBreakingDelta(BlockState state, PlayerEntity player, BlockView world, BlockPos pos) {
+        if (ClaimUtils.isInAdminMode(player) || (world instanceof ServerWorld serverWorld && ClaimUtils.getClaimsAt(serverWorld, pos).anyMatch(x -> x.getValue().isOwner(player)))) {
+            return super.calcBlockBreakingDelta(state, player, world, pos);
+        } else {
+            return 0;
+        }
     }
 
     @Override
