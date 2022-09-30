@@ -4,6 +4,7 @@ import com.jamieswhiteshirt.rtree3i.Box;
 import draylar.goml.GetOffMyLawn;
 import draylar.goml.api.ClaimUtils;
 import draylar.goml.block.ClaimAnchorBlock;
+import me.lucko.fabric.api.permissions.v0.Options;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.text.Text;
@@ -33,8 +34,29 @@ public class ClaimAnchorBlockItem extends TooltippedBlockItem {
 
         if (!ClaimUtils.isInAdminMode(context.getPlayer())) {
             var count = ClaimUtils.getClaimsOwnedBy(context.getWorld(), context.getPlayer().getUuid()).count();
-            if (GetOffMyLawn.CONFIG.maxClaimsPerPlayer != -1
-                    && count >= GetOffMyLawn.CONFIG.maxClaimsPerPlayer
+
+            int maxCount;
+            var allowedCount = Options.get(context.getPlayer(), "goml.claim_limit");
+            var allowedCount2 = Options.get(context.getPlayer(), "goml.claim_limit." + context.getWorld().getRegistryKey().getValue().toString());
+
+            if (allowedCount2.isPresent()) {
+                try {
+                    maxCount = Integer.parseInt(allowedCount2.get());
+                } catch (Throwable t) {
+                    maxCount = GetOffMyLawn.CONFIG.maxClaimsPerPlayer;
+                }
+            } else if (allowedCount.isPresent()) {
+                try {
+                    maxCount = Integer.parseInt(allowedCount.get());
+                } catch (Throwable t) {
+                    maxCount = GetOffMyLawn.CONFIG.maxClaimsPerPlayer;
+                }
+            } else {
+                maxCount = GetOffMyLawn.CONFIG.maxClaimsPerPlayer;
+            }
+
+            if (maxCount != -1
+                    && count >= maxCount
             ) {
                 context.getPlayer().sendMessage(GetOffMyLawn.CONFIG.prefix(Text.translatable("text.goml.cant_place_claim.max_count_reached", count, GetOffMyLawn.CONFIG.maxClaimsPerPlayer).formatted(Formatting.RED)), false);
                 return false;
@@ -48,6 +70,10 @@ public class ClaimAnchorBlockItem extends TooltippedBlockItem {
 
 
         var claims = ClaimUtils.getClaimsInBox(context.getWorld(), pos.add(-radius, -vertRadius, -radius), pos.add(radius, vertRadius, radius));
+        if (GetOffMyLawn.CONFIG.allowClaimOverlappingIfSameOwner) {
+            claims = claims.filter(x -> !x.getValue().isOwner(context.getPlayer()));
+        }
+
         if (claims.isNotEmpty()) {
             var list = Text.literal("");
 

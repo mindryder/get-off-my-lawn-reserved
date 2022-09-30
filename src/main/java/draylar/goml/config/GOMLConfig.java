@@ -4,17 +4,14 @@ package draylar.goml.config;
 import com.google.gson.*;
 import com.jamieswhiteshirt.rtree3i.Box;
 import draylar.goml.GetOffMyLawn;
-import draylar.goml.api.ClaimBox;
 import draylar.goml.other.WrappedText;
 import draylar.goml.registry.GOMLBlocks;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import org.apache.commons.io.IOUtils;
@@ -42,8 +39,12 @@ public class GOMLConfig {
     public int maxClaimsPerPlayer = -1;
     public boolean enablePvPinClaims = false;
     public boolean allowDamagingUnnamedHostileMobs = true;
+    public boolean allowDamagingNamedHostileMobs = false;
 
     public boolean claimProtectsFullWorldHeight = false;
+    public boolean allowClaimOverlappingIfSameOwner = false;
+    public boolean allowFakePlayersToModify = false;
+    public boolean protectAgainstHostileExplosionsActivatedByTrustedPlayers = false;
 
     public Set<Identifier> dimensionBlacklist = new HashSet<>();
     public Map<Identifier, List<Box>> regionBlacklist = new HashMap<>();

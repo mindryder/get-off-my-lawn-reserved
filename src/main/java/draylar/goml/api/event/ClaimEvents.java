@@ -1,5 +1,7 @@
 package draylar.goml.api.event;
 
+import draylar.goml.api.Claim;
+import draylar.goml.api.ClaimBox;
 import draylar.goml.api.PermissionReason;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
@@ -29,7 +31,39 @@ public class ClaimEvents {
             }
     );
 
+    public static final Event<GenericClaimEvent> CLAIM_CREATED = EventFactory.createArrayBacked(GenericClaimEvent.class,
+            (listeners) -> (claim) -> {
+                for (var event : listeners) {
+                    event.onEvent(claim);
+                }
+            }
+    );
+
+    public static final Event<GenericClaimEvent> CLAIM_DESTROYED = EventFactory.createArrayBacked(GenericClaimEvent.class,
+            (listeners) -> (claim) -> {
+                for (var event : listeners) {
+                    event.onEvent(claim);
+                }
+            }
+    );
+
+    public static final Event<ClaimResizedEvent> CLAIM_RESIZED = EventFactory.createArrayBacked(ClaimResizedEvent.class,
+            (listeners) -> (claim, x, y) -> {
+                for (var event : listeners) {
+                    event.onResizeEvent(claim, x, y);
+                }
+            }
+    );
+
     public interface InteractionHandler {
         ActionResult check(PlayerEntity player, World world, Hand hand, BlockPos pos, PermissionReason reason);
+    }
+
+    public interface GenericClaimEvent {
+        void onEvent(Claim claim);
+    }
+
+    public interface ClaimResizedEvent {
+        void onResizeEvent(Claim claim, ClaimBox oldSize, ClaimBox newSize);
     }
 }

@@ -61,7 +61,10 @@ public class EventHandlers {
                 return ActionResult.PASS;
             }
 
-            if (GetOffMyLawn.CONFIG.allowDamagingUnnamedHostileMobs && entity instanceof HostileEntity && entity.getCustomName() == null) {
+            if (((GetOffMyLawn.CONFIG.allowDamagingUnnamedHostileMobs && entity.getCustomName() == null)
+                    || (GetOffMyLawn.CONFIG.allowDamagingNamedHostileMobs && entity.getCustomName() != null))
+                    && entity instanceof HostileEntity
+            ) {
                 return ActionResult.PASS;
             }
 
@@ -151,7 +154,7 @@ public class EventHandlers {
             var be = world.getBlockEntity(blockPos);
 
             if (be instanceof ClaimAnchorBlockEntity) {
-                if (((ClaimAnchorBlockEntity) be).hasAugment()) {
+                if (!(((ClaimAnchorBlockEntity) be).getClaim().isOwner(playerEntity) || ClaimUtils.isInAdminMode(playerEntity))) {
                     return ActionResult.FAIL;
                 }
             }

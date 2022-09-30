@@ -77,6 +77,9 @@ public class GOMLBlocks {
 
         Item registeredItem = Registry.register(Registry.ITEM, id, new ToggleableBlockItem(augment, new Item.Settings().group(withGroup ? GetOffMyLawn.GROUP : null), tooltipLines, check));
         AUGMENTS.add(registered);
+
+        GOMLAugments.register(id, augment);
+
         return Pair.of(augment, registeredItem);
     }
 

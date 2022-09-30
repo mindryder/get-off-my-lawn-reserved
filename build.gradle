@@ -48,6 +48,8 @@ repositories {
 		}
 	}
 
+	maven { url 'https://repo.mikeprimm.com/' }
+
 	mavenLocal()
 }
 
@@ -68,10 +70,10 @@ dependencies {
 	modImplementation include("io.github.ladysnake:PlayerAbilityLib:${pal_version}")
 
 	// Dev testing
-	modCompileOnly 'curse.maven:BLAST-349938:3543409'
+	//modCompileOnly 'curse.maven:BLAST-349938:3838824'
+	//modCompileOnly 'com.github.Ladysnake:BLAST:1.19-SNAPSHOT'
 	modCompileOnly files("./modsWithCompat/appliedenergistics2-10.0.0-beta.2.jar")
 	modCompileOnly 'vazkii.botania:Botania:1.18.1-427-FABRIC'
-
 
 	// Server side stuff
 	modImplementation include("eu.pb4:polymer:${project.polymer_version}")
@@ -79,7 +81,7 @@ dependencies {
 	modImplementation include("eu.pb4:hologram-api:${project.hologram_version}")
 	modImplementation include("eu.pb4:placeholder-api:${project.placeholder_version}")
 	modImplementation include("fr.catcore:server-translations-api:${project.stapi_version}")
-	modImplementation include("me.lucko:fabric-permissions-api:0.1-SNAPSHOT")
+	modImplementation include("me.lucko:fabric-permissions-api:0.2-SNAPSHOT")
 	modImplementation include("eu.pb4:common-protection-api:1.0.0")
 }
 

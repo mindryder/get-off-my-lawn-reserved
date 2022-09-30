@@ -15,9 +15,10 @@
     "ShapedRecipeMixin",
     "TntEntityMixin",
     "augment.EndermanEntityMixin",
+    "augment.EndermanEntityMixin$PickBlockGoalMixin",
+    "augment.EndermanEntityMixin$PlaceBlockGoalMixin",
     "augment.VillagerEntityMixin",
     "compat.AE2TinyTNTEntityMixin",
-    "compat.BlastExplosionMixin",
     "compat.BotaniaEntityManaBurstMixin",
     "compat.BotaniaItemLaputaShardMixin"
   ],

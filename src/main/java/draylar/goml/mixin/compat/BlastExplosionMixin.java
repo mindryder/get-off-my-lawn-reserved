@@ -6,7 +6,6 @@ import draylar.goml.api.Claim;
 import draylar.goml.api.ClaimBox;
 import draylar.goml.api.ClaimUtils;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import ladysnake.blast.common.world.CustomExplosion;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
@@ -23,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.Iterator;
 import java.util.List;
-
+/*
 @Pseudo
 @Mixin(CustomExplosion.class)
 public abstract class BlastExplosionMixin extends Explosion {
@@ -42,4 +41,4 @@ public abstract class BlastExplosionMixin extends Explosion {
         x.removeIf((e) -> !ClaimUtils.canExplosionDestroy(this.world, e.getBlockPos(), this.getCausingEntity()));
         return x;
     }
-}
+}*/

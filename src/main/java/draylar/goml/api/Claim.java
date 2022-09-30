@@ -1,7 +1,9 @@
 package draylar.goml.api;
 
+import draylar.goml.api.event.ClaimEvents;
 import draylar.goml.block.ClaimAnchorBlock;
 import draylar.goml.block.entity.ClaimAnchorBlockEntity;
+import draylar.goml.registry.GOMLAugments;
 import draylar.goml.registry.GOMLBlocks;
 import draylar.goml.registry.GOMLTextures;
 import draylar.goml.ui.AdminAugmentGui;
@@ -26,7 +28,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
+import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import org.jetbrains.annotations.ApiStatus;
@@ -44,6 +46,7 @@ public class Claim {
     public static final String TRUSTED_KEY = "Trusted";
     public static final String ICON_KEY = "Icon";
     public static final String TYPE_KEY = "Type";
+    public static final String AUGMENTS_KEY = "Augments";
     public static final String CUSTOM_DATA_KEY = "CustomData";
 
     private final Set<UUID> owners = new HashSet<>();
@@ -56,6 +59,11 @@ public class Claim {
 
     private Map<DataKey<Object>, Object> customData = new HashMap<>();
     private ClaimBox claimBox;
+    private int chunksLoadedCount;
+    private final Map<BlockPos, Augment> augments = new HashMap<>();
+
+    private final List<PlayerEntity> previousTickPlayers = new ArrayList<>();
+    private boolean destroyed = false;
 
     @ApiStatus.Internal
     public Claim(Set<UUID> owners, Set<UUID> trusted, BlockPos origin) {
@@ -163,6 +171,19 @@ public class Claim {
 
         nbt.put(CUSTOM_DATA_KEY, customData);
 
+
+        var augments = new NbtList();
+
+        for (var entry : this.augments.entrySet()) {
+            var value = new NbtCompound();
+            value.put("Pos", NbtHelper.fromBlockPos(entry.getKey()));
+            value.putString("Type", GOMLAugments.getId(entry.getValue()).toString());
+
+            augments.add(value);
+        }
+
+        nbt.put(AUGMENTS_KEY, augments);
+
         return nbt;
     }
 
@@ -209,6 +230,16 @@ public class Claim {
 
             if (dataKey != null) {
                 claim.customData.put((DataKey<Object>) dataKey, dataKey.deserializer().apply(customData.get(stringKey)));
+            }
+        }
+
+        for (var entry : nbt.getList(AUGMENTS_KEY, NbtElement.COMPOUND_TYPE)) {
+            var value = (NbtCompound) entry;
+            var pos = NbtHelper.toBlockPos(value.getCompound("Pos"));
+            var type = GOMLAugments.get(Identifier.tryParse(value.getString("Type")));
+
+            if (pos != null && type != null) {
+                claim.augments.put(pos, type);
             }
         }
 
@@ -329,12 +360,105 @@ public class Claim {
         this.claimBox = box;
     }
 
+    @ApiStatus.Internal
+    public void internal_incrementChunks() {
+        this.chunksLoadedCount++;
+    }
+
+    @ApiStatus.Internal
+    public void internal_decrementChunks() {
+        this.chunksLoadedCount--;
+        if (this.chunksLoadedCount == 0) {
+            this.clearTickedPlayers();
+        }
+    }
+
+    @ApiStatus.Internal
+    public void internal_updateChunkCount(ServerWorld world) {
+        var minX = ChunkSectionPos.getSectionCoord(this.claimBox.toBox().x1());
+        var minZ = ChunkSectionPos.getSectionCoord(this.claimBox.toBox().z1());
+
+        var maxX = ChunkSectionPos.getSectionCoord(this.claimBox.toBox().x2());
+        var maxZ = ChunkSectionPos.getSectionCoord(this.claimBox.toBox().z2());
+
+        for (var x = minX; x <= maxX; x++) {
+            for (var z = minZ; z <= maxZ; z++) {
+                if (world.isChunkLoaded(x, z)) {
+                    this.chunksLoadedCount++;
+                }
+            }
+        }
+
+        if (this.chunksLoadedCount == 0) {
+            this.clearTickedPlayers();
+        }
+    }
+
+    @ApiStatus.Internal
+    public void internal_onDestroyed() {
+        if (!this.destroyed) {
+            this.destroyed = true;
+            ClaimEvents.CLAIM_DESTROYED.invoker().onEvent(this);
+            this.clearTickedPlayers();
+        }
+    }
+
+    private void clearTickedPlayers() {
+        if (!this.previousTickPlayers.isEmpty()) {
+            for (var augment : this.augments.values()) {
+                if (augment != null) {
+                    // Tick exit behavior
+                    for (var player : this.previousTickPlayers) {
+                        augment.onPlayerExit(this, player);
+                    }
+                }
+            }
+        }
+    }
+
+    public void addAugment(BlockPos pos, Augment augment) {
+        this.augments.put(pos, augment);
+        for (var player : this.previousTickPlayers) {
+            augment.onPlayerEnter(this, player);
+        }
+    }
+
+    public void removeAugment(BlockPos pos) {
+        var augment = this.augments.remove(pos);
+        if (augment != null) {
+            for (var player : this.previousTickPlayers) {
+                augment.onPlayerExit(this, player);
+            }
+        }
+    }
+
+    public boolean hasAugment() {
+        return this.augments.size() > 0;
+    }
+
+    public boolean hasAugment(Augment augment) {
+        for (var a : this.augments.values()) {
+            if (a == augment) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Map<BlockPos, Augment> getAugments() {
+        return this.augments;
+    }
+
     public ClaimBox getClaimBox() {
         return this.claimBox != null ? this.claimBox : ClaimBox.EMPTY;
     }
 
     public int getRadius() {
-        return this.claimBox != null ? this.claimBox.radius() : 0;
+        return (this.claimBox != null ? this.claimBox.radius() : 0);
+    }
+
+    public boolean isDestroyed() {
+        return this.destroyed;
     }
 
     public Collection<ServerPlayerEntity> getPlayersIn(MinecraftServer server) {
@@ -345,5 +469,41 @@ public class Claim {
         }
 
         return world.getEntitiesByClass(ServerPlayerEntity.class, this.getClaimBox().minecraftBox(), entity -> true);
+    }
+
+    public void tick(ServerWorld world) {
+        if (this.chunksLoadedCount > 0) {
+            var playersInClaim = world.getEntitiesByClass(PlayerEntity.class, this.claimBox.minecraftBox(), entity -> true);
+
+            // Tick all augments
+            for (var augment : this.augments.values()) {
+
+                if (augment != null && augment.isEnabled(this, world)) {
+                    if (augment.ticks()) {
+                        augment.tick(this, world);
+                        for (var playerEntity : playersInClaim) {
+                            augment.playerTick(this, playerEntity);
+                        }
+                    }
+
+                    // Enter/Exit behavior
+                    for (var playerEntity : playersInClaim) {
+                        // this player was NOT in the claim last tick, call entry method
+                        if (!this.previousTickPlayers.contains(playerEntity)) {
+                            augment.onPlayerEnter(this, playerEntity);
+                        }
+                    }
+
+                    // Tick exit behavior
+                    this.previousTickPlayers.stream().filter(player -> !playersInClaim.contains(player)).forEach(player -> {
+                        augment.onPlayerExit(this, player);
+                    });
+                }
+            }
+
+            // Reset players in claim
+            this.previousTickPlayers.clear();
+            this.previousTickPlayers.addAll(playersInClaim);
+        }
     }
 }

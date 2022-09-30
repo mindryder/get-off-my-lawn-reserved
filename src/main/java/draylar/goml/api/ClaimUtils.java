@@ -3,7 +3,6 @@ package draylar.goml.api;
 import com.jamieswhiteshirt.rtree3i.Box;
 import com.jamieswhiteshirt.rtree3i.Entry;
 import com.jamieswhiteshirt.rtree3i.Selection;
-import com.mojang.authlib.GameProfile;
 import draylar.goml.GetOffMyLawn;
 import draylar.goml.api.event.ClaimEvents;
 import draylar.goml.block.augment.ExplosionControllerAugmentBlock;
@@ -13,9 +12,10 @@ import draylar.goml.other.StatusEnum;
 import draylar.goml.registry.GOMLBlocks;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.mob.CreeperEntity;
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
@@ -35,8 +35,6 @@ public class ClaimUtils {
     /**
      * Returns all claims at the given position in the given world.
      *
-     * <p>Under normal circumstances, only 1 claim will exist at a location, but multiple may still be returned.
-     *
      * @param world world to check for claim in
      * @param pos   position to check at
      * @return claims at the given position in the given world
@@ -44,6 +42,17 @@ public class ClaimUtils {
     public static Selection<Entry<ClaimBox, Claim>> getClaimsAt(WorldView world, BlockPos pos) {
         Box checkBox = Box.create(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1);
         return GetOffMyLawn.CLAIM.get(world).getClaims().entries(box -> box.contains(checkBox));
+    }
+
+    /**
+     * Returns all claims with the given origin in the given world.
+     *
+     * @param world world to check for claim in
+     * @param pos   position to check at
+     * @return claims at the given position in the given world
+     */
+    public static Selection<Entry<ClaimBox, Claim>> getClaimsWithOrigin(WorldView world, BlockPos pos) {
+        return GetOffMyLawn.CLAIM.get(world).getClaims().entries().filter(x -> x.getValue().getOrigin().equals(pos));
     }
 
     /**
@@ -152,7 +161,7 @@ public class ClaimUtils {
 
         if (causingEntity instanceof PlayerEntity playerEntity) {
             player = playerEntity;
-        } else if (causingEntity instanceof CreeperEntity creeperEntity && creeperEntity.getTarget() instanceof PlayerEntity playerEntity) {
+        } else if (!GetOffMyLawn.CONFIG.protectAgainstHostileExplosionsActivatedByTrustedPlayers && causingEntity instanceof MobEntity creeperEntity && creeperEntity.getTarget() instanceof PlayerEntity playerEntity) {
             player = playerEntity;
         } else {
             player = null;
@@ -174,6 +183,10 @@ public class ClaimUtils {
     }
 
     public static boolean canModify(World world, BlockPos pos, @Nullable PlayerEntity player) {
+        if (GetOffMyLawn.CONFIG.allowFakePlayersToModify && player != null && player.getClass() != ServerPlayerEntity.class && !world.isClient) {
+            return true;
+        }
+
         Selection<Entry<ClaimBox, Claim>> claimsFound = ClaimUtils.getClaimsAt(world, pos);
         if (player != null && claimsFound.isNotEmpty()) {
             return !claimsFound.anyMatch((Entry<ClaimBox, Claim> boxInfo) -> !canModifyClaimAt(world, pos, boxInfo, player));

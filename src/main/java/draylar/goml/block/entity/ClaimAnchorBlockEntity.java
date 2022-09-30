@@ -30,9 +30,8 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
 
     private static final String AUGMENT_LIST_KEY = "AugmentPositions";
 
-    private final Map<BlockPos, Augment> augmentEntities = new HashMap<>();
     private final List<BlockPos> loadPositions = new ArrayList<>();
-    private final List<PlayerEntity> previousTickPlayers = new ArrayList<>();
+
     private Claim claim;
     private ClaimBox box;
 
@@ -45,7 +44,7 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
 
             // Claim is null, world probably just loaded, re-grab claim
             if (anchor.claim == null) {
-                var collect = ClaimUtils.getClaimsAt(anchor.world, anchor.pos).collect(Collectors.toList());
+                var collect = ClaimUtils.getClaimsAt(anchor.world, anchor.pos).filter(x -> x.getValue().getOrigin().equals(pos)).collect(Collectors.toList());
 
                 if (collect.isEmpty()) {
                     GetOffMyLawn.LOGGER.warn(String.format("A Claim Anchor at %s tried to initialize its claim, but one could not be found! Was the claim removed without the anchor?", anchor.pos));
@@ -61,13 +60,18 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
                 }
             }
 
+            if (anchor.claim.isDestroyed()) {
+                world.breakBlock(pos, true);
+                return;
+            }
+
             // no augments, some queued from fromTag
-            if (anchor.augmentEntities.isEmpty() && !anchor.loadPositions.isEmpty()) {
+            if (!anchor.loadPositions.isEmpty()) {
                 for (BlockPos foundPos : anchor.loadPositions) {
                     BlockEntity foundEntity = anchor.world.getBlockEntity(foundPos);
 
-                    if (foundEntity instanceof ClaimAugmentBlockEntity) {
-                        anchor.augmentEntities.put(foundPos, ((ClaimAugmentBlockEntity) foundEntity).getAugment());
+                    if (foundEntity instanceof ClaimAugmentBlockEntity be) {
+                        anchor.claim.addAugment(foundPos, be.getAugment());
                     } else {
                         GetOffMyLawn.LOGGER.warn(String.format("A Claim Anchor at %s tried to load a child at %s, but none were found!", anchor.pos.toString(), foundPos.toString()));
                     }
@@ -75,42 +79,6 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
 
                 anchor.loadPositions.clear();
             }
-
-            int sizeX = anchor.box.getX();
-            int sizeY = anchor.box.getY();
-            int sizeZ = anchor.box.getZ();
-            var playersInClaim = anchor.world.getEntitiesByClass(PlayerEntity.class, new Box(anchor.pos.add(-sizeX, -sizeY, -sizeZ), anchor.pos.add(sizeX, sizeY, sizeZ)), entity -> true);
-
-            // Tick all augments
-            for (var augment : anchor.augmentEntities.values()) {
-
-                if (augment != null && augment.isEnabled(anchor.claim, world)) {
-                    if (augment.ticks()) {
-                        augment.tick(anchor.claim, anchor.world);
-                        for (PlayerEntity playerEntity : playersInClaim) {
-                            augment.playerTick(anchor.claim, playerEntity);
-                        }
-                    }
-
-                    // Enter/Exit behavior
-                    for (PlayerEntity playerEntity : playersInClaim) {
-                        // this player was NOT in the claim last tick, call entry method
-                        if (!anchor.previousTickPlayers.contains(playerEntity)) {
-                            augment.onPlayerEnter(anchor.claim, playerEntity);
-                        }
-                    }
-
-                    // Tick exit behavior
-                    anchor.previousTickPlayers.stream().filter(player -> !playersInClaim.contains(player)).forEach(player -> {
-                        augment.onPlayerExit(anchor.claim, player);
-                    });
-                }
-            }
-
-            // Reset players in claim
-            anchor.previousTickPlayers.clear();
-            anchor.previousTickPlayers.addAll(playersInClaim);
-
         }
     }
 
@@ -120,8 +88,10 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
         for (BlockPos loadPosition : this.loadPositions) {
             positions.add(NbtLong.of(loadPosition.asLong()));
         }
-        for (Map.Entry<BlockPos, Augment> entry : this.augmentEntities.entrySet()) {
-            positions.add(NbtLong.of(entry.getKey().asLong()));
+        if (this.claim != null) {
+            for (Map.Entry<BlockPos, Augment> entry : this.claim.getAugments().entrySet()) {
+                positions.add(NbtLong.of(entry.getKey().asLong()));
+            }
         }
 
         tag.put(AUGMENT_LIST_KEY, positions);
@@ -140,19 +110,12 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
     }
 
     public void addChild(BlockPos pos, Augment augment) {
-        this.augmentEntities.put(pos, augment);
-        for (var player : this.previousTickPlayers) {
-            augment.onPlayerEnter(this.claim, player);
-        }
+        this.claim.addAugment(pos, augment);
+
     }
 
     public void removeChild(BlockPos pos) {
-        var augment = this.augmentEntities.remove(pos);
-        if (augment != null) {
-            for (var player : this.previousTickPlayers) {
-                augment.onPlayerExit(this.claim, player);
-            }
-        }
+        this.claim.removeAugment(pos);
     }
 
     @Nullable
@@ -171,53 +134,31 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
     }
 
     public boolean hasAugment(Augment augment) {
-        assert world != null;
-
-        for (var entry : this.augmentEntities.entrySet()) {
-            BlockPos position = entry.getKey();
-            var block = world.getBlockState(position).getBlock();
-
-            if (block instanceof Augment && block.equals(augment)) {
-                return true;
-            }
-        }
-
-        return false;
+        return this.claim.hasAugment(augment);
     }
 
+    @Deprecated
     public boolean hasAugment() {
-        return augmentEntities.size() > 0;
+        return this.claim.hasAugment();
     }
 
+    @Deprecated
     public Map<BlockPos, Augment> getAugments() {
-        return augmentEntities;
+        return this.claim.getAugments();
     }
 
+    @Deprecated
     public List<PlayerEntity> getPreviousTickPlayers() {
-        return previousTickPlayers;
+        return List.of();
     }
 
     public void from(ClaimAnchorBlockEntity be) {
-        this.previousTickPlayers.addAll(be.getPreviousTickPlayers());
-        this.augmentEntities.putAll(be.getAugments());
+        this.claim = be.claim;
     }
 
     @Override
     public void markRemoved() {
-
-        // Make sure exit logic is run after claim is removed from world
-        // This can happen while teleporting
-        for (var augment : this.augmentEntities.values()) {
-            if (augment != null && augment.isEnabled(this.claim, this.world)) {
-                for (var player : this.previousTickPlayers) {
-                    augment.onPlayerExit(this.claim, player);
-                }
-            }
-        }
-
         // Reset players in claim
-        this.previousTickPlayers.clear();
-
         super.markRemoved();
     }
 }

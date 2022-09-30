@@ -7,6 +7,7 @@ import draylar.goml.GetOffMyLawn;
 import draylar.goml.api.Claim;
 import draylar.goml.api.ClaimBox;
 import draylar.goml.api.ClaimUtils;
+import draylar.goml.api.event.ClaimEvents;
 import draylar.goml.block.ClaimAnchorBlock;
 import draylar.goml.block.entity.ClaimAnchorBlockEntity;
 import eu.pb4.polymer.api.item.PolymerItem;
@@ -18,6 +19,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
@@ -79,6 +81,7 @@ public class UpgradeKitItem extends Item implements PolymerItem {
                     var claims = ClaimUtils.getClaimsInBox(world, pos.add(-radius, -radiusY, -radius), pos.add(radius, radiusY, radius), currentClaim.get().getKey().toBox());
                     if (claims.isEmpty()) {
                         var claimInfo = currentClaim.get().getValue();
+                        var oldSize = claimInfo.getClaimBox();
 
                         // remove claim
                         GetOffMyLawn.CLAIM.get(world).remove(currentClaim.get().getKey());
@@ -94,6 +97,9 @@ public class UpgradeKitItem extends Item implements PolymerItem {
 
                         var box = new ClaimBox(pos, radius, radiusY);
                         claimInfo.internal_setClaimBox(box);
+                        if (world instanceof ServerWorld world1) {
+                            claimInfo.internal_updateChunkCount(world1);
+                        }
                         claimInfo.internal_setWorld(currentClaim.get().getValue().getWorld());
                         GetOffMyLawn.CLAIM.get(world).add(box, claimInfo);
 
@@ -108,6 +114,7 @@ public class UpgradeKitItem extends Item implements PolymerItem {
                             ((ClaimAnchorBlockEntity) newBE).from(((ClaimAnchorBlockEntity) oldBE));
                         }
 
+                        ClaimEvents.CLAIM_RESIZED.invoker().onResizeEvent(claimInfo, oldSize, box);
                         return ActionResult.SUCCESS;
                     } else {
                         var list = Text.literal("");

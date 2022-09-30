@@ -3,6 +3,7 @@ package draylar.goml.ui;
 import draylar.goml.GetOffMyLawn;
 import draylar.goml.api.Claim;
 import draylar.goml.api.ClaimBox;
+import draylar.goml.api.event.ClaimEvents;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import net.minecraft.item.Items;
@@ -10,6 +11,8 @@ import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryKey;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.stream.Collectors;
@@ -63,9 +66,12 @@ public class AdminAugmentGui extends SimpleGui {
                 .setCallback((i, a, c, g) -> {
                     PagedGui.playClickSound(this.player);
                     GetOffMyLawn.CLAIM.get(claim.getWorldInstance(player.server)).remove(this.claimBox);
+                    var oldSize = claim.getClaimBox();
                     this.claimBox = new ClaimBox(this.claim.getOrigin(), this.claimRadius, this.claimHeight);
                     GetOffMyLawn.CLAIM.get(claim.getWorldInstance(player.server)).add(this.claimBox, this.claim);
                     claim.internal_setClaimBox(this.claimBox);
+                    claim.internal_updateChunkCount(player.getServer().getWorld(RegistryKey.of(Registry.WORLD_KEY, this.claim.getWorld())));
+                    ClaimEvents.CLAIM_RESIZED.invoker().onResizeEvent(claim, oldSize, this.claimBox);
                 })
         );
 

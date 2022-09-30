@@ -7,6 +7,7 @@ import draylar.goml.api.ClaimBox;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -48,6 +49,9 @@ public class WorldClaimComponent implements ClaimComponent {
                 Claim claimInfo = Claim.fromNbt((NbtCompound) childCompound.get("Info"));
                 claimInfo.internal_setWorld(world);
                 claimInfo.internal_setClaimBox(box);
+                if (this.world instanceof ServerWorld world1) {
+                    claimInfo.internal_updateChunkCount(world1);
+                }
                 add(box, claimInfo);
             }
         });

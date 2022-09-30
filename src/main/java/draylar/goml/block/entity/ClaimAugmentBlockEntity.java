@@ -2,6 +2,8 @@ package draylar.goml.block.entity;
 
 import draylar.goml.GetOffMyLawn;
 import draylar.goml.api.Augment;
+import draylar.goml.api.Claim;
+import draylar.goml.api.ClaimUtils;
 import draylar.goml.registry.GOMLEntities;
 import eu.pb4.polymer.api.utils.PolymerObject;
 import net.minecraft.block.BlockState;
@@ -12,13 +14,15 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.stream.Collectors;
+
 public class ClaimAugmentBlockEntity extends BlockEntity implements PolymerObject {
 
     private static final String PARENT_POSITION_KEY = "ParentPosition";
-    @Nullable
-    private ClaimAnchorBlockEntity parent;
     private BlockPos parentPosition;
     private Augment augment;
+    @Nullable
+    private Claim claim;
 
     public ClaimAugmentBlockEntity(BlockPos pos, BlockState state) {
         super(GOMLEntities.CLAIM_AUGMENT, pos, state);
@@ -27,20 +31,26 @@ public class ClaimAugmentBlockEntity extends BlockEntity implements PolymerObjec
     public static <T extends BlockEntity> void tick(World world, BlockPos pos, BlockState state, T baseBlockEntity) {
         if (world instanceof ServerWorld && baseBlockEntity instanceof ClaimAugmentBlockEntity entity) {
             // Parent is null and parent position is not null, assume we are just loading the augment from tags.
-            if (entity.parent == null && entity.parentPosition != null) {
-                var blockEntity = entity.world.getChunk(entity.parentPosition).getBlockEntity(entity.parentPosition);
+            if (entity.parentPosition != null) {
+                var claims = ClaimUtils.getClaimsWithOrigin(world, entity.parentPosition);
 
-                if (blockEntity instanceof ClaimAnchorBlockEntity claimAnchorBlockEntity) {
-                    entity.parent = claimAnchorBlockEntity;
+                if (claims.isNotEmpty()) {
+                    entity.claim = claims.collect(Collectors.toList()).get(0).getValue();
                     entity.markDirty();
                 } else {
                     GetOffMyLawn.LOGGER.warn(String.format("An augment at %s tried to locate a parent at %s, but it could not be found!", entity.pos.toString(), entity.parentPosition.toString()));
                     world.breakBlock(pos, true);
+                    return;
                 }
             }
 
-            if (entity.parent == null && entity.parentPosition == null) {
+            if (entity.parentPosition == null) {
                 GetOffMyLawn.LOGGER.warn(String.format("An augment at %s has an invalid parent and parent position! Removing now.", entity.pos.toString()));
+                world.breakBlock(pos, true);
+                return;
+            }
+
+            if (entity.claim.isDestroyed()) {
                 world.breakBlock(pos, true);
             }
         }
@@ -48,11 +58,8 @@ public class ClaimAugmentBlockEntity extends BlockEntity implements PolymerObjec
 
     @Override
     protected void writeNbt(NbtCompound tag) {
-        if (this.parent != null) {
-            tag.putLong(PARENT_POSITION_KEY, this.parent.getPos().asLong());
-        } else if (this.parentPosition != null) {
+        if (this.parentPosition != null) {
             tag.putLong(PARENT_POSITION_KEY, this.parentPosition.asLong());
-
         }
 
         super.writeNbt(tag);
@@ -72,18 +79,19 @@ public class ClaimAugmentBlockEntity extends BlockEntity implements PolymerObjec
     }
 
     public void remove() {
-        if (this.parent != null) {
-            parent.removeChild(pos);
+        if (this.claim != null) {
+            claim.removeAugment(pos);
         }
     }
 
+    @Deprecated
     @Nullable
     public ClaimAnchorBlockEntity getParent() {
-        return parent;
+        return this.claim.getBlockEntityInstance(this.world.getServer());
     }
 
     public void setParent(ClaimAnchorBlockEntity parent) {
-        this.parent = parent;
+        this.parentPosition = parent.getPos();
         parent.addChild(pos, this.getAugment());
     }
 
