@@ -41,13 +41,9 @@ public class GogglesItem extends ArmorItem implements PolymerItem {
                         entity.getBlockPos().add(-distance, -distance, -distance),
                         entity.getBlockPos().add(distance, distance, distance)).forEach(
                         claim -> {
-                            BlockPos claimPos = claim.getKey().getOrigin();
-                            int xSize = claim.getKey().getX();
-                            int ySize = claim.getKey().getY();
-                            int zSize = claim.getKey().getZ();
-
-                            var minPos = new BlockPos(claimPos.getX() - xSize, Math.max(claimPos.getY() - ySize, world.getBottomY()), claimPos.getZ() - zSize);
-                            var maxPos = new BlockPos(claimPos.getX() + xSize, Math.min(claimPos.getY() + ySize, world.getTopY()), claimPos.getZ() + zSize);
+                            var box = claim.getKey().toBox();
+                            var minPos = new BlockPos(box.x1(), Math.max(box.y1(), world.getBottomY()), box.z1());
+                            var maxPos = new BlockPos(box.x2() - 1, Math.min(box.y2() - 1, world.getTopY()), box.z2() - 1);
 
                             WorldParticleUtils.render(player, minPos, maxPos,
                                     //new DustParticleEffect(new Vec3f(0.8f, 0.8f, 0.8f), 2)

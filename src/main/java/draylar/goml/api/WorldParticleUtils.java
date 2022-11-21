@@ -9,6 +9,8 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3f;
 
+import java.util.ArrayList;
+
 
 // Original implementation https://github.com/NucleoidMC/plasmid/blob/1.16/src/main/java/xyz/nucleoid/plasmid/map/workspace/editor/ParticleOutlineRenderer.java
 public class WorldParticleUtils {
@@ -62,6 +64,7 @@ public class WorldParticleUtils {
     }
 
     private static Edge[] edges(BlockPos min, BlockPos max) {
+        var list = new ArrayList<Edge>();
         int minX = min.getX();
         int minY = min.getY();
         int minZ = min.getZ();
@@ -69,25 +72,39 @@ public class WorldParticleUtils {
         int maxY = max.getY();
         int maxZ = max.getZ();
 
-        return new Edge[] {
-                // edges
-                new Edge(minX, minY, minZ, minX, minY, maxZ),
-                new Edge(minX, maxY, minZ, minX, maxY, maxZ),
-                new Edge(maxX, minY, minZ, maxX, minY, maxZ),
-                new Edge(maxX, maxY, minZ, maxX, maxY, maxZ),
+        // edges
 
-                // front
-                new Edge(minX, minY, minZ, minX, maxY, minZ),
-                new Edge(maxX, minY, minZ, maxX, maxY, minZ),
-                new Edge(minX, minY, minZ, maxX, minY, minZ),
-                new Edge(minX, maxY, minZ, maxX, maxY, minZ),
 
-                // back
-                new Edge(minX, minY, maxZ, minX, maxY, maxZ),
-                new Edge(maxX, minY, maxZ, maxX, maxY, maxZ),
-                new Edge(minX, minY, maxZ, maxX, minY, maxZ),
-                new Edge(minX, maxY, maxZ, maxX, maxY, maxZ),
-        };
+        list.add(new Edge(minX, minY, minZ, minX, maxY, minZ));
+        list.add(new Edge(maxX, minY, minZ, maxX, maxY, minZ));
+
+        list.add(new Edge(minX, minY, maxZ, minX, maxY, maxZ));
+        list.add(new Edge(maxX, minY, maxZ, maxX, maxY, maxZ));
+
+        list.add(new Edge(minX, minY, minZ, maxX, minY, minZ));
+        list.add(new Edge(minX, minY, maxZ, maxX, minY, maxZ));
+        list.add(new Edge(maxX, minY, minZ, maxX, minY, maxZ));
+        list.add(new Edge(minX, minY, minZ, minX, minY, maxZ));
+
+        list.add(new Edge(minX, maxY, minZ, minX, maxY, maxZ));
+        list.add(new Edge(maxX, maxY, minZ, maxX, maxY, maxZ));
+        list.add(new Edge(minX, maxY, minZ, maxX, maxY, minZ));
+        list.add(new Edge(minX, maxY, maxZ, maxX, maxY, maxZ));
+
+        var height = (max.getY() - min.getY());
+
+        var count = MathHelper.ceil(height / 64d);
+
+        var delta = height / count;
+
+        for (int i = 1; i < count; i++) {
+            list.add(new Edge(minX, minY + i * delta, minZ, maxX, minY + i * delta, minZ));
+            list.add(new Edge(minX, minY + i * delta, maxZ, maxX, minY + i * delta, maxZ));
+            list.add(new Edge(maxX, minY + i * delta, minZ, maxX, minY + i * delta, maxZ));
+            list.add(new Edge(minX, minY + i * delta, minZ, minX, minY + i * delta, maxZ));
+        }
+
+        return list.toArray(new Edge[0]);
     }
 
     private record Edge(int startX, int startY, int startZ, int endX, int endY, int endZ) {

@@ -42,6 +42,8 @@ public class GOMLConfig {
     public boolean allowDamagingNamedHostileMobs = false;
 
     public boolean claimProtectsFullWorldHeight = false;
+    public double claimAreaHeightMultiplier = 1;
+    public boolean makeClaimAreaChunkBound = false;
     public boolean allowClaimOverlappingIfSameOwner = false;
     public boolean allowFakePlayersToModify = false;
     public boolean protectAgainstHostileExplosionsActivatedByTrustedPlayers = false;

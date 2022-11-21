@@ -23,15 +23,22 @@ public abstract class PagedGui extends SimpleGui {
     public static final int PAGE_SIZE = 9 * 4;
     protected final Runnable closeCallback;
     protected int page = 0;
+    public boolean ignoreCloseCallback;
 
     public PagedGui(ServerPlayerEntity player, @Nullable Runnable closeCallback) {
         super(ScreenHandlerType.GENERIC_9X5, player, false);
         this.closeCallback = closeCallback;
     }
 
+
+    public void refreshOpen() {
+        this.updateDisplay();
+        this.open();
+    }
+
     @Override
     public void onClose() {
-        if (this.closeCallback != null) {
+        if (this.closeCallback != null && !ignoreCloseCallback) {
             this.closeCallback.run();
         }
     }
@@ -99,12 +106,12 @@ public abstract class PagedGui extends SimpleGui {
             case 1 -> DisplayElement.previousPage(this);
             case 3 -> DisplayElement.nextPage(this);
             case 7 -> DisplayElement.of(
-                    new GuiElementBuilder(Items.BARRIER)
+                    new GuiElementBuilder(Items.STRUCTURE_VOID)
                             .setName(Text.translatable(this.closeCallback != null ? "text.goml.gui.back" : "text.goml.gui.close").formatted(Formatting.RED))
                             .hideFlags()
                             .setCallback((x, y, z) -> {
                                 playClickSound(this.player);
-                                this.close();
+                                this.close(this.closeCallback != null);
                             })
             );
             default -> DisplayElement.filler();

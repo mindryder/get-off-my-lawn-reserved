@@ -48,6 +48,7 @@ public class Claim {
     public static final String TYPE_KEY = "Type";
     public static final String AUGMENTS_KEY = "Augments";
     public static final String CUSTOM_DATA_KEY = "CustomData";
+    private static final String BOX_KEY = "Box";
 
     private final Set<UUID> owners = new HashSet<>();
     private final Set<UUID> trusted = new HashSet<>();
@@ -84,6 +85,10 @@ public class Claim {
         owners.add(player.getUuid());
     }
 
+    public void addOwner(UUID id) {
+        this.owners.add(id);
+    }
+
     public boolean hasPermission(PlayerEntity player) {
         return hasPermission(player.getUuid());
     }
@@ -96,8 +101,16 @@ public class Claim {
         trusted.add(player.getUuid());
     }
 
+    public void trust(UUID uuid) {
+        trusted.add(uuid);
+    }
+
     public void untrust(PlayerEntity player) {
         trusted.remove(player.getUuid());
+    }
+
+    public void untrust(UUID uuid) {
+        trusted.remove(uuid);
     }
 
     /**
@@ -184,21 +197,31 @@ public class Claim {
 
         nbt.put(AUGMENTS_KEY, augments);
 
+        nbt.put(BOX_KEY, this.claimBox.toNbt());
+
+
         return nbt;
     }
 
-    /**
-     * Uses the top level information in the given {@link NbtCompound} to construct a {@link Claim}.
-     *
-     * <p>This method expects to find the following tags at the top level of the tag:
-     * <ul>
-     * <li>"Owners" - {@link UUID}s of claim owners
-     * <li>"Pos" - origin {@link BlockPos} of claim
-     *
-     * @param nbt  tag to deserialize information from
-     * @return  {@link Claim} instance with information from tag
-     */
+    @Deprecated
     public static Claim fromNbt(NbtCompound nbt) {
+        return fromNbt(nbt, 0);
+    }
+
+
+        /**
+         * Uses the top level information in the given {@link NbtCompound} to construct a {@link Claim}.
+         *
+         * <p>This method expects to find the following tags at the top level of the tag:
+         * <ul>
+         * <li>"Owners" - {@link UUID}s of claim owners
+         * <li>"Pos" - origin {@link BlockPos} of claim
+         *
+         * @param nbt  tag to deserialize information from
+         * @param version
+         * @return  {@link Claim} instance with information from tag
+         */
+    public static Claim fromNbt(NbtCompound nbt, int version) {
         // Collect UUID of owners
         Set<UUID> ownerUUIDs = new HashSet<>();
         NbtList ownersTag = nbt.getList(OWNERS_KEY, NbtType.INT_ARRAY);
@@ -233,6 +256,12 @@ public class Claim {
             }
         }
 
+        if (version == 0) {
+            claim.claimBox = ClaimBox.EMPTY;
+        } else {
+            claim.claimBox = ClaimBox.readNbt(nbt.getCompound(BOX_KEY), 0);
+        }
+
         for (var entry : nbt.getList(AUGMENTS_KEY, NbtElement.COMPOUND_TYPE)) {
             var value = (NbtCompound) entry;
             var pos = NbtHelper.toBlockPos(value.getCompound("Pos"));
@@ -241,6 +270,10 @@ public class Claim {
             if (pos != null && type != null) {
                 claim.augments.put(pos, type);
             }
+        }
+
+        for (var augment : claim.augments.entrySet()) {
+            augment.getValue().onLoaded(claim, augment.getKey());
         }
 
         return claim;
@@ -270,7 +303,13 @@ public class Claim {
     @Nullable
     public <T> T getData(DataKey<T> key) {
         try {
-            return (T) this.customData.getOrDefault(key, key.defaultValue());
+            var val = this.customData.get(key);
+            if (val == null) {
+                val = key.defaultSupplier().get();
+                this.customData.put((DataKey<Object>) key, val);
+            }
+
+            return (T) val;
         } catch (Exception e) {
             return key.defaultValue();
         }

@@ -41,7 +41,7 @@ public class GOMLBlocks {
     public static final Pair<SelectiveClaimAugmentBlock, Item> PVP_ARENA = register("pvp_arena", new SelectiveClaimAugmentBlock("pvp_arena", FabricBlockSettings.of(Material.STONE).hardness(10).resistance(3600000.0F), GOMLTextures.PVP_ARENA), 2);
     public static final Pair<ClaimAugmentBlock, Item> EXPLOSION_CONTROLLER = register("explosion_controller", new ExplosionControllerAugmentBlock(FabricBlockSettings.of(Material.STONE).hardness(10).resistance(3600000.0F), GOMLTextures.EXPLOSION_CONTROLLER), 2);
 
-    //public static final Pair<ClaimAugmentBlock, Item> FORCE_FIELD = register("force_field", new ForceFieldAugmentBlock(FabricBlockSettings.of(Material.STONE).hardness(10).resistance(3600000.0F), GOMLTextures.MISSING_TEXTURE), 2, false);
+    public static final Pair<ClaimAugmentBlock, Item> FORCE_FIELD = register("force_field", new ForceFieldAugmentBlock(FabricBlockSettings.of(Material.STONE).hardness(10).resistance(3600000.0F), GOMLTextures.FORCE_FIELD), 2);
 
     private static Pair<ClaimAnchorBlock, Item> register(String name, IntSupplier radius, float hardness, String texture) {
         var claimAnchorBlock = Registry.register(

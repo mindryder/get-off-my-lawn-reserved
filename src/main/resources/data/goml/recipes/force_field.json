@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "###",
+    "#R#",
+    "III"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:copper_ingot"
+    },
+    "R": {
+      "item": "minecraft:redstone_block"
+    },
+    "I": {
+      "item": "minecraft:iron_block"
+    }
+  },
+  "result": {
+    "item": "goml:force_field",
+    "count": 1
+  }
+}

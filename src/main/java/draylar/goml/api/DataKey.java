@@ -10,7 +10,10 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public record DataKey<T>(Identifier key, T defaultValue, Function<T, NbtElement> serializer, Function<NbtElement, T> deserializer) {
+public record DataKey<T>(Identifier key, T defaultValue, Function<T, NbtElement> serializer, Function<NbtElement, T> deserializer, @Nullable Supplier<T> defaultSupplier) {
+    public DataKey(Identifier key, T defaultValue, Function<T, NbtElement> serializer, Function<NbtElement, T> deserializer) {
+        this(key, defaultValue, serializer, deserializer, () -> defaultValue);
+    }
 
     private static final Map<Identifier, DataKey<?>> REGISTRY = new HashMap<>();
 
@@ -44,7 +47,7 @@ public record DataKey<T>(Identifier key, T defaultValue, Function<T, NbtElement>
             }
 
             return list;
-        });
+        }, collectionCreator);
     }
 
     public static DataKey<String> ofString(Identifier key, String defaultValue) {

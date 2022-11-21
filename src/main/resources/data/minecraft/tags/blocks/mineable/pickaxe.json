@@ -12,6 +12,9 @@
    "goml:heaven_wings",
    "goml:village_core",
    "goml:withering_seal",
-   "goml:chaos_zone"
+   "goml:chaos_zone",
+    "goml:force_field",
+    "goml:explosion_controller",
+    "goml:pvp_arena"
   ]
 }

@@ -30,7 +30,7 @@ public class AdminAugmentGui extends SimpleGui {
         this.setTitle(Text.translatable("text.goml.gui.admin_settings.title"));
         this.claim = claim;
         this.onClose = onClose;
-        this.claimBox = GetOffMyLawn.CLAIM.get(claim.getWorldInstance(player.server)).getClaims().entries().filter(e -> e.getValue() == this.claim).collect(Collectors.toList()).get(0).getKey();
+        this.claimBox = claim.getClaimBox();
         this.claimHeight = this.claimBox.radiusY();
         this.claimRadius = this.claimBox.radius();
 
@@ -65,11 +65,11 @@ public class AdminAugmentGui extends SimpleGui {
                 .setName(Text.translatable("text.goml.apply"))
                 .setCallback((i, a, c, g) -> {
                     PagedGui.playClickSound(this.player);
-                    GetOffMyLawn.CLAIM.get(claim.getWorldInstance(player.server)).remove(this.claimBox);
+                    GetOffMyLawn.CLAIM.get(claim.getWorldInstance(player.server)).remove(this.claim);
                     var oldSize = claim.getClaimBox();
-                    this.claimBox = new ClaimBox(this.claim.getOrigin(), this.claimRadius, this.claimHeight);
-                    GetOffMyLawn.CLAIM.get(claim.getWorldInstance(player.server)).add(this.claimBox, this.claim);
+                    this.claimBox = new ClaimBox(this.claimBox.getOrigin(), this.claimRadius, this.claimHeight, this.claimBox.noShift());
                     claim.internal_setClaimBox(this.claimBox);
+                    GetOffMyLawn.CLAIM.get(claim.getWorldInstance(player.server)).add(this.claim);
                     claim.internal_updateChunkCount(player.getServer().getWorld(RegistryKey.of(Registry.WORLD_KEY, this.claim.getWorld())));
                     ClaimEvents.CLAIM_RESIZED.invoker().onResizeEvent(claim, oldSize, this.claimBox);
                 })

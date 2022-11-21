@@ -4,6 +4,7 @@
     "recipes": [
       "goml:angelic_aura",
       "goml:chaos_zone",
+      "goml:force_field",
       "goml:crystal_claim_anchor",
       "goml:crystal_upgrade_kit",
       "goml:emeradic_claim_anchor",

@@ -55,6 +55,10 @@
   "block.goml.explosion_controller.description.1": "Allows to toggle prevention of",
   "block.goml.explosion_controller.description.2": "natural/non-player caused explosions.",
 
+  "block.goml.force_field": "Force Field",
+  "block.goml.force_field.description.1": "Prevents untrusted players",
+  "block.goml.force_field.description.2": "from entering the claim.",
+
   "item.goml.goggles": "Goggles of (Claim) Revealing",
   "item.goml.reinforced_upgrade_kit": "Reinforced Upgrade Kit",
   "item.goml.glistening_upgrade_kit": "Glistening Upgrade Kit",
@@ -81,6 +85,13 @@
   "text.goml.gui.admin_settings": "Modify Admin Claim...",
   "text.goml.gui.augment_list.title": "Anchor Augments",
   "text.goml.gui.admin_settings.title": "Modify Admin Claim",
+  "text.goml.gui.player_selector.by_name": "Select by name",
+  "text.goml.gui.player_selector.input.select_player": "Select: %s",
+  "text.goml.gui.player_selector.input.invalid": "Invalid player",
+  "text.goml.gui.player_selector.input.title": "Select by name",
+  "text.goml.gui.force_field.player_list": "Effected Players...",
+  "text.goml.gui.force_field.whitelist_mode": "Whitelist Mode: %s",
+  "text.goml.gui.force_field.add_player.title": "Add players to list",
 
   "text.goml.mode.everyone": "Everyone",
   "text.goml.mode.trusted": "Trusted Only",
@@ -104,6 +115,8 @@
   "text.goml.command.add_self": "You are already allowed in this claim!",
   "text.goml.command.remove_self": "You can't remove yourself from this claim!",
   "text.goml.command.removed_claim": "Removed claim in %s with origin of %s.",
+  "text.goml.command.escaped": "Escaped from claim!",
+  "text.goml.command.cant_escape": "You can't escape from here, because this area isn't protected agains you!",
 
   "text.goml.block_protected": "This block is protected by a claim!",
   "text.goml.entity_protected": "This entity is protected by a claim!",

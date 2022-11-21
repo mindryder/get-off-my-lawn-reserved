@@ -5,6 +5,7 @@ import draylar.goml.api.Claim;
 import draylar.goml.api.DataKey;
 import draylar.goml.block.ClaimAugmentBlock;
 import draylar.goml.other.StatusEnum;
+import draylar.goml.ui.GenericPlayerListGui;
 import draylar.goml.ui.PagedGui;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.SimpleGui;
@@ -18,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class ExplosionControllerAugmentBlock extends ClaimAugmentBlock {
     public static final DataKey<StatusEnum.Toggle> KEY = DataKey.ofEnum(GetOffMyLawn.id("explosion_control"), StatusEnum.Toggle.class, StatusEnum.Toggle.ENABLED);
+
 
     public ExplosionControllerAugmentBlock(Settings settings, String texture) {
         super(settings, texture);
@@ -41,25 +43,26 @@ public class ExplosionControllerAugmentBlock extends ClaimAugmentBlock {
         };
 
         gui.setTitle(this.getGuiName());
+        {
+            var change = new MutableObject<Runnable>();
+            change.setValue(() -> {
+                var currentMode = claim.getData(KEY);
+                gui.setSlot(0, new GuiElementBuilder(currentMode.getIcon())
+                        .setName(Text.translatable("text.goml.explosion_control_toggle", currentMode.getName()))
+                        .addLoreLine(Text.translatable("text.goml.mode_toggle.help").formatted(Formatting.GRAY))
+                        .setCallback((x, y, z) -> {
+                            PagedGui.playClickSound(player);
+                            var mode = currentMode.getNext();
+                            claim.setData(KEY, mode);
+                            change.getValue().run();
+                        })
+                );
+            });
 
-        var change = new MutableObject<Runnable>();
-        change.setValue(() -> {
-            var currentMode = claim.getData(KEY);
-            gui.setSlot(0, new GuiElementBuilder(currentMode.getIcon())
-                    .setName(Text.translatable("text.goml.explosion_control_toggle", currentMode.getName()))
-                    .addLoreLine(Text.translatable("text.goml.mode_toggle.help").formatted(Formatting.GRAY))
-                    .setCallback((x, y, z) -> {
-                        PagedGui.playClickSound(player);
-                        var mode = currentMode.getNext();
-                        claim.setData(KEY, mode);
-                        change.getValue().run();
-                    })
-            );
-        });
+            change.getValue().run();
+        }
 
-        change.getValue().run();
-
-        gui.setSlot(4, new GuiElementBuilder(Items.BARRIER)
+        gui.setSlot(4, new GuiElementBuilder(Items.STRUCTURE_VOID)
                 .setName(Text.translatable(closeCallback != null ? "text.goml.gui.back" : "text.goml.gui.close").formatted(Formatting.RED))
                 .setCallback((x, y, z) -> {
                     PagedGui.playClickSound(player);

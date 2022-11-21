@@ -1,0 +1,65 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#ftbchunks:interact_whitelist",
+      "required": false
+    },
+    {
+      "id": "waystones:waystone",
+      "required": false
+    },
+    {
+      "id": "waystones:desert_waystone",
+      "required": false
+    },
+    {
+      "id": "waystones:red_desert_waystone",
+      "required": false
+    },
+    {
+      "id": "waystones:stone_brick_waystone",
+      "required": false
+    },
+    {
+      "id": "waystones:nether_brick_waystone",
+      "required": false
+    },
+    {
+      "id": "waystones:red_nether_brick_waystone",
+      "required": false
+    },
+    {
+      "id": "waystones:end_stone_brick_waystone",
+      "required": false
+    },
+    {
+      "id": "waystones:blackstone_brick_waystone",
+      "required": false
+    },
+    {
+      "id": "waystones:deepslate_brick_waystone",
+      "required": false
+    },
+    {
+      "id": "adorn:trading_station",
+      "required": false
+    },
+    {
+      "id": "universal_shops:trade_block",
+      "required": false
+    },
+    {
+      "id": "universal_shops:admin_trade_block",
+      "required": false
+    },
+    {
+      "id": "universal_graves:grave",
+      "required": false
+    },
+    {
+      "id": "yigd:grave",
+      "required": false
+    }
+  ]
+}

@@ -20,7 +20,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.Pair;
+import net.minecraft.util.math.*;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.Nullable;
@@ -103,8 +104,20 @@ public class ClaimUtils {
      * @return claims that intersect with a box created by the 2 positions in the given world
      */
     public static Selection<Entry<ClaimBox, Claim>> getClaimsInBox(WorldView world, BlockPos lower, BlockPos upper) {
-        Box checkBox = Box.create(lower.getX(), lower.getY(), lower.getZ(), upper.getX(), upper.getY(), upper.getZ());
+        Box checkBox = createBox(lower, upper);
         return GetOffMyLawn.CLAIM.get(world).getClaims().entries(box -> box.intersectsClosed(checkBox));
+    }
+
+    public static Selection<Entry<ClaimBox, Claim>> getClaimsInBox(WorldView world, Box checkBox) {
+        return GetOffMyLawn.CLAIM.get(world).getClaims().entries(box -> box.intersectsClosed(checkBox));
+    }
+
+    public static Box createBox(int x1, int y1, int z1, int x2, int y2, int z2) {
+        return Box.create(Math.min(x1, x2), Math.min(y1, y2), Math.min(z1, z2), Math.max(x1, x2), Math.max(y1, y2), Math.max(z1, z2));
+    }
+
+    public static Box createBox(BlockPos pos1, BlockPos pos2) {
+        return Box.create(Math.min(pos1.getX(), pos2.getX()), Math.min(pos1.getY(), pos2.getY()), Math.min(pos1.getZ(), pos2.getZ()), Math.max(pos1.getX(), pos2.getX()), Math.max(pos1.getY(), pos2.getY()), Math.max(pos1.getZ(), pos2.getZ()));
     }
 
     /**
@@ -119,6 +132,10 @@ public class ClaimUtils {
      */
     public static Selection<Entry<ClaimBox, Claim>> getClaimsInBox(WorldView world, BlockPos lower, BlockPos upper, Box ignore) {
         Box checkBox = Box.create(lower.getX(), lower.getY(), lower.getZ(), upper.getX(), upper.getY(), upper.getZ());
+        return GetOffMyLawn.CLAIM.get(world).getClaims().entries(box -> box.intersectsClosed(checkBox) && !box.equals(ignore));
+    }
+
+    public static Selection<Entry<ClaimBox, Claim>> getClaimsInBox(WorldView world, Box checkBox, Box ignore) {
         return GetOffMyLawn.CLAIM.get(world).getClaims().entries(box -> box.intersectsClosed(checkBox) && !box.equals(ignore));
     }
 
@@ -205,7 +222,7 @@ public class ClaimUtils {
             // Remove claim
             GetOffMyLawn.CLAIM.get(world).getClaims().entries().forEach(entry -> {
                 if (entry.getValue() == claim) {
-                    GetOffMyLawn.CLAIM.get(world).remove(entry.getKey());
+                    GetOffMyLawn.CLAIM.get(world).remove(entry.getValue());
                 }
             });
 
@@ -284,5 +301,62 @@ public class ClaimUtils {
     @Deprecated
     public static boolean playerHasPermission(Entry<ClaimBox, Claim> claim, PlayerEntity checkPlayer) {
         return claim.getValue().getOwners().contains(checkPlayer.getUuid()) || isInAdminMode(checkPlayer);
+    }
+
+    public static ClaimBox createClaimBox(BlockPos pos, int radius) {
+        if (GetOffMyLawn.CONFIG.makeClaimAreaChunkBound) {
+            var chunkPos = ChunkSectionPos.from(pos);
+
+            radius = (int) ((Math.ceil(radius / 16d) - 1) * 16) + 8;
+            var radiusY = (int) ((Math.ceil((radius * GetOffMyLawn.CONFIG.claimAreaHeightMultiplier) / 16d) - 1) * 16) + 8;
+
+            return new ClaimBox(chunkPos.getCenterPos(), radius, GetOffMyLawn.CONFIG.claimProtectsFullWorldHeight ? Short.MAX_VALUE : radiusY, true);
+        }
+
+        return new ClaimBox(pos, radius, GetOffMyLawn.CONFIG.claimProtectsFullWorldHeight ? Short.MAX_VALUE : (int) (radius * GetOffMyLawn.CONFIG.claimAreaHeightMultiplier));
+    }
+
+    public static Pair<Vec3d, Direction> getClosestXZBorder(Claim claim, Vec3d curPos) {
+        return getClosestXZBorder(claim, curPos, 0);
+    }
+
+    public static Pair<Vec3d, Direction> getClosestXZBorder(Claim claim, Vec3d curPos, double extraDistance) {
+        var box = claim.getClaimBox();
+
+        var center = box.noShift() ? Vec3d.of(box.origin()) : Vec3d.ofCenter(box.getOrigin());
+        var vec = curPos.subtract(center);
+        var r = (box.noShift() ? box.radius() - 0.5 : box.radius()) + extraDistance;
+        var angle = MathHelper.atan2(vec.z, vec.x);
+
+        var tan = Math.tan(angle);
+
+        if (Double.isNaN(tan)) {
+            tan = 1;
+        }
+
+        double x, z;
+
+        Direction dir = null;
+
+        if (angle >= -MathHelper.HALF_PI / 2 && angle <= MathHelper.HALF_PI / 2) {
+            x = r;
+            z = tan * r;
+            dir = Direction.EAST;
+        } else if (angle >= MathHelper.HALF_PI / 2 && angle <= MathHelper.HALF_PI * 3 / 2) {
+            x = 1 / tan * r;
+            z = r;
+            dir = Direction.SOUTH;
+        } else if (angle <= -MathHelper.HALF_PI / 2 && angle >= -MathHelper.HALF_PI * 3 / 2) {
+            x = -1 / tan * r;
+            z = -r;
+            dir = Direction.NORTH;
+        } else {
+            x = -r;
+            z = -Math.tan(angle) * r;
+            dir = Direction.WEST;
+        }
+
+
+        return new Pair<>(center.add(x, 0, z), dir);
     }
 }

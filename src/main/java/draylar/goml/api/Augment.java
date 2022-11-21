@@ -34,6 +34,10 @@ public interface Augment {
 
     }
 
+    default void onLoaded(Claim claim, BlockPos key) {
+
+    }
+
     default boolean ticks() {
         return false;
     }

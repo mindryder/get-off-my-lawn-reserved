@@ -68,14 +68,15 @@ To configure your claim, you can interact with the anchor block. A UI will appea
 To upgrade your claim, place an Anchor Augment next to the core Claim Anchor. Anchor Augments available include:
 - Ender Binding: Prevents Enddermen from teleporting
 - Villager Core: Prevents Zombies from damaging Villagers
-- Visitor Greeter: MOTD to visitors
+- Greeter: MOTD to visitors
 - Angelic Aura: Regen to all players inside region
 - Withering Seal: Prevents wither status effect
-- Forceful Ejection: non-whitelisted players get launched out of the claim
+- Force Field: non-whitelisted players get launched out of the claim
 - Heaven's Wings: flight
 - Lake Spirit's Grace: water breathing, water sight, and better breathing
-- Defender's Right: pets & golems do 100% more damage to hostile mobs
 - Chaos Zone: Strength to all players inside region
+- PvP Arena: Allows changing pvp state in claim
+- Exprosion Controller: Allows toggling explosion protection
 
 ## Config:
 You can find config file in `./config/getoffmylawn.json`. To reload it, just type `/goml admin reload` in chat/console.

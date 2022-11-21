@@ -65,11 +65,11 @@ public class GreeterAugmentBlock extends ClaimAugmentBlock {
         );
 
         ui.setSlot(2,
-                new GuiElementBuilder(Items.BARRIER)
+                new GuiElementBuilder(Items.STRUCTURE_VOID)
                         .setName(Text.translatable("text.goml.gui.input_greeting.close").formatted(Formatting.RED))
                         .setCallback((index, clickType, actionType) -> {
                             PagedGui.playClickSound(player);
-                            ui.close();
+                            ui.close(closeCallback != null);
                         })
         );
 

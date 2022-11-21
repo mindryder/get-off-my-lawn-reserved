@@ -92,7 +92,7 @@ public class SelectiveClaimAugmentBlock extends ClaimAugmentBlock {
 
         change.getValue().run();
 
-        gui.setSlot(4, new GuiElementBuilder(Items.BARRIER)
+        gui.setSlot(4, new GuiElementBuilder(Items.STRUCTURE_VOID)
                 .setName(Text.translatable(closeCallback != null ? "text.goml.gui.back" : "text.goml.gui.close").formatted(Formatting.RED))
                 .setCallback((x, y, z) -> {
                     PagedGui.playClickSound(player);

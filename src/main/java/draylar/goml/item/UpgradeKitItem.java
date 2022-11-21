@@ -75,16 +75,16 @@ public class UpgradeKitItem extends Item implements PolymerItem {
                 // if we have permission
                 if(!noPermission) {
                     var radius = to.getRadius();
-                    var radiusY = GetOffMyLawn.CONFIG.claimProtectsFullWorldHeight ? Short.MAX_VALUE : radius;
+                    var newBox = ClaimUtils.createClaimBox(pos, radius);
 
                     // if we don't overlap with another claim
-                    var claims = ClaimUtils.getClaimsInBox(world, pos.add(-radius, -radiusY, -radius), pos.add(radius, radiusY, radius), currentClaim.get().getKey().toBox());
+                    var claims = ClaimUtils.getClaimsInBox(world, newBox.rtree3iBox(), currentClaim.get().getKey().toBox());
                     if (claims.isEmpty()) {
                         var claimInfo = currentClaim.get().getValue();
                         var oldSize = claimInfo.getClaimBox();
 
                         // remove claim
-                        GetOffMyLawn.CLAIM.get(world).remove(currentClaim.get().getKey());
+                        GetOffMyLawn.CLAIM.get(world).remove(currentClaim.get().getValue());
 
                         // set block
                         BlockEntity oldBE = world.getBlockEntity(pos);
@@ -95,13 +95,12 @@ public class UpgradeKitItem extends Item implements PolymerItem {
                         }
                         claimInfo.internal_setType(this.to);
 
-                        var box = new ClaimBox(pos, radius, radiusY);
-                        claimInfo.internal_setClaimBox(box);
+                        claimInfo.internal_setClaimBox(newBox);
                         if (world instanceof ServerWorld world1) {
                             claimInfo.internal_updateChunkCount(world1);
                         }
                         claimInfo.internal_setWorld(currentClaim.get().getValue().getWorld());
-                        GetOffMyLawn.CLAIM.get(world).add(box, claimInfo);
+                        GetOffMyLawn.CLAIM.get(world).add(claimInfo);
 
                         // decrement stack
                         if(!context.getPlayer().isCreative() && !context.getPlayer().isSpectator()) {
@@ -114,7 +113,7 @@ public class UpgradeKitItem extends Item implements PolymerItem {
                             ((ClaimAnchorBlockEntity) newBE).from(((ClaimAnchorBlockEntity) oldBE));
                         }
 
-                        ClaimEvents.CLAIM_RESIZED.invoker().onResizeEvent(claimInfo, oldSize, box);
+                        ClaimEvents.CLAIM_RESIZED.invoker().onResizeEvent(claimInfo, oldSize, newBox);
                         return ActionResult.SUCCESS;
                     } else {
                         var list = Text.literal("");

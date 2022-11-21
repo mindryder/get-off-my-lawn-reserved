@@ -44,7 +44,7 @@ public final class GomlProtectionProvider implements ProtectionProvider {
             return ClaimUtils.canModify(world, pos, player);
         } else {
             var claims = ClaimUtils.getClaimsAt(world, pos);
-            return claims.isEmpty() || claims.anyMatch((c) -> c.getValue().hasPermission(player.getUuid()));
+            return claims.isEmpty() || claims.anyMatch((c) -> c.getValue().hasPermission(profile.getId()));
         }
     }
 
@@ -89,7 +89,7 @@ public final class GomlProtectionProvider implements ProtectionProvider {
             if (claims.isEmpty()) {
                 return true;
             } else {
-                claims = claims.filter((e) -> e.getValue().getBlockEntityInstance(world.getServer()).hasAugment(GOMLBlocks.PVP_ARENA.getFirst()));
+                claims = claims.filter((e) -> e.getValue().hasAugment(GOMLBlocks.PVP_ARENA.getFirst()));
 
                 if (claims.isEmpty()) {
                     return GetOffMyLawn.CONFIG.enablePvPinClaims;

@@ -7,6 +7,9 @@ import draylar.goml.block.ClaimAnchorBlock;
 import me.lucko.fabric.api.permissions.v0.Options;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
@@ -21,16 +24,20 @@ public class ClaimAnchorBlockItem extends TooltippedBlockItem {
 
     @Override
     protected boolean canPlace(ItemPlacementContext context, BlockState state) {
+        if (context.getWorld().isClient) {
+            return true;
+        }
+
         var pos = context.getBlockPos();
         var radius = this.claimBlock.getRadius();
+
         if (radius <= 0 && !ClaimUtils.isInAdminMode(context.getPlayer())) {
             context.getPlayer().sendMessage(GetOffMyLawn.CONFIG.prefix(Text.translatable("text.goml.cant_place_claim.admin_only").formatted(Formatting.RED)), false);
             return false;
         }
 
         radius = Math.max(radius, 1);
-        var vertRadius = GetOffMyLawn.CONFIG.claimProtectsFullWorldHeight ? Short.MAX_VALUE : radius;
-        var checkBox = Box.create(pos.getX() - radius, pos.getY() - vertRadius, pos.getZ() - radius, pos.getX() + radius, pos.getY() + vertRadius, pos.getZ() + radius);
+        var checkBox = ClaimUtils.createClaimBox(pos, radius);
 
         if (!ClaimUtils.isInAdminMode(context.getPlayer())) {
             var count = ClaimUtils.getClaimsOwnedBy(context.getWorld(), context.getPlayer().getUuid()).count();
@@ -62,16 +69,16 @@ public class ClaimAnchorBlockItem extends TooltippedBlockItem {
                 return false;
             }
 
-            if (GetOffMyLawn.CONFIG.isBlacklisted(context.getWorld(), checkBox)) {
+            if (GetOffMyLawn.CONFIG.isBlacklisted(context.getWorld(), checkBox.toBox())) {
                 context.getPlayer().sendMessage(GetOffMyLawn.CONFIG.prefix(Text.translatable("text.goml.cant_place_claim.blacklisted_area", context.getWorld().getRegistryKey().getValue().toString(), context.getBlockPos().toShortString()).formatted(Formatting.RED)), false);
                 return false;
             }
         }
 
 
-        var claims = ClaimUtils.getClaimsInBox(context.getWorld(), pos.add(-radius, -vertRadius, -radius), pos.add(radius, vertRadius, radius));
+        var claims = ClaimUtils.getClaimsInBox(context.getWorld(), checkBox.rtree3iBox());
         if (GetOffMyLawn.CONFIG.allowClaimOverlappingIfSameOwner) {
-            claims = claims.filter(x -> !x.getValue().isOwner(context.getPlayer()));
+            claims = claims.filter(x -> !x.getValue().isOwner(context.getPlayer()) || x.getKey().toBox().equals(checkBox.toBox()));
         }
 
         if (claims.isNotEmpty()) {

@@ -1,10 +1,13 @@
 package draylar.goml.ui;
 
+import com.mojang.authlib.GameProfile;
+import draylar.goml.registry.GOMLTextures;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import net.minecraft.item.Items;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
@@ -14,12 +17,12 @@ import java.util.function.Predicate;
 @ApiStatus.Internal
 public class GenericPlayerSelectionGui extends PagedGui {
     private final PlayerManager playerManager;
-    private final Predicate<ServerPlayerEntity> shouldDisplay;
-    private final Consumer<ServerPlayerEntity> onClick;
+    private final Predicate<GameProfile> shouldDisplay;
+    private final Consumer<GameProfile> onClick;
     private int ticker;
-    private List<ServerPlayerEntity> cachedPlayers = Collections.emptyList();
+    private List<GameProfile> cachedPlayers = Collections.emptyList();
 
-    public GenericPlayerSelectionGui(ServerPlayerEntity player, Text title, Predicate<ServerPlayerEntity> shouldDisplay, Consumer<ServerPlayerEntity> onClick, Runnable postClose) {
+    public GenericPlayerSelectionGui(ServerPlayerEntity player, Text title, Predicate<GameProfile> shouldDisplay, Consumer<GameProfile> onClick, Runnable postClose) {
         super(player, postClose);
         this.shouldDisplay = shouldDisplay;
         this.onClick = onClick;
@@ -36,13 +39,13 @@ public class GenericPlayerSelectionGui extends PagedGui {
 
     @Override
     protected void updateDisplay() {
-        List<ServerPlayerEntity> list = new ArrayList<>();
-        for (ServerPlayerEntity p : this.playerManager.getPlayerList()) {
-            if (this.shouldDisplay.test(p)) {
-                list.add(p);
+        List<GameProfile> list = new ArrayList<>();
+        for (var p : this.playerManager.getPlayerList()) {
+            if (this.shouldDisplay.test(p.getGameProfile())) {
+                list.add(p.getGameProfile());
             }
         }
-        list.sort(Comparator.comparing((player) -> player.getGameProfile().getName()));
+        list.sort(Comparator.comparing((player) -> player.getName()));
         this.cachedPlayers = list;
         super.updateDisplay();
     }
@@ -53,17 +56,40 @@ public class GenericPlayerSelectionGui extends PagedGui {
            var player = this.cachedPlayers.get(id);
            return DisplayElement.of(
                    new GuiElementBuilder(Items.PLAYER_HEAD)
-                           .setName(player.getName())
-                           .setSkullOwner(player.getGameProfile(), null)
+                           .setName(Text.literal(player.getName()))
+                           .setSkullOwner(player, null)
                            .setCallback((x, y, z) -> {
                        playClickSound(this.player);
                        this.onClick.accept(player);
-                       this.close();
+                       this.close(this.closeCallback != null);
                    })
            );
        }
 
         return DisplayElement.empty();
+    }
+
+    @Override
+    protected DisplayElement getNavElement(int id) {
+        return switch (id) {
+            case 5 -> DisplayElement.of(new GuiElementBuilder(Items.NAME_TAG)
+                    .setName(Text.translatable("text.goml.gui.player_selector.by_name").formatted(Formatting.GREEN))
+                    .setCallback((x, y, z) -> {
+                        playClickSound(this.player);
+
+                        this.ignoreCloseCallback = true;
+                        this.close(true);
+                        this.ignoreCloseCallback = false;
+                        new NamePlayerSelectorGui(this.player, this.shouldDisplay, this::refreshOpen, (p) -> {
+                            this.onClick.accept(p);
+                            this.close(true);
+                            if (this.closeCallback != null) {
+                                this.closeCallback.run();
+                            }
+                        });
+                    }));
+            default -> super.getNavElement(id);
+        };
     }
 
     @Override

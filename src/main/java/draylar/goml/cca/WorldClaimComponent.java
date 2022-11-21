@@ -8,9 +8,10 @@ import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
 
 public class WorldClaimComponent implements ClaimComponent {
 
@@ -27,70 +28,64 @@ public class WorldClaimComponent implements ClaimComponent {
     }
 
     @Override
-    public void add(ClaimBox box, Claim info) {
-        this.claims = this.claims.put(box, info);
+    public void add(Claim info) {
+        this.claims = this.claims.put(info.getClaimBox(), info);
     }
 
     @Override
-    public void remove(ClaimBox box) {
-        this.claims = this.claims.remove(box);
+    public void remove(Claim info) {
+        this.claims = this.claims.remove(info.getClaimBox());
     }
 
     @Override
     public void readFromNbt(NbtCompound tag) {
         this.claims = RTreeMap.create(new ConfigurationBuilder().star().build(), ClaimBox::rtree3iBox);
         var world = this.world.getRegistryKey().getValue();
-        NbtList NbtList = tag.getList("Claims", NbtType.COMPOUND);
 
-        NbtList.forEach(child -> {
-            NbtCompound childCompound = (NbtCompound) child;
-            ClaimBox box = boxFromTag((NbtCompound) childCompound.get("Box"));
-            if (box != null) {
-                Claim claimInfo = Claim.fromNbt((NbtCompound) childCompound.get("Info"));
+        var version = tag.getInt("Version");
+        NbtList nbtList = tag.getList("Claims", NbtType.COMPOUND);
+
+        if (version == 0) {
+            nbtList.forEach(child -> {
+                NbtCompound childCompound = (NbtCompound) child;
+                ClaimBox box = boxFromTag((NbtCompound) childCompound.get("Box"));
+                if (box != null) {
+                    Claim claimInfo = Claim.fromNbt((NbtCompound) childCompound.get("Info"), version);
+                    claimInfo.internal_setWorld(world);
+                    claimInfo.internal_setClaimBox(box);
+                    if (this.world instanceof ServerWorld world1) {
+                        claimInfo.internal_updateChunkCount(world1);
+                    }
+                    add(claimInfo);
+                }
+            });
+        } else {
+            nbtList.forEach(child -> {
+                Claim claimInfo = Claim.fromNbt((NbtCompound) child, version);
                 claimInfo.internal_setWorld(world);
-                claimInfo.internal_setClaimBox(box);
                 if (this.world instanceof ServerWorld world1) {
                     claimInfo.internal_updateChunkCount(world1);
                 }
-                add(box, claimInfo);
-            }
-        });
+                add(claimInfo);
+            });
+        }
     }
 
     @Override
     public void writeToNbt(NbtCompound tag) {
-        NbtList NbtListClaims = new NbtList();
+        NbtList nbtListClaims = new NbtList();
+        tag.putInt("Version", 1);
 
-        claims.entries().forEach(claim -> {
-            NbtCompound claimTag = new NbtCompound();
-
-            claimTag.put("Box", serializeBox(claim.getKey()));
-            claimTag.put("Info", claim.getValue().asNbt());
-
-            NbtListClaims.add(claimTag);
+        claims.values().forEach(claim -> {
+            nbtListClaims.add(claim.asNbt());
         });
 
-        tag.put("Claims", NbtListClaims);
-    }
-
-    public NbtCompound serializeBox(ClaimBox box) {
-        NbtCompound boxTag = new NbtCompound();
-
-        boxTag.putLong("OriginPos", box.getOrigin().asLong());
-        boxTag.putInt("Radius", box.getRadius());
-        boxTag.putInt("Height", box.getY());
-
-        return boxTag;
+        tag.put("Claims", nbtListClaims);
     }
 
     @Nullable
+    @Deprecated
     public ClaimBox boxFromTag(NbtCompound tag) {
-        BlockPos originPos = BlockPos.fromLong(tag.getLong("OriginPos"));
-        var radius = tag.getInt("Radius");
-        var height = tag.contains("Height") ? tag.getInt("Height") : radius;
-        if (radius > 0 && height > 0) {
-            return new ClaimBox(originPos, radius, height);
-        }
-        return null;
+        return ClaimBox.readNbt(tag, 0);
     }
 }
