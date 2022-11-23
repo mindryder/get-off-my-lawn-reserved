@@ -190,7 +190,7 @@ public class ClaimUtils {
 
         return claimsFound.isEmpty() || claimsFound.anyMatch((c) -> {
             if (world.getServer() != null) {
-                if (c.getValue().getBlockEntityInstance(world.getServer()).hasAugment(GOMLBlocks.EXPLOSION_CONTROLLER.getFirst())) {
+                if (c.getValue().hasAugment(GOMLBlocks.EXPLOSION_CONTROLLER.getFirst())) {
                     return c.getValue().getData(ExplosionControllerAugmentBlock.KEY) == StatusEnum.Toggle.DISABLED;
                 }
             }

@@ -289,6 +289,7 @@ public class Claim {
     }
 
     @Nullable
+    @Deprecated
     public ClaimAnchorBlockEntity getBlockEntityInstance(MinecraftServer server) {
         if (server.getWorld(RegistryKey.of(Registry.WORLD_KEY, getWorld())).getBlockEntity(this.origin) instanceof ClaimAnchorBlockEntity claimAnchorBlock) {
             return claimAnchorBlock;
