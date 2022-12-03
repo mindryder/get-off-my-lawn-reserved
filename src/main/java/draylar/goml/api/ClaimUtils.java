@@ -105,11 +105,15 @@ public class ClaimUtils {
      */
     public static Selection<Entry<ClaimBox, Claim>> getClaimsInBox(WorldView world, BlockPos lower, BlockPos upper) {
         Box checkBox = createBox(lower, upper);
-        return GetOffMyLawn.CLAIM.get(world).getClaims().entries(box -> box.intersectsClosed(checkBox));
+        return getClaimsInBox(world, checkBox);
     }
 
     public static Selection<Entry<ClaimBox, Claim>> getClaimsInBox(WorldView world, Box checkBox) {
         return GetOffMyLawn.CLAIM.get(world).getClaims().entries(box -> box.intersectsClosed(checkBox));
+    }
+
+    public static Selection<Entry<ClaimBox, Claim>> getClaimsInOpenBox(WorldView world, Box checkBox) {
+        return GetOffMyLawn.CLAIM.get(world).getClaims().entries(box -> box.intersectsOpen(checkBox));
     }
 
     public static Box createBox(int x1, int y1, int z1, int x2, int y2, int z2) {

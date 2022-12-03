@@ -166,9 +166,16 @@ public class EventHandlers {
                 }
             }
 
-            Selection<Entry<ClaimBox, Claim>> claimsFound = ClaimUtils.getClaimsInBox(world, ClaimUtils.createBox(blockHitResult.getBlockPos(), blockHitResult.getBlockPos().offset(blockHitResult.getSide())));
+            var claimsFound = ClaimUtils.getClaimsAt(world, blockHitResult.getBlockPos());
 
-            return testPermission(claimsFound, playerEntity, hand, blockHitResult.getBlockPos(), PermissionReason.AREA_PROTECTED);
+            var ac = testPermission(claimsFound, playerEntity, hand, blockHitResult.getBlockPos(), PermissionReason.AREA_PROTECTED);
+
+            if (ac == ActionResult.PASS) {
+                var claimsFound2 = ClaimUtils.getClaimsAt(world, blockHitResult.getBlockPos().offset(blockHitResult.getSide()));
+                return testPermission(claimsFound2, playerEntity, hand, blockHitResult.getBlockPos().offset(blockHitResult.getSide()), PermissionReason.AREA_PROTECTED);
+            }
+
+            return ac;
         });
     }
 

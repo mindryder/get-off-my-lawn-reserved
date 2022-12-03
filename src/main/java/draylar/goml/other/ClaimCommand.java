@@ -370,7 +370,7 @@ public class ClaimCommand {
         player.sendMessage(Text.literal("-------------------------------------").formatted(Formatting.DARK_GRAY), false);
         player.sendMessage(Text.literal("GitHub: ")
                 .append(
-                        Text.literal("https://github.com/Patbox/get-off-my-lawn-server-sided")
+                        Text.literal("https://github.com/Patbox/get-off-my-lawn-reserved")
                                 .setStyle(Style.EMPTY.withColor(Formatting.BLUE).withUnderline(true).withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/Patbox/get-off-my-lawn-server-sided")))
                 ), false);
 

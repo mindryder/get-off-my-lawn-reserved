@@ -75,7 +75,7 @@
   "text.goml.gui.back": "Back",
   "text.goml.gui.player_list.title": "Trusted players",
   "text.goml.gui.player_list.add_player": "Add player",
-  "text.goml.gui.click_to_remove": "Click to remove player from claim",
+  "text.goml.gui.click_to_remove": "Click to remove",
   "text.goml.gui.player_add_gui.title": "Add player to claim",
   "text.goml.gui.claim.title": "Claim",
   "text.goml.gui.claim.about": "About...",
@@ -116,7 +116,7 @@
   "text.goml.command.remove_self": "You can't remove yourself from this claim!",
   "text.goml.command.removed_claim": "Removed claim in %s with origin of %s.",
   "text.goml.command.escaped": "Escaped from claim!",
-  "text.goml.command.cant_escape": "You can't escape from here, because this area isn't protected agains you!",
+  "text.goml.command.cant_escape": "You can't escape from here, because this area isn't protected against you!",
 
   "text.goml.block_protected": "This block is protected by a claim!",
   "text.goml.entity_protected": "This entity is protected by a claim!",
@@ -136,6 +136,7 @@
   "text.goml.command.help.untrust": "removes a trusted member from the current claim.",
   "text.goml.command.help.list": "displays all claims you have access to.",
   "text.goml.command.help.gui": "displays gui of claim you stand on.",
+  "text.goml.command.help.escape": "teleports you out of the claim, if you can't modify it.",
   "text.goml.command.help.admin": "all administration-related commands.",
 
   "text.goml.position": "Position: %s",
