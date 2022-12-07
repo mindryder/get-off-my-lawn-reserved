@@ -7,12 +7,13 @@ import draylar.goml.api.event.ClaimEvents;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import net.minecraft.item.Items;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.stream.Collectors;
@@ -70,7 +71,7 @@ public class AdminAugmentGui extends SimpleGui {
                     this.claimBox = new ClaimBox(this.claimBox.getOrigin(), this.claimRadius, this.claimHeight, this.claimBox.noShift());
                     claim.internal_setClaimBox(this.claimBox);
                     GetOffMyLawn.CLAIM.get(claim.getWorldInstance(player.server)).add(this.claim);
-                    claim.internal_updateChunkCount(player.getServer().getWorld(RegistryKey.of(Registry.WORLD_KEY, this.claim.getWorld())));
+                    claim.internal_updateChunkCount(player.getServer().getWorld(RegistryKey.of(RegistryKeys.WORLD, this.claim.getWorld())));
                     ClaimEvents.CLAIM_RESIZED.invoker().onResizeEvent(claim, oldSize, this.claimBox);
                 })
         );

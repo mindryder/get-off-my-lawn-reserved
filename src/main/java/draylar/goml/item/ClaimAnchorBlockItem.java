@@ -1,15 +1,11 @@
 package draylar.goml.item;
 
-import com.jamieswhiteshirt.rtree3i.Box;
 import draylar.goml.GetOffMyLawn;
 import draylar.goml.api.ClaimUtils;
 import draylar.goml.block.ClaimAnchorBlock;
 import me.lucko.fabric.api.permissions.v0.Options;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 

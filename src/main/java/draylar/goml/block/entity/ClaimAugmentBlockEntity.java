@@ -5,7 +5,7 @@ import draylar.goml.api.Augment;
 import draylar.goml.api.Claim;
 import draylar.goml.api.ClaimUtils;
 import draylar.goml.registry.GOMLEntities;
-import eu.pb4.polymer.api.utils.PolymerObject;
+import eu.pb4.polymer.core.api.utils.PolymerObject;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;

@@ -9,10 +9,11 @@ import draylar.goml.registry.GOMLBlocks;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
+import net.minecraft.registry.Registries;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.registry.Registry;
 import net.minecraft.world.World;
 import org.apache.commons.io.IOUtils;
 
@@ -66,11 +67,11 @@ public class GOMLConfig {
     public WrappedText placeholderClaimCantBuildInfo = WrappedText.of("${owners} <gray>(<red>${anchor}</red>)");
 
     public boolean canInteract(Block block) {
-        return this.allowedBlockInteraction.contains(Registry.BLOCK.getId(block));
+        return this.allowedBlockInteraction.contains(Registries.BLOCK.getId(block));
     }
 
     public boolean canInteract(Entity entity) {
-        return this.allowedEntityInteraction.contains(Registry.ENTITY_TYPE.getId(entity.getType()));
+        return this.allowedEntityInteraction.contains(Registries.ENTITY_TYPE.getId(entity.getType()));
     }
 
     public boolean isBlacklisted(World world, Box claimBox) {
@@ -108,7 +109,7 @@ public class GOMLConfig {
             }
 
             for (var augment : GOMLBlocks.AUGMENTS) {
-                var id = Registry.BLOCK.getId(augment);
+                var id = Registries.BLOCK.getId(augment);
 
                 if (id != null && !config.enabledAugments.containsKey(id)) {
                     config.enabledAugments.put(id, true);

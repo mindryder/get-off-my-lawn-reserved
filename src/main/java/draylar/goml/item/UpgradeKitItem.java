@@ -10,7 +10,7 @@ import draylar.goml.api.ClaimUtils;
 import draylar.goml.api.event.ClaimEvents;
 import draylar.goml.block.ClaimAnchorBlock;
 import draylar.goml.block.entity.ClaimAnchorBlockEntity;
-import eu.pb4.polymer.api.item.PolymerItem;
+import eu.pb4.polymer.core.api.item.PolymerItem;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.item.TooltipContext;
@@ -37,7 +37,7 @@ public class UpgradeKitItem extends Item implements PolymerItem {
     private final Item clientItem;
 
     public UpgradeKitItem(ClaimAnchorBlock from, ClaimAnchorBlock to, Item display) {
-        super(new Item.Settings().group(GetOffMyLawn.GROUP));
+        super(new Item.Settings());
         this.clientItem = display;
 
         this.from = from;
@@ -153,8 +153,8 @@ public class UpgradeKitItem extends Item implements PolymerItem {
     }
 
     @Override
-    public ItemStack getPolymerItemStack(ItemStack itemStack, @Nullable ServerPlayerEntity player) {
-        var clientStack = PolymerItem.super.getPolymerItemStack(itemStack, player);
+    public ItemStack getPolymerItemStack(ItemStack itemStack, TooltipContext context, @Nullable ServerPlayerEntity player) {
+        var clientStack = PolymerItem.super.getPolymerItemStack(itemStack, context, player);
         clientStack.addEnchantment(Enchantments.LURE, 68);
         return clientStack;
     }

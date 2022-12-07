@@ -7,11 +7,12 @@ import draylar.goml.api.ClaimBox;
 import draylar.goml.api.ClaimUtils;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import me.lucko.fabric.api.permissions.v0.Permissions;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
@@ -58,7 +59,7 @@ public class ClaimListGui extends PagedGui {
 
             icon.setCallback((x, y, z) -> {
                 if (Permissions.check(this.player, "goml.teleport", 3)) {
-                    var world = server.getWorld(RegistryKey.of(Registry.WORLD_KEY, claim.getWorld()));
+                    var world = server.getWorld(RegistryKey.of(RegistryKeys.WORLD, claim.getWorld()));
                     if (world != null) {
                         this.player.teleport(world, claim.getOrigin().getX(), claim.getOrigin().getY() + 1, claim.getOrigin().getZ(), this.player.getYaw(), this.player.getPitch());
                     }

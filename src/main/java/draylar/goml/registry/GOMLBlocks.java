@@ -11,7 +11,8 @@ import draylar.goml.item.ToggleableBlockItem;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.Material;
 import net.minecraft.item.Item;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,13 +46,13 @@ public class GOMLBlocks {
 
     private static Pair<ClaimAnchorBlock, Item> register(String name, IntSupplier radius, float hardness, String texture) {
         var claimAnchorBlock = Registry.register(
-                    Registry.BLOCK,
+                    Registries.BLOCK,
                     GetOffMyLawn.id(name),
                     new ClaimAnchorBlock(FabricBlockSettings.of(Material.STONE).strength(hardness, 3600000.0F), radius, texture)
             );
 
 
-        var registeredItem = Registry.register(Registry.ITEM, GetOffMyLawn.id(name), new ClaimAnchorBlockItem(claimAnchorBlock, new Item.Settings().group(GetOffMyLawn.GROUP), 0));
+        var registeredItem = Registry.register(Registries.ITEM, GetOffMyLawn.id(name), new ClaimAnchorBlockItem(claimAnchorBlock, new Item.Settings(), 0));
         ANCHORS.add(claimAnchorBlock);
         return Pair.of(claimAnchorBlock, registeredItem);
     }
@@ -68,14 +69,14 @@ public class GOMLBlocks {
         var id = GetOffMyLawn.id(name);
         BooleanSupplier check = () -> GetOffMyLawn.CONFIG.enabledAugments.getOrDefault(id, true);
         ClaimAugmentBlock registered = Registry.register(
-                Registry.BLOCK,
+                Registries.BLOCK,
                 id,
                 augment
         );
 
         augment.setEnabledCheck(check);
 
-        Item registeredItem = Registry.register(Registry.ITEM, id, new ToggleableBlockItem(augment, new Item.Settings().group(withGroup ? GetOffMyLawn.GROUP : null), tooltipLines, check));
+        Item registeredItem = Registry.register(Registries.ITEM, id, new ToggleableBlockItem(augment, new Item.Settings(), tooltipLines, check));
         AUGMENTS.add(registered);
 
         GOMLAugments.register(id, augment);

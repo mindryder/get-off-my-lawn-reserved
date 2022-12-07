@@ -76,7 +76,7 @@ dependencies {
 	modCompileOnly 'vazkii.botania:Botania:1.18.1-427-FABRIC'
 
 	// Server side stuff
-	modImplementation include("eu.pb4:polymer:${project.polymer_version}")
+	modImplementation include("eu.pb4:polymer-core:${project.polymer_version}")
 	modImplementation include("eu.pb4:sgui:${project.sgui_version}")
 	modImplementation include("eu.pb4:hologram-api:${project.hologram_version}")
 	modImplementation include("eu.pb4:placeholder-api:${project.placeholder_version}")

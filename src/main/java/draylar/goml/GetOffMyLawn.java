@@ -1,11 +1,9 @@
 package draylar.goml;
 
-import com.jamieswhiteshirt.rtree3i.Box;
 import dev.onyxstudios.cca.api.v3.component.ComponentKey;
 import dev.onyxstudios.cca.api.v3.component.ComponentRegistryV3;
 import dev.onyxstudios.cca.api.v3.world.WorldComponentFactoryRegistry;
 import dev.onyxstudios.cca.api.v3.world.WorldComponentInitializer;
-import draylar.goml.api.Claim;
 import draylar.goml.api.GomlProtectionProvider;
 import draylar.goml.cca.ClaimComponent;
 import draylar.goml.cca.WorldClaimComponent;
@@ -17,14 +15,13 @@ import draylar.goml.registry.GOMLBlocks;
 import draylar.goml.registry.GOMLEntities;
 import draylar.goml.registry.GOMLItems;
 import eu.pb4.common.protection.api.CommonProtection;
-import eu.pb4.polymer.api.item.PolymerItemGroup;
+import eu.pb4.polymer.core.api.item.PolymerItemGroupUtils;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ChunkSectionPos;
@@ -34,7 +31,15 @@ import org.apache.logging.log4j.Logger;
 public class GetOffMyLawn implements ModInitializer, WorldComponentInitializer {
 
     public static final ComponentKey<ClaimComponent> CLAIM = ComponentRegistryV3.INSTANCE.getOrCreate(id("claims"), ClaimComponent.class);
-    public static final PolymerItemGroup GROUP = PolymerItemGroup.create(id("group"), Text.translatable("itemGroup.goml.group"));
+    public static final ItemGroup GROUP = PolymerItemGroupUtils.builder(id("group"))
+            .displayName(Text.translatable("itemGroup.goml.group"))
+            .icon(() -> new ItemStack(GOMLBlocks.WITHERED_CLAIM_ANCHOR.getSecond()))
+            .entries((f, c, op) -> {
+                GOMLBlocks.ANCHORS.forEach(c::add);
+                GOMLBlocks.AUGMENTS.forEach(c::add);
+                GOMLItems.BASE_ITEMS.forEach(c::add);
+            })
+            .build();
     public static final Logger LOGGER = LogManager.getLogger();
     public static GOMLConfig CONFIG = new GOMLConfig();
 
@@ -88,8 +93,6 @@ public class GetOffMyLawn implements ModInitializer, WorldComponentInitializer {
                 return (minX <= chunk.getPos().x && maxX >= chunk.getPos().x && minZ <= chunk.getPos().z && maxZ >= chunk.getPos().z);
             }).forEach(x -> x.getValue().internal_decrementChunks());
         });
-
-        GROUP.setIcon(new ItemStack(GOMLBlocks.WITHERED_CLAIM_ANCHOR.getSecond()));
     }
 
     @Override

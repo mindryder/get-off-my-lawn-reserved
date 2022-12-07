@@ -7,7 +7,7 @@ import draylar.goml.block.entity.ClaimAnchorBlockEntity;
 import draylar.goml.block.entity.ClaimAugmentBlockEntity;
 import draylar.goml.registry.GOMLEntities;
 import draylar.goml.registry.GOMLTextures;
-import eu.pb4.polymer.api.block.PolymerHeadBlock;
+import eu.pb4.polymer.core.api.block.PolymerHeadBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
@@ -204,12 +204,12 @@ public class ClaimAugmentBlock extends Block implements Augment, BlockEntityProv
     }
 
     @Override
-    public String getPolymerSkinValue(BlockState state) {
-        return this.texture;
+    public Block getPolymerBlock(BlockState state) {
+        return Blocks.PLAYER_HEAD;
     }
 
     @Override
-    public Block getPolymerBlock(BlockState state) {
-        return Blocks.PLAYER_HEAD;
+    public String getPolymerSkinValue(BlockState state, BlockPos pos, ServerPlayerEntity player) {
+        return this.texture;
     }
 }

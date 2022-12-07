@@ -16,11 +16,12 @@ import net.minecraft.entity.Tameable;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.registry.Registry;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -58,7 +59,7 @@ public class EventHandlers {
                 return ActionResult.PASS;
             }
 
-            if (GetOffMyLawn.CONFIG.allowedEntityInteraction.contains(Registry.ENTITY_TYPE.getId(entity.getType()))
+            if (GetOffMyLawn.CONFIG.allowedEntityInteraction.contains(Registries.ENTITY_TYPE.getId(entity.getType()))
                     || entity.getType().isIn(GOMLTags.ALLOWED_INTERACTIONS_ENTITY)) {
                 return ActionResult.PASS;
             }
@@ -161,7 +162,7 @@ public class EventHandlers {
             if (!(playerEntity.getStackInHand(hand).getItem() instanceof BlockItem)) {
                 var blockState = world.getBlockState(blockHitResult.getBlockPos());
 
-                if (GetOffMyLawn.CONFIG.allowedBlockInteraction.contains(Registry.BLOCK.getId(blockState.getBlock())) || blockState.isIn(GOMLTags.ALLOWED_INTERACTIONS_BLOCKS)) {
+                if (GetOffMyLawn.CONFIG.allowedBlockInteraction.contains(Registries.BLOCK.getId(blockState.getBlock())) || blockState.isIn(GOMLTags.ALLOWED_INTERACTIONS_BLOCKS)) {
                     return ActionResult.PASS;
                 }
             }

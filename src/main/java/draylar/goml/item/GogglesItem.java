@@ -3,31 +3,33 @@ package draylar.goml.item;
 import draylar.goml.GetOffMyLawn;
 import draylar.goml.api.ClaimUtils;
 import draylar.goml.api.WorldParticleUtils;
-import eu.pb4.polymer.api.item.PolymerItem;
+import eu.pb4.polymer.core.api.item.PolymerItem;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.*;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.registry.Registry;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.stream.Collectors;
 
 public class GogglesItem extends ArmorItem implements PolymerItem {
-    private static final BlockState[] STATES = Registry.BLOCK.stream().filter((b) -> {
-        var id = Registry.BLOCK.getId(b);
+    private static final BlockState[] STATES = Registries.BLOCK.stream().filter((b) -> {
+        var id = Registries.BLOCK.getId(b);
 
         return id.getNamespace().equals("minecraft") && id.getPath().endsWith("_concrete");
     }).map((b) -> b.getDefaultState()).collect(Collectors.toList()).toArray(new BlockState[0]);
 
     public GogglesItem() {
-        super(ArmorMaterials.IRON, EquipmentSlot.HEAD, new Item.Settings().group(GetOffMyLawn.GROUP).maxDamage(-1));
+        super(ArmorMaterials.IRON, EquipmentSlot.HEAD, new Item.Settings().maxDamage(-1));
     }
 
     @Override
@@ -60,8 +62,8 @@ public class GogglesItem extends ArmorItem implements PolymerItem {
     }
 
     @Override
-    public ItemStack getPolymerItemStack(ItemStack itemStack, @Nullable ServerPlayerEntity player) {
-        var clientStack = PolymerItem.super.getPolymerItemStack(itemStack, player);
+    public ItemStack getPolymerItemStack(ItemStack itemStack, TooltipContext context, @Nullable ServerPlayerEntity player) {
+        var clientStack = PolymerItem.super.getPolymerItemStack(itemStack, context, player);
         clientStack.addEnchantment(Enchantments.LURE, 64);
         return clientStack;
     }

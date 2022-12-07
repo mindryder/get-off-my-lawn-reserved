@@ -21,7 +21,7 @@ public class FireBlockMixin {
         }
     }
 
-    @Inject(method = "scheduledTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;createAndScheduleBlockTick(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;I)V", shift = At.Shift.AFTER), cancellable = true)
+    @Inject(method = "scheduledTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;scheduleBlockTick(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;I)V", shift = At.Shift.AFTER), cancellable = true)
     private void goml_preventFire2(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo ci) {
         if (!ClaimUtils.canFireDestroy(world, pos)) {
             ci.cancel();

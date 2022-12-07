@@ -1,16 +1,14 @@
 package draylar.goml.block;
 
-import com.jamieswhiteshirt.rtree3i.Box;
 import draylar.goml.GetOffMyLawn;
 import draylar.goml.api.Claim;
-import draylar.goml.api.ClaimBox;
 import draylar.goml.api.ClaimUtils;
 import draylar.goml.api.event.ClaimEvents;
 import draylar.goml.block.entity.ClaimAnchorBlockEntity;
 import draylar.goml.item.UpgradeKitItem;
 import draylar.goml.registry.GOMLEntities;
 import draylar.goml.registry.GOMLTextures;
-import eu.pb4.polymer.api.block.PolymerHeadBlock;
+import eu.pb4.polymer.core.api.block.PolymerHeadBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
@@ -155,14 +153,13 @@ public class ClaimAnchorBlock extends Block implements BlockEntityProvider, Poly
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
         return ClaimAnchorBlockEntity::tick;
     }
-
-    @Override
-    public String getPolymerSkinValue(BlockState state) {
-        return this.texture;
-    }
-
     @Override
     public Block getPolymerBlock(BlockState state) {
         return Blocks.PLAYER_HEAD;
+    }
+
+    @Override
+    public String getPolymerSkinValue(BlockState state, BlockPos pos, ServerPlayerEntity player) {
+        return this.texture;
     }
 }

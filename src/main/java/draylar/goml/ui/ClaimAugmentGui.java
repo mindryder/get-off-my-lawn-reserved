@@ -7,12 +7,13 @@ import draylar.goml.block.entity.ClaimAnchorBlockEntity;
 import draylar.goml.item.TooltippedBlockItem;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import net.minecraft.block.Block;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,7 +29,7 @@ public class ClaimAugmentGui extends PagedGui {
     public ClaimAugmentGui(ServerPlayerEntity player, Claim claim, boolean canModify, @Nullable Runnable onClose) {
         super(player, onClose);
         this.claim = claim;
-        this.blockEntity = ClaimUtils.getAnchor(player.server.getWorld(RegistryKey.of(Registry.WORLD_KEY, claim.getWorld())), claim);
+        this.blockEntity = ClaimUtils.getAnchor(player.server.getWorld(RegistryKey.of(RegistryKeys.WORLD, claim.getWorld())), claim);
         this.canModify = canModify;
         this.setTitle(Text.translatable("text.goml.gui.augment_list.title"));
         this.updateDisplay();

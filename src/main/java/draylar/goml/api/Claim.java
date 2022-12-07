@@ -20,6 +20,8 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -29,8 +31,8 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -170,7 +172,7 @@ public class Claim {
         if (this.icon != null) {
             nbt.put(ICON_KEY, this.icon.writeNbt(new NbtCompound()));
         }
-        nbt.putString(TYPE_KEY, Registry.BLOCK.getId(this.type).toString());
+        nbt.putString(TYPE_KEY, Registries.BLOCK.getId(this.type).toString());
 
         var customData = new NbtCompound();
 
@@ -239,7 +241,7 @@ public class Claim {
         } else if (nbt.contains(ICON_KEY, NbtElement.COMPOUND_TYPE)) {
             claim.icon = ItemStack.fromNbt(nbt.getCompound(ICON_KEY));
         } else if (nbt.contains(TYPE_KEY, NbtElement.STRING_TYPE)) {
-            var block = Registry.BLOCK.get(Identifier.tryParse(nbt.getString(TYPE_KEY)));
+            var block = Registries.BLOCK.get(Identifier.tryParse(nbt.getString(TYPE_KEY)));
             if (block instanceof ClaimAnchorBlock anchorBlock) {
                 claim.type = anchorBlock;
             }
@@ -285,13 +287,13 @@ public class Claim {
 
     @Nullable
     public ServerWorld getWorldInstance(MinecraftServer server) {
-        return server.getWorld(RegistryKey.of(Registry.WORLD_KEY, getWorld()));
+        return server.getWorld(RegistryKey.of(RegistryKeys.WORLD, getWorld()));
     }
 
     @Nullable
     @Deprecated
     public ClaimAnchorBlockEntity getBlockEntityInstance(MinecraftServer server) {
-        if (server.getWorld(RegistryKey.of(Registry.WORLD_KEY, getWorld())).getBlockEntity(this.origin) instanceof ClaimAnchorBlockEntity claimAnchorBlock) {
+        if (server.getWorld(RegistryKey.of(RegistryKeys.WORLD, getWorld())).getBlockEntity(this.origin) instanceof ClaimAnchorBlockEntity claimAnchorBlock) {
             return claimAnchorBlock;
         }
         return null;
@@ -502,7 +504,7 @@ public class Claim {
     }
 
     public Collection<ServerPlayerEntity> getPlayersIn(MinecraftServer server) {
-        var world = server.getWorld(RegistryKey.of(Registry.WORLD_KEY, this.world));
+        var world = server.getWorld(RegistryKey.of(RegistryKeys.WORLD, this.world));
 
         if (world == null) {
             return Collections.emptyList();
