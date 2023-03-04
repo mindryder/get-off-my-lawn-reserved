@@ -26,16 +26,7 @@ public abstract class VillagerEntityMixin extends LivingEntity {
             EntityDamageSource eds = (EntityDamageSource) damageSource;
 
             if(eds.getAttacker() instanceof HostileEntity) {
-                boolean b = ClaimUtils.getClaimsAt(world, getBlockPos()).anyMatch(claim -> {
-                    Claim foundClaim = claim.getValue();
-                    ClaimAnchorBlockEntity anchor = ClaimUtils.getAnchor(world, foundClaim);
-
-                    if(anchor != null) {
-                        return anchor.hasAugment(GOMLBlocks.VILLAGE_CORE.getFirst());
-                    } else {
-                        return false;
-                    }
-                });
+                boolean b = ClaimUtils.getClaimsAt(world, getBlockPos()).anyMatch(claim -> claim.getValue().hasAugment(GOMLBlocks.VILLAGE_CORE.getFirst()));
 
                 if(b) return true;
             }

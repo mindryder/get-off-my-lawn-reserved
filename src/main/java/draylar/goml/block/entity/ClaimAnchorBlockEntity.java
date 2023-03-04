@@ -111,7 +111,6 @@ public class ClaimAnchorBlockEntity extends BlockEntity implements PolymerObject
 
     public void addChild(BlockPos pos, Augment augment) {
         this.claim.addAugment(pos, augment);
-
     }
 
     public void removeChild(BlockPos pos) {

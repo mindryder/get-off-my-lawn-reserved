@@ -74,8 +74,8 @@ public class ClaimAugmentBlock extends Block implements Augment, BlockEntityProv
         if (playerEntity instanceof ServerPlayerEntity player && this.hasSettings()) {
             var blockEntity = world.getBlockEntity(pos, GOMLEntities.CLAIM_AUGMENT);
 
-            if (blockEntity.isPresent() && blockEntity.get().getParent() != null) {
-                var claim = blockEntity.get().getParent().getClaim();
+            if (blockEntity.isPresent() && blockEntity.get().getClaim() != null) {
+                var claim = blockEntity.get().getClaim();
 
                 if (claim != null && claim.isOwner(player)) {
                     this.openSettings(claim, player, null);
@@ -96,8 +96,8 @@ public class ClaimAugmentBlock extends Block implements Augment, BlockEntityProv
 
                 if (blockEntity instanceof ClaimAnchorBlockEntity claimAnchorBlockEntity && claimAnchorBlockEntity.getClaim() != null) {
                     return this.canPlace(claimAnchorBlockEntity.getClaim(), (World) world, pos, claimAnchorBlockEntity);
-                } else if (blockEntity instanceof ClaimAugmentBlockEntity claimAugmentBlockEntity && claimAugmentBlockEntity.getParent() != null && claimAugmentBlockEntity.getParent().getClaim() != null) {
-                    return this.canPlace(claimAugmentBlockEntity.getParent().getClaim(), (World) world, pos, claimAugmentBlockEntity.getParent());
+                } else if (blockEntity instanceof ClaimAugmentBlockEntity claimAugmentBlockEntity && claimAugmentBlockEntity.getClaim() != null && claimAugmentBlockEntity.getClaim() != null) {
+                    return this.canPlace(claimAugmentBlockEntity.getClaim(), (World) world, pos, claimAugmentBlockEntity.getParent());
                 }
             }
         }
@@ -126,17 +126,17 @@ public class ClaimAugmentBlock extends Block implements Augment, BlockEntityProv
 
             // Neighbor is a core element, set parent directly
             if (offsetBlock instanceof ClaimAnchorBlock) {
-                ClaimAnchorBlockEntity coreBE = (ClaimAnchorBlockEntity) world.getBlockEntity(offsetPos);
-                thisBE.setParent(coreBE);
+                if (world.getBlockEntity(offsetPos) instanceof ClaimAnchorBlockEntity be) {
+                    thisBE.setParent(be.getPos(), be.getClaim());
+                }
                 return;
             }
 
             // Neighbor is another augment, grab parent from it
             if (offsetBlock instanceof ClaimAugmentBlock) {
-                ClaimAugmentBlockEntity otherAugmentBE = (ClaimAugmentBlockEntity) world.getBlockEntity(offsetPos);
 
-                if (otherAugmentBE != null) {
-                    thisBE.setParent(otherAugmentBE.getParent());
+                if ( world.getBlockEntity(offsetPos) instanceof ClaimAugmentBlockEntity be) {
+                    thisBE.setParent(be.getPos(), be.getClaim());
                 }
 
                 return;
@@ -173,8 +173,8 @@ public class ClaimAugmentBlock extends Block implements Augment, BlockEntityProv
     }
 
     @Override
-    public boolean canPlace(Claim claim, World world, BlockPos pos, ClaimAnchorBlockEntity anchor) {
-        return !anchor.hasAugment(this);
+    public boolean canPlace(Claim claim, World world, BlockPos pos, @Deprecated ClaimAnchorBlockEntity anchor) {
+        return !claim.hasAugment(this);
     }
 
     @Override

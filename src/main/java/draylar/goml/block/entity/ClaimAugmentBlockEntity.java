@@ -87,12 +87,18 @@ public class ClaimAugmentBlockEntity extends BlockEntity implements PolymerObjec
     @Deprecated
     @Nullable
     public ClaimAnchorBlockEntity getParent() {
-        return this.claim.getBlockEntityInstance(this.world.getServer());
+        return this.claim != null ? this.claim.getBlockEntityInstance(this.world.getServer()) : null;
     }
 
+    @Deprecated
     public void setParent(ClaimAnchorBlockEntity parent) {
         this.parentPosition = parent.getPos();
         parent.addChild(pos, this.getAugment());
+    }
+
+    public void setParent(BlockPos pos, Claim claim) {
+        this.parentPosition = pos;
+        claim.addAugment(pos, this.getAugment());
     }
 
     public void initialize(Augment augment) {
@@ -105,5 +111,10 @@ public class ClaimAugmentBlockEntity extends BlockEntity implements PolymerObjec
         } else {
             return this.getCachedState().getBlock() instanceof Augment augment ? augment : Augment.noop();
         }
+    }
+
+    @Nullable
+    public Claim getClaim() {
+        return this.claim;
     }
 }
