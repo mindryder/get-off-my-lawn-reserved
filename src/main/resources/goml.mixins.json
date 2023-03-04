@@ -6,7 +6,9 @@
   "plugin": "draylar.goml.mixin.GOMLMixinPlugin",
   "mixins": [
     "BucketItemMixin",
+    "EntityMixin",
     "ExplosionMixin",
+    "FarmlandBlockMixin",
     "FireBlockMixin",
     "FlowableFluidMixin",
     "PistonBlockMixin",
