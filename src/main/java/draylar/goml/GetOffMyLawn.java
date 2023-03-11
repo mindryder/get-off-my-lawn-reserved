@@ -34,7 +34,7 @@ public class GetOffMyLawn implements ModInitializer, WorldComponentInitializer {
     public static final ItemGroup GROUP = PolymerItemGroupUtils.builder(id("group"))
             .displayName(Text.translatable("itemGroup.goml.group"))
             .icon(() -> new ItemStack(GOMLBlocks.WITHERED_CLAIM_ANCHOR.getSecond()))
-            .entries((f, c, op) -> {
+            .entries((ctx, c) -> {
                 GOMLBlocks.ANCHORS.forEach(c::add);
                 GOMLBlocks.AUGMENTS.forEach(c::add);
                 GOMLItems.BASE_ITEMS.forEach(c::add);

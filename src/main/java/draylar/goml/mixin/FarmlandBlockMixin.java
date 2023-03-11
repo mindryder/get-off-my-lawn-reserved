@@ -19,10 +19,9 @@ public abstract class FarmlandBlockMixin extends Block {
         super(settings);
     }
 
-    @Inject(method = "onLandedUpon", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/FarmlandBlock;setToDirt(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V", shift = At.Shift.BEFORE), cancellable = true)
-    private void goml$protectFarmland(World world, BlockState state, BlockPos pos, Entity entity, float fallDistance, CallbackInfo ci) {
+    @Inject(method = "setToDirt", at = @At("HEAD"), cancellable = true)
+    private static void goml$protectFarmland(Entity entity, BlockState state, World world, BlockPos pos, CallbackInfo ci) {
         if (!ClaimUtils.canModify(world, pos, entity instanceof PlayerEntity player ? player : null)) {
-            super.onLandedUpon(world, state, pos, entity, fallDistance);
             ci.cancel();
         }
     }

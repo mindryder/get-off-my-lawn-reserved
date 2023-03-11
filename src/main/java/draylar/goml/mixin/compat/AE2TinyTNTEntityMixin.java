@@ -11,18 +11,18 @@ import net.minecraft.entity.TntEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
+import javax.annotation.Nullable;
+
 @Pseudo
 @Mixin(TinyTNTPrimedEntity.class)
 public abstract class AE2TinyTNTEntityMixin extends TntEntity {
-    @Shadow @Nullable
-    public abstract LivingEntity getCausingEntity();
+    @Shadow @Nullable public abstract LivingEntity getOwner();
 
     public AE2TinyTNTEntityMixin(EntityType<? extends TntEntity> entityType, World world) {
         super(entityType, world);
@@ -30,7 +30,7 @@ public abstract class AE2TinyTNTEntityMixin extends TntEntity {
 
     @Redirect(method = "method_6971", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;damage(Lnet/minecraft/entity/damage/DamageSource;F)Z"))
     private boolean goml_damageEntities(Entity instance, DamageSource source, float amount) {
-        if (ClaimUtils.canExplosionDestroy(this.world, instance.getBlockPos(), this.getCausingEntity())) {
+        if (ClaimUtils.canExplosionDestroy(this.world, instance.getBlockPos(), this.getOwner())) {
             return instance.damage(source, amount);
         }
 
@@ -39,7 +39,7 @@ public abstract class AE2TinyTNTEntityMixin extends TntEntity {
 
     @Redirect(method = "method_6971", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
     private BlockState goml_damageBlocks(World instance, BlockPos pos) {
-        if (ClaimUtils.canExplosionDestroy(this.world, pos, this.getCausingEntity())) {
+        if (ClaimUtils.canExplosionDestroy(this.world, pos, this.getOwner())) {
             return Blocks.AIR.getDefaultState();
         }
 

@@ -31,7 +31,7 @@ public final class GomlProtectionProvider implements ProtectionProvider {
         if (world.getServer() == null) {
             return false;
         }
-        return ClaimUtils.getClaimsInBox(world, new BlockPos(box.minX, box.minY, box.minZ), new BlockPos(box.maxX, box.maxY, box.maxZ)).isNotEmpty();
+        return ClaimUtils.getClaimsInBox(world, BlockPos.ofFloored(box.minX, box.minY, box.minZ), BlockPos.ofFloored(box.maxX, box.maxY, box.maxZ)).isNotEmpty();
     }
 
     @Override

@@ -4,8 +4,6 @@ import com.mojang.authlib.GameProfile;
 import draylar.goml.api.Claim;
 import draylar.goml.registry.GOMLTextures;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
-import fr.catcore.server.translations.api.LocalizationTarget;
-import fr.catcore.server.translations.api.text.LocalizableText;
 import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
@@ -82,7 +80,7 @@ public class ClaimPlayerListGui extends GenericPlayerListGui {
         builder.setName(Text.literal(exist ? gameProfile.getName() : uuid.toString())
                 .formatted(isOwner ? Formatting.GOLD : Formatting.WHITE) .append(isOwner
                         ? Text.literal(" (").formatted(Formatting.DARK_GRAY)
-                        .append(((MutableText) LocalizableText.asLocalizedFor(Text.translatable("text.goml.owner"), (LocalizationTarget) this.player)).formatted(Formatting.WHITE))
+                        .append(Text.translatable("text.goml.owner").formatted(Formatting.WHITE))
                         .append(Text.literal(")").formatted(Formatting.DARK_GRAY))
                         : Text.empty()
                 ));

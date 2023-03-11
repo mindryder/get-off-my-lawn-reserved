@@ -78,9 +78,8 @@ dependencies {
 	// Server side stuff
 	modImplementation include("eu.pb4:polymer-core:${project.polymer_version}")
 	modImplementation include("eu.pb4:sgui:${project.sgui_version}")
-	modImplementation include("eu.pb4:hologram-api:${project.hologram_version}")
 	modImplementation include("eu.pb4:placeholder-api:${project.placeholder_version}")
-	modImplementation include("fr.catcore:server-translations-api:${project.stapi_version}")
+	modImplementation include("xyz.nucleoid:server-translations-api:${project.stapi_version}")
 	modImplementation include("me.lucko:fabric-permissions-api:0.2-SNAPSHOT")
 	modImplementation include("eu.pb4:common-protection-api:1.0.0")
 }
@@ -143,7 +142,7 @@ curseforge {
 			releaseType = "release"
 			changelog = System.getenv("CHANGELOG")
 			changelogType = "markdown"
-			addGameVersion ((String) project.minecraft_version)
+			addGameVersion((String) project.minecraft_version.split("-")[0])
 			addGameVersion "Fabric"
 			addGameVersion "Quilt"
 			mainArtifact(remapJar)

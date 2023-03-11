@@ -109,7 +109,7 @@ public class EventHandlers {
 
     private static void registerAttackEntityCallback() {
         AttackEntityCallback.EVENT.register(GOML_PHASE, (playerEntity, world, hand, entity, entityHitResult) -> {
-            return ClaimUtils.canDamageEntity(world, entity, DamageSource.player(playerEntity)) ? ActionResult.PASS : ActionResult.FAIL;
+            return ClaimUtils.canDamageEntity(world, entity, world.getDamageSources().playerAttack(playerEntity)) ? ActionResult.PASS : ActionResult.FAIL;
         });
     }
 

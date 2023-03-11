@@ -29,7 +29,7 @@ public class GogglesItem extends ArmorItem implements PolymerItem {
     }).map((b) -> b.getDefaultState()).collect(Collectors.toList()).toArray(new BlockState[0]);
 
     public GogglesItem() {
-        super(ArmorMaterials.IRON, EquipmentSlot.HEAD, new Item.Settings().maxDamage(-1));
+        super(ArmorMaterials.IRON, Type.HELMET, new Item.Settings().maxDamage(-1));
     }
 
     @Override
