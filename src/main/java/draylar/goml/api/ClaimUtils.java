@@ -231,7 +231,7 @@ public class ClaimUtils {
             return true;
         }
 
-        if (ClaimUtils.isInAdminMode(player)) {
+        if (ClaimUtils.isInAdminMode(player) || entity == player) {
             return true;
         }
 
