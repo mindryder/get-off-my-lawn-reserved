@@ -9,6 +9,8 @@ import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
+import java.util.function.Consumer;
+
 public class ClaimAnchorBlockItem extends TooltippedBlockItem {
 
     private final ClaimAnchorBlock claimBlock;
@@ -16,6 +18,14 @@ public class ClaimAnchorBlockItem extends TooltippedBlockItem {
     public ClaimAnchorBlockItem(ClaimAnchorBlock block, Settings settings, int lines) {
         super(block, settings, lines);
         this.claimBlock = block;
+    }
+
+    @Override
+    public void addLines(Consumer<Text> textConsumer) {
+        super.addLines(textConsumer);
+        textConsumer.accept(Text.translatable("text.goml.radius",
+                Text.literal("" + this.claimBlock.getRadius()).formatted(Formatting.WHITE)
+        ).formatted(Formatting.YELLOW));
     }
 
     @Override
