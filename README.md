@@ -1,63 +1,33 @@
 # Get Off My Lawn ReServed
 
-*Get Off My Lawn ReServer* is a take on the popular concept of player claims for Survival/Freebuild Fabric servers. 
+*Get Off My Lawn ReServed* is a take on the popular concept of player claims for Survival/Freebuild Fabric servers. 
 This mod works fully server side (no client mod required!) while being compatible with major Fabric modpacks
 
 This project is a fork [Get Off My Lawn by Draylar](https://github.com/Draylar/get-off-my-lawn), with main focus on improving and building on top of original.
 
 
+# Video Showcase
+
+* English: https://youtu.be/R9-PuMRbNEc
+
+* Polish: https://youtu.be/1V8kh0h3NoU
+
 # Getting started
 
 To get started, you'll have to craft a *Claim Anchor*. Each anchor has a different (configurable by admin) claim radius; after placing one, a box around it will be formed. This box is yours!
 
-### **Makeshift**, default radius of 10
+* **Makeshift**, default radius of 10
+* **Reinforced**, default radius of 25
+* **Glistening**, default radius of 50
+* **Crystal**, default radius of 75
+* **Emeradic**, default radius of 125
+* **Withered**, default radius of 200
 
-![](https://imgur.com/sIQXEy3.png)
-
-### **Reinforced**, default radius of 25
-
-![](https://imgur.com/3hTueto.png)
-
-Upgrade:
-
-![](https://imgur.com/VFewmBO.png)
-
-### **Glistening**, default radius of 50
-
-![](https://imgur.com/Su5SCS2.png)
-
-Upgrade:
-
-![](https://imgur.com/JIVbMMn.png)
-
-### **Crystal**, default radius of 75
-
-![](https://imgur.com/2NOZz3S.png)
-
-Upgrade:
-
-![](https://imgur.com/DkLlxAU.png)
-
-### **Emeradic**, default radius of 125
-
-![](https://imgur.com/W9Y4Qr1.png)
-
-Upgrade:
-
-![](https://imgur.com/RoRbqaV.png)
-### **Withered**, default radius of 200
-
-![](https://imgur.com/WhbQtAE.png)
-
-Upgrade:
-
-![](https://imgur.com/dINKXct.png)
-
-To see claim areas, you'll have to craft a *Goggles of (Claim) Revealing*:
-
-![](https://imgur.com/WowJvmJ.png)
+To see claim areas, you'll have to craft a *Goggles of (Claim) Revealing*
 
 When this item equipped in the helmet, mainhand or offhand slot, claim outlines become visible.
+
+## [Recipes](https://github.com/Patbox/get-off-my-lawn-reserved/blob/1.19.4/recipes.md)
 
 ## Claim configuration:
 To configure your claim, you can interact with the anchor block. A UI will appear that offers several configuration options:
