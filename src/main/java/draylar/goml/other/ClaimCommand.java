@@ -148,7 +148,7 @@ public class ClaimCommand {
     }
 
     private static int fixAugments(CommandContext<ServerCommandSource> context) {
-        ClaimUtils.getClaimsAt(context.getSource().getWorld(), new BlockPos(context.getSource().getPosition())).forEach(x -> {
+        ClaimUtils.getClaimsAt(context.getSource().getWorld(), BlockPos.ofFloored(context.getSource().getPosition())).forEach(x -> {
             var copy = new ArrayList<>(x.getValue().getAugments().entrySet());
 
             for (var y : copy) {
