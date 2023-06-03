@@ -169,7 +169,7 @@ public class EventHandlers {
             boolean noPermission = claims.anyMatch((Entry<ClaimBox, Claim> boxInfo) -> !boxInfo.getValue().hasPermission(player));
 
             if (noPermission && !ClaimUtils.isInAdminMode(player)) {
-                ActionResult check = ClaimEvents.PERMISSION_DENIED.invoker().check(player, player.world, hand, pos, reason);
+                ActionResult check = ClaimEvents.PERMISSION_DENIED.invoker().check(player, player.getWorld(), hand, pos, reason);
 
                 if (check.isAccepted() || check.equals(ActionResult.PASS)) {
                     player.sendMessage(reason.getReason(), true);

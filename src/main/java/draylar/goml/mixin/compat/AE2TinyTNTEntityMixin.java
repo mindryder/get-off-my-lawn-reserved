@@ -30,7 +30,7 @@ public abstract class AE2TinyTNTEntityMixin extends TntEntity {
 
     @Redirect(method = "method_6971", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;damage(Lnet/minecraft/entity/damage/DamageSource;F)Z"))
     private boolean goml_damageEntities(Entity instance, DamageSource source, float amount) {
-        if (ClaimUtils.canExplosionDestroy(this.world, instance.getBlockPos(), this.getOwner())) {
+        if (ClaimUtils.canExplosionDestroy(this.getWorld(), instance.getBlockPos(), this.getOwner())) {
             return instance.damage(source, amount);
         }
 
@@ -39,7 +39,7 @@ public abstract class AE2TinyTNTEntityMixin extends TntEntity {
 
     @Redirect(method = "method_6971", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
     private BlockState goml_damageBlocks(World instance, BlockPos pos) {
-        if (ClaimUtils.canExplosionDestroy(this.world, pos, this.getOwner())) {
+        if (ClaimUtils.canExplosionDestroy(this.getWorld(), pos, this.getOwner())) {
             return Blocks.AIR.getDefaultState();
         }
 

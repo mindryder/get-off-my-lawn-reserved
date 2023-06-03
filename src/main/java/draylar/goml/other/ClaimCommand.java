@@ -135,7 +135,7 @@ public class ClaimCommand {
                                                 var player = GameProfileArgumentType.getProfileArgument(context, "player").toArray(new GameProfile[0]);
 
                                                 if (player.length == 0) {
-                                                    context.getSource().sendFeedback(Text.translatable("argument.player.unknown").formatted(Formatting.RED), false);
+                                                    context.getSource().sendFeedback(() -> Text.translatable("argument.player.unknown").formatted(Formatting.RED), false);
                                                 }
 
                                                 return openList(context, player[0]);
@@ -177,10 +177,10 @@ public class ClaimCommand {
                 var dir = pair.getRight();
 
                 double y;
-                if (player.world.isSpaceEmpty(player, player.getDimensions(player.getPose()).getBoxAt(pos.x, player.getY(), pos.z))) {
+                if (player.getWorld().isSpaceEmpty(player, player.getDimensions(player.getPose()).getBoxAt(pos.x, player.getY(), pos.z))) {
                     y = player.getY();
                 } else {
-                    y = player.world.getTopY(Heightmap.Type.MOTION_BLOCKING, (int) pos.x, (int) pos.z);
+                    y = player.getWorld().getTopY(Heightmap.Type.MOTION_BLOCKING, (int) pos.x, (int) pos.z);
                 }
 
                 player.teleport(pos.x, y, pos.z);
@@ -199,10 +199,10 @@ public class ClaimCommand {
                     player.networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(player.getVehicle()));
                 }
             });
-            context.getSource().sendFeedback(prefix(Text.translatable("text.goml.command.escaped").formatted(Formatting.GREEN)), false);
+            context.getSource().sendFeedback(() -> prefix(Text.translatable("text.goml.command.escaped").formatted(Formatting.GREEN)), false);
 
         } else {
-            context.getSource().sendFeedback(prefix(Text.translatable("text.goml.command.cant_escape").formatted(Formatting.RED)), false);
+            context.getSource().sendFeedback(() -> prefix(Text.translatable("text.goml.command.cant_escape").formatted(Formatting.RED)), false);
 
         }
 
@@ -214,7 +214,7 @@ public class ClaimCommand {
 
         var newMode = !((GomlPlayer) player).goml_getAdminMode();
         ((GomlPlayer) player).goml_setAdminMode(newMode);
-        context.getSource().sendFeedback(prefix(Text.translatable(newMode ? "text.goml.admin_mode.enabled" : "text.goml.admin_mode.disabled")), false);
+        context.getSource().sendFeedback(() -> prefix(Text.translatable(newMode ? "text.goml.admin_mode.enabled" : "text.goml.admin_mode.disabled")), false);
 
         return 1;
     }
@@ -480,7 +480,7 @@ public class ClaimCommand {
 
     private static int reload(CommandContext<ServerCommandSource> context) {
         GetOffMyLawn.CONFIG = GOMLConfig.loadOrCreateConfig();
-        context.getSource().sendFeedback(prefix(Text.literal("Reloaded config")), false);
+        context.getSource().sendFeedback(() -> prefix(Text.literal("Reloaded config")), false);
         return 1;
     }
 

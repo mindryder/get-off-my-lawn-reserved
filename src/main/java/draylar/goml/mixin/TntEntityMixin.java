@@ -32,7 +32,7 @@ public abstract class TntEntityMixin extends Entity {
     @Inject(at = @At("HEAD"), method = "explode", cancellable = true)
     private void goml_attemptExplosion(CallbackInfo ci) {
         if (causingEntity instanceof PlayerEntity) {
-            Selection<Entry<ClaimBox, Claim>> claimsFound = ClaimUtils.getClaimsAt(world, getBlockPos());
+            Selection<Entry<ClaimBox, Claim>> claimsFound = ClaimUtils.getClaimsAt(getWorld(), getBlockPos());
 
             if (!claimsFound.isEmpty()) {
                 boolean noPermission = claimsFound.anyMatch((Entry<ClaimBox, Claim> boxInfo) -> !boxInfo.getValue().hasPermission((PlayerEntity) causingEntity));

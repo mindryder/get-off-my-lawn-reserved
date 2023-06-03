@@ -68,10 +68,10 @@ public class ForceFieldAugmentBlock extends ClaimAugmentBlock {
             }
 
             double y;
-            if (player.world.isSpaceEmpty(player, player.getDimensions(player.getPose()).getBoxAt(pos.x, player.getY(), pos.z))) {
+            if (player.getWorld().isSpaceEmpty(player, player.getDimensions(player.getPose()).getBoxAt(pos.x, player.getY(), pos.z))) {
                 y = player.getY();
             } else {
-                y = player.world.getTopY(Heightmap.Type.MOTION_BLOCKING, (int) pos.x, (int) pos.z);
+                y = player.getWorld().getTopY(Heightmap.Type.MOTION_BLOCKING, (int) pos.x, (int) pos.z);
             }
 
             player.teleport(pos.x, y, pos.z);

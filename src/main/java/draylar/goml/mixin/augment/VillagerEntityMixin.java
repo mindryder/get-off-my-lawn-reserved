@@ -22,7 +22,7 @@ public abstract class VillagerEntityMixin extends LivingEntity {
     @Override
     public boolean isInvulnerableTo(DamageSource damageSource) {
         if(damageSource.getAttacker() instanceof HostileEntity) {
-            boolean b = ClaimUtils.getClaimsAt(world, getBlockPos()).anyMatch(claim -> claim.getValue().hasAugment(GOMLBlocks.VILLAGE_CORE.getFirst()));
+            boolean b = ClaimUtils.getClaimsAt(getWorld(), getBlockPos()).anyMatch(claim -> claim.getValue().hasAugment(GOMLBlocks.VILLAGE_CORE.getFirst()));
 
             if(b) return true;
         }

@@ -69,7 +69,7 @@ public class AE2MatterCannonItemMixin {
 
     @Redirect(method = "shootPaintBalls", at = @At(value = "INVOKE", target = "Lappeng/util/Platform;hasPermissions(Lappeng/api/util/DimensionalBlockPos;Lnet/minecraft/entity/player/PlayerEntity;)Z"))
     private static boolean goml_protectBlock2(DimensionalBlockPos dc, PlayerEntity player) {
-        if (!ClaimUtils.canModify(player.world, dc.getPos(), goml_player)) {
+        if (!ClaimUtils.canModify(player.getWorld(), dc.getPos(), goml_player)) {
             return false;
         }
         return Platform.hasPermissions(dc, player);

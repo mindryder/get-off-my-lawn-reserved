@@ -29,7 +29,7 @@ public abstract class EndermanEntityMixin extends HostileEntity {
             cancellable = true
     )
     private void goml$attemptTeleport(double x, double y, double z, CallbackInfoReturnable<Boolean> cir) {
-        boolean b = ClaimUtils.getClaimsAt(this.world, this.getBlockPos())
+        boolean b = ClaimUtils.getClaimsAt(this.getWorld(), this.getBlockPos())
                 .anyMatch(claim -> claim.getValue().hasAugment(GOMLBlocks.ENDER_BINDING.getFirst()));
 
         if (b) {
@@ -43,7 +43,7 @@ public abstract class EndermanEntityMixin extends HostileEntity {
 
         @Inject(method = "canStart", at = @At("HEAD"), cancellable = true)
         private void goml$cancelInClaim(CallbackInfoReturnable<Boolean> cir) {
-            boolean b = ClaimUtils.getClaimsAt(this.enderman.world, this.enderman.getBlockPos())
+            boolean b = ClaimUtils.getClaimsAt(this.enderman.getWorld(), this.enderman.getBlockPos())
                     .anyMatch(claim -> claim.getValue().hasAugment(GOMLBlocks.ENDER_BINDING.getFirst()));
 
             if (b) {
@@ -58,7 +58,7 @@ public abstract class EndermanEntityMixin extends HostileEntity {
 
         @Inject(method = "canStart", at = @At("HEAD"), cancellable = true)
         private void goml$cancelInClaim(CallbackInfoReturnable<Boolean> cir) {
-            boolean b = ClaimUtils.getClaimsAt(this.enderman.world, this.enderman.getBlockPos())
+            boolean b = ClaimUtils.getClaimsAt(this.enderman.getWorld(), this.enderman.getBlockPos())
                     .anyMatch(claim -> claim.getValue().hasAugment(GOMLBlocks.ENDER_BINDING.getFirst()));
 
             if (b) {

@@ -31,7 +31,7 @@ import org.apache.logging.log4j.Logger;
 public class GetOffMyLawn implements ModInitializer, WorldComponentInitializer {
 
     public static final ComponentKey<ClaimComponent> CLAIM = ComponentRegistryV3.INSTANCE.getOrCreate(id("claims"), ClaimComponent.class);
-    public static final ItemGroup GROUP = PolymerItemGroupUtils.builder(id("group"))
+    public static final ItemGroup GROUP = ItemGroup.create(null, -1)
             .displayName(Text.translatable("itemGroup.goml.group"))
             .icon(() -> new ItemStack(GOMLBlocks.WITHERED_CLAIM_ANCHOR.getSecond()))
             .entries((ctx, c) -> {
@@ -56,6 +56,8 @@ public class GetOffMyLawn implements ModInitializer, WorldComponentInitializer {
         EventHandlers.init();
         ClaimCommand.init();
         PlaceholdersReg.init();
+
+        PolymerItemGroupUtils.registerPolymerItemGroup(id("group"), GROUP);
 
         CommonProtection.register(new Identifier("goml", "claim_protection"), GomlProtectionProvider.INSTANCE);
 
